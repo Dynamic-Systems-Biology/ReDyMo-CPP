@@ -1,0 +1,13 @@
+Language: Cpp
+BasedOnStyle: LLVM
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+DerivePointerAlignment: false
+PointerAlignment: Right
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: true
+AccessModifierOffset: -2
+IndentWidth: 4
