@@ -15,13 +15,13 @@
 class Chromosome
 {
   private:
-    int code;
-    int size;
-    int n_replicated_bases;
-    int n_origins;
-    std::vector<float> strand;
-    std::vector<float> prob_landscape;
-    std::vector<bool> fired_constitutive_origins;
+    unsigned int code;
+    unsigned int size;
+    unsigned int n_replicated_bases;
+    unsigned int n_fired_origins;
+    std::vector<int> strand;
+    std::vector<float> probability_landscape;
+    std::vector<int> fired_constitutive_origins;
     std::vector<transcription_region_t> transcription_regions;
     std::vector<constitutive_origin_t> constitutive_origins;
 
@@ -47,16 +47,20 @@ class Chromosome
      * Chromosome.
      */
 
-    Chromosome(int code, int length, std::vector<float> probability_landscape,
-               std::vector<transcription_region_t> transcription_regions,
-               std::vector<constitutive_origin_t> constitutive_origins);
+    Chromosome(unsigned int code, unsigned int length, std::vector<float> &probability_landscape,
+               std::vector<transcription_region_t> &transcription_regions,
+               std::vector<constitutive_origin_t> &constitutive_origins);
+    
+    Chromosome();
 
-    ~Chromosome();
+    void initialize(unsigned int code, unsigned int length, std::vector<float> &probability_landscape,
+               std::vector<transcription_region_t> &transcription_regions,
+               std::vector<constitutive_origin_t> &constitutive_origins);
 
     /*! Query the length of the Chromosome.
      * @return The length of the Chromosome.
      */
-    int length();
+    unsigned int length();
 
     /*! Print method for better visualization.
      * @return A string representation of the chromosome state.
@@ -67,7 +71,7 @@ class Chromosome
      * @param base The index of a base to check.
      * @return True if the given base was replicated.
      */
-    bool base_is_replicated(int base);
+    bool base_is_replicated(unsigned int base);
 
     /*! Query the activation probability of a base.
      * @param int base The index of a base to check. Note that it starts at 0.
@@ -75,7 +79,7 @@ class Chromosome
      * base based on the probability_landscape.
      * @see probability_landscape
      */
-    float activation_probability();
+    float activation_probability(unsigned int base);
 
     /*! This method changes the probability landscape around the location of a
      * head-to-head collision. It sets the probability landscape with a
@@ -83,19 +87,20 @@ class Chromosome
      * @param int base The index of the base around which the
      * probability_landscape will be changed. Note that it starts at 0.
      */
-    int set_dormant_activation_probability();
+    void set_dormant_activation_probability(unsigned int base);
 
     /*! This function replicates the genome inside a given interval of bases.
      * This sets all the bases in the interval as replicated, and increasing
      * the number of replicated bases.
      * @see number_of_replicated_bases.
      * @param int start The index of the first base to replicate.
-     * @param int end The index of the last base to replicate.
+     * @param int end The index of the last base to replicate(exclusive).
      * @param float time The simulation iteration (time) when the replication
      * occurrs.
-     * @return true if was a normal (not at the very end) transcription.
+     * @return true if the replication did not overlap an already
+     * replicated area, nor included bases outside the Chromosome.
      */
-    int replicate(uint start, uint end, float time);
+    bool replicate(int start, int end, int time);
 
     /*! Checks if the entire Chromosome is replicated.
      * @return True if all bases have been replicated.
@@ -107,12 +112,12 @@ class Chromosome
     /*! Query the id of the Chromosome.
      * @return The code of the Chromosome.
      */
-    int get_code();
+    unsigned int get_code();
 
     /*! Retrieve the number of constitutive origins of this chromosome.
      * @return The number of constitutive origins.
      */
-    int get_n_constitutive_origins();
+    unsigned int n_constitutive_origins();
 };
 
 #endif
