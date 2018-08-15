@@ -16,7 +16,7 @@ class Chromosome
 {
   private:
     unsigned int code;
-    unsigned int size;
+    unsigned int length;
     unsigned int n_replicated_bases;
     unsigned int n_fired_origins;
     std::vector<int> strand;
@@ -60,7 +60,7 @@ class Chromosome
     /*! Query the length of the Chromosome.
      * @return The length of the Chromosome.
      */
-    unsigned int length();
+    unsigned int size();
 
     /*! Print method for better visualization.
      * @return A string representation of the chromosome state.

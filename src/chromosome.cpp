@@ -1,5 +1,4 @@
 #include "chromosome.hpp"
-#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 #include <string>
@@ -25,7 +24,7 @@ void Chromosome::initialize(
     if (length <= 0)
         throw std::invalid_argument("Given length is not a positive number.");
     this->code                  = code;
-    this->size                  = length;
+    this->length                = length;
     this->probability_landscape = probability_landscape;
     this->transcription_regions = transcription_regions;
     this->constitutive_origins  = constitutive_origins;
@@ -35,12 +34,12 @@ void Chromosome::initialize(
     this->fired_constitutive_origins.resize(length, false);
 }
 
-unsigned int Chromosome::length() { return this->size; }
+unsigned int Chromosome::size() { return this->length; }
 
 std::string Chromosome::to_string()
 {
     std::string chromosome_string = "";
-    for (int base = 0; base < size; base += 500)
+    for (int base = 0; base < length; base += 500)
     {
         chromosome_string += strand[base];
     }
@@ -49,27 +48,27 @@ std::string Chromosome::to_string()
 
 bool Chromosome::base_is_replicated(unsigned int base)
 {
-    if (base < 0 || base >= this->size)
+    if (base < 0 || base >= this->length)
         throw std::out_of_range("Given base is outside Chromosome length.");
     return this->strand[base] != -1;
 }
 
 float Chromosome::activation_probability(unsigned int base)
 {
-    if (base < 0 || base >= this->size)
+    if (base < 0 || base >= this->length)
         throw std::out_of_range("Given base is outside Chromosome length.");
     return probability_landscape[base];
 }
 
 void Chromosome::set_dormant_activation_probability(unsigned int base)
 {
-    if (base < 0 || base >= this->size)
+    if (base < 0 || base >= this->length)
         throw std::out_of_range("Given base is outside Chromosome length.");
     int c          = 10000;
     int left_base  = base - 2 * c;
     int right_base = base + 2 * c;
     left_base      = left_base < 0 ? 0 : left_base;
-    right_base     = right_base > this->size ? this->size : right_base;
+    right_base     = right_base > this->length ? this->length : right_base;
 
     for (int curr_base = left_base; curr_base < right_base; curr_base++)
     {
@@ -83,7 +82,7 @@ void Chromosome::set_dormant_activation_probability(unsigned int base)
 
 bool Chromosome::replicate(int start, int end, int time)
 {
-    if (start < 0 || start > this->size)
+    if (start < 0 || start > this->length)
         throw std::out_of_range("The start base is not inside the Chromosome");
 
     // A non normal replication refers to a replication which overlaps areas
@@ -112,7 +111,7 @@ bool Chromosome::replicate(int start, int end, int time)
 
 bool Chromosome::is_replicated()
 {
-    return this->n_replicated_bases == this->size;
+    return this->n_replicated_bases == this->length;
 }
 
 unsigned int Chromosome::get_code() { return this->code; }

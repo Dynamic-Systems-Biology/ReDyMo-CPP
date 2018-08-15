@@ -53,9 +53,9 @@ TEST_F(ChromosomeTest, ZeroOrNegativeLength)
 TEST_F(ChromosomeTest, Length)
 {
     auto chrm_300 = create_chromosome(300);
-    ASSERT_EQ(300, chrm_300->length());
+    ASSERT_EQ(300, chrm_300->size());
     auto chrm_500 = create_chromosome(500);
-    ASSERT_EQ(500, chrm_500->length());
+    ASSERT_EQ(500, chrm_500->size());
 }
 
 /*! Tests if an exception is thrown in case of non existant base.
@@ -142,10 +142,14 @@ TEST_F(ChromosomeTest, InRangeReplicate)
 TEST_F(ChromosomeTest, Replicate)
 {
     ASSERT_EQ(chrm.replicate(0, 30, 1), true);
-    // FIXME: change to not use own method
     for (int base = 0; base < 30; base++)
         ASSERT_EQ(true, chrm.base_is_replicated(base));
 }
 
 TEST_F(ChromosomeTest, IsReplicated) { ASSERT_FALSE(chrm.is_replicated()); }
 
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
