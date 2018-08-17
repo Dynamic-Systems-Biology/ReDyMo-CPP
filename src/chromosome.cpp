@@ -120,3 +120,5 @@ unsigned int Chromosome::n_constitutive_origins()
 {
     return this->constitutive_origins.size();
 }
+
+unsigned int Chromosome::get_n_replicated_bases() { return n_replicated_bases; }

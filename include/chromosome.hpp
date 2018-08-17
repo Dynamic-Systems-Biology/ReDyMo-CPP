@@ -18,12 +18,14 @@ class Chromosome
     unsigned int code;
     unsigned int length;
     unsigned int n_replicated_bases;
-    unsigned int n_fired_origins;
     std::vector<int> strand;
     std::vector<float> probability_landscape;
-    std::vector<int> fired_constitutive_origins;
     std::vector<transcription_region_t> transcription_regions;
+
+  public:
+    unsigned int n_fired_origins;
     std::vector<constitutive_origin_t> constitutive_origins;
+    std::vector<constitutive_origin_t> fired_constitutive_origins;
 
   public:
     /*! @var int number_of_replicated_bases
@@ -47,15 +49,17 @@ class Chromosome
      * Chromosome.
      */
 
-    Chromosome(unsigned int code, unsigned int length, std::vector<float> &probability_landscape,
+    Chromosome(unsigned int code, unsigned int length,
+               std::vector<float> &probability_landscape,
                std::vector<transcription_region_t> &transcription_regions,
                std::vector<constitutive_origin_t> &constitutive_origins);
-    
+
     Chromosome();
 
-    void initialize(unsigned int code, unsigned int length, std::vector<float> &probability_landscape,
-               std::vector<transcription_region_t> &transcription_regions,
-               std::vector<constitutive_origin_t> &constitutive_origins);
+    void initialize(unsigned int code, unsigned int length,
+                    std::vector<float> &probability_landscape,
+                    std::vector<transcription_region_t> &transcription_regions,
+                    std::vector<constitutive_origin_t> &constitutive_origins);
 
     /*! Query the length of the Chromosome.
      * @return The length of the Chromosome.
@@ -118,6 +122,11 @@ class Chromosome
      * @return The number of constitutive origins.
      */
     unsigned int n_constitutive_origins();
+
+    /*! Getter for the number of replicated bases
+     * @return unsigned int The number of already replicated bases.
+     */
+    unsigned int get_n_replicated_bases();
 };
 
 #endif
