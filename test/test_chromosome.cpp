@@ -15,9 +15,9 @@ class ChromosomeTest : public ::testing::Test
 
     void SetUp() { chrm = *create_chromosome(); }
 
-    std::shared_ptr<Chromosome> create_chromosome(unsigned int size = 300)
+    std::shared_ptr<Chromosome> create_chromosome(uint size = 300)
     {
-        unsigned int test_size = size;
+        uint test_size = size;
         std::vector<float> prob_landscape;
         std::vector<transcription_region_t> transcription_regions;
         std::vector<constitutive_origin_t> cons_origins;
@@ -50,7 +50,7 @@ TEST_F(ChromosomeTest, ZeroOrNegativeLength)
 
 /*! Tests if length returns the right value.
  */
-TEST_F(ChromosomeTest, Length)
+TEST_F(ChromosomeTest, Size)
 {
     auto chrm_300 = create_chromosome(300);
     ASSERT_EQ(300, chrm_300->size());
