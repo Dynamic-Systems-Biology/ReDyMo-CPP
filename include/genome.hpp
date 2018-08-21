@@ -6,6 +6,7 @@
 
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
+#include <memory>
 #include <vector>
 
 /*! This class represents a Genome.
@@ -14,7 +15,7 @@
  */
 class Genome
 {
-  private:
+  public:
     std::vector<Chromosome> chromosomes;
 
   public:
@@ -28,16 +29,16 @@ class Genome
     void initialize(std::vector<Chromosome> &chromosomes);
 
     /*! The combined length of the Genome
-     * @return unsigned int The total number of bases in the genomes.
+     * @return uint The total number of bases in the genomes.
      */
-    unsigned int size();
+    uint size();
 
     /*! This function chooses a random base from a random Chromosome.
      * It does this using random integers from an uniform distribution.
      * @return A GenomicLocation object referencing the random base selected.
      * @see GenomicLocation
      */
-    GenomicLocation random_genomic_location();
+    std::shared_ptr<GenomicLocation> random_genomic_location();
 
     /*! This function chooses a random UNREPLICATED base from a random
      *Chromosome. It assumes that the genome is not completely replicated yet.
@@ -45,7 +46,7 @@ class Genome
      * @return A GenomicLocation object referencing the random base selected.
      * @see GenomicLocation
      */
-    GenomicLocation random_unreplicated_genomic_location();
+    std::shared_ptr<GenomicLocation> random_unreplicated_genomic_location();
 
     /*! Checks if the Genome is entirely replicated.
      * It checks if all Chromosomes are completely replicated.
@@ -62,7 +63,7 @@ class Genome
     /*! Retrieve the number of constitutive origins in the whole genome.
      * @return The number of constitutive origins in the whole genome.
      */
-    unsigned int n_constitutive_origins();
+    uint n_constitutive_origins();
 };
 
 #endif

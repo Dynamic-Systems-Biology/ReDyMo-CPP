@@ -1,6 +1,6 @@
 /*! File Chromosome.hpp
-    Contains the Chromosome class.
-*/
+ *  Contains the Chromosome class.
+ */
 #ifndef __CHROMOSOME_HPP__
 #define __CHROMOSOME_HPP__
 
@@ -15,15 +15,15 @@
 class Chromosome
 {
   private:
-    unsigned int code;
-    unsigned int length;
-    unsigned int n_replicated_bases;
+    uint code;
+    uint length;
+    uint n_replicated_bases;
     std::vector<int> strand;
     std::vector<float> probability_landscape;
     std::vector<transcription_region_t> transcription_regions;
 
   public:
-    unsigned int n_fired_origins;
+    uint n_fired_origins;
     std::vector<constitutive_origin_t> constitutive_origins;
     std::vector<constitutive_origin_t> fired_constitutive_origins;
 
@@ -49,14 +49,14 @@ class Chromosome
      * Chromosome.
      */
 
-    Chromosome(unsigned int code, unsigned int length,
+    Chromosome(uint code, uint length,
                std::vector<float> &probability_landscape,
                std::vector<transcription_region_t> &transcription_regions,
                std::vector<constitutive_origin_t> &constitutive_origins);
 
     Chromosome();
 
-    void initialize(unsigned int code, unsigned int length,
+    void initialize(uint code, uint length,
                     std::vector<float> &probability_landscape,
                     std::vector<transcription_region_t> &transcription_regions,
                     std::vector<constitutive_origin_t> &constitutive_origins);
@@ -64,7 +64,7 @@ class Chromosome
     /*! Query the length of the Chromosome.
      * @return The length of the Chromosome.
      */
-    unsigned int size();
+    uint size();
 
     /*! Print method for better visualization.
      * @return A string representation of the chromosome state.
@@ -75,7 +75,7 @@ class Chromosome
      * @param base The index of a base to check.
      * @return True if the given base was replicated.
      */
-    bool base_is_replicated(unsigned int base);
+    bool base_is_replicated(uint base);
 
     /*! Query the activation probability of a base.
      * @param int base The index of a base to check. Note that it starts at 0.
@@ -83,7 +83,7 @@ class Chromosome
      * base based on the probability_landscape.
      * @see probability_landscape
      */
-    float activation_probability(unsigned int base);
+    float activation_probability(uint base);
 
     /*! This method changes the probability landscape around the location of a
      * head-to-head collision. It sets the probability landscape with a
@@ -91,7 +91,7 @@ class Chromosome
      * @param int base The index of the base around which the
      * probability_landscape will be changed. Note that it starts at 0.
      */
-    void set_dormant_activation_probability(unsigned int base);
+    void set_dormant_activation_probability(uint base);
 
     /*! This function replicates the genome inside a given interval of bases.
      * This sets all the bases in the interval as replicated, and increasing
@@ -116,17 +116,19 @@ class Chromosome
     /*! Query the id of the Chromosome.
      * @return The code of the Chromosome.
      */
-    unsigned int get_code();
+    uint get_code();
 
     /*! Retrieve the number of constitutive origins of this chromosome.
      * @return The number of constitutive origins.
      */
-    unsigned int n_constitutive_origins();
+    uint n_constitutive_origins();
 
     /*! Getter for the number of replicated bases
-     * @return unsigned int The number of already replicated bases.
+     * @return uint The number of already replicated bases.
      */
-    unsigned int get_n_replicated_bases();
+    uint get_n_replicated_bases();
+
+    // TODO: getters for the public
 };
 
 #endif

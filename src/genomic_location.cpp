@@ -5,13 +5,13 @@
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
 
-GenomicLocation::GenomicLocation(unsigned int base, Chromosome &chromosome)
+GenomicLocation::GenomicLocation(uint base, Chromosome &chromosome)
+    : chromosome(chromosome)
 {
     if (base >= chromosome.size())
         throw std::invalid_argument("Base is not inside given chromosome.");
 
-    this->base       = base;
-    this->chromosome = chromosome;
+    this->base = base;
 }
 
 bool GenomicLocation::is_replicated()
@@ -20,7 +20,7 @@ bool GenomicLocation::is_replicated()
 }
 
 bool GenomicLocation::will_activate(bool use_constitutive_origin,
-                                    unsigned int origins_range)
+                                    uint origins_range)
 {
     if (!use_constitutive_origin)
     {
@@ -42,7 +42,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 }
 
 constitutive_origin_t *
-GenomicLocation::get_constitutive_origin(unsigned int origins_range)
+GenomicLocation::get_constitutive_origin(uint origins_range)
 {
     constitutive_origin_t found_origin;
     std::vector<constitutive_origin_t> not_fired_origins;

@@ -10,9 +10,9 @@
  */
 class GenomicLocation
 {
-  private:
-    unsigned int base;
-    Chromosome chromosome;
+  public:
+    uint base;
+    Chromosome &chromosome;
 
   public:
     /*! The constructor.
@@ -22,7 +22,7 @@ class GenomicLocation
      * @throw invalid_argument If base doesn't belong to chromosome.
      * @see Chromosome
      */
-    GenomicLocation(unsigned int base, Chromosome &chromosome);
+    GenomicLocation(uint base, Chromosome &chromosome);
 
     /*! Queries if the particular base has been replicated.
      * @return True if the base is replicated.
@@ -35,14 +35,14 @@ class GenomicLocation
      * @return True if the base will be activated.
      */
     bool will_activate(bool use_constitutive_origin,
-                       unsigned int origins_range);
+                       uint origins_range);
 
     /*! Retrieve a constitutive origin located in this range.
      * @param int origins_range Considered range around a constitutive origin.
      * @return True if the base will be activate, False otherwise.
      * @throw range_error if no origin is found within the range.
      */
-    constitutive_origin_t *get_constitutive_origin(unsigned int origins_range);
+    constitutive_origin_t *get_constitutive_origin(uint origins_range);
 
     /*! Update the list of fired constitutive origins with an fired origin.
      * @param constitutive_origin_t location of the constitutive origin.

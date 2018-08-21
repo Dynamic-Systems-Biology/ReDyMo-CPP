@@ -1,21 +1,20 @@
 #ifndef __UTIL_HPP__
 #define __UTIL_HPP__
 
+typedef unsigned int uint;
+
 typedef struct
 {
-    unsigned int start;
-    unsigned int end;
+    uint start;
+    uint end;
 
 } transcription_region_t;
 
 typedef struct
 {
-    unsigned int base;
+    uint base;
 
-    bool operator==(const constitutive_origin_t &other)
-    {
-        return (base == other.base);
-    }
 } constitutive_origin_t;
 
+bool operator==(const constitutive_origin_t &a, const constitutive_origin_t &b);
 #endif

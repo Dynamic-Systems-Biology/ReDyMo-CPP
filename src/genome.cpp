@@ -17,35 +17,28 @@ void Genome::initialize(std::vector<Chromosome> &chromosomes)
     this->chromosomes = chromosomes;
 }
 
-unsigned int Genome::size()
+uint Genome::size()
 {
-    unsigned int tot_length = 0;
+    uint tot_length = 0;
     for (auto chromosome : chromosomes)
         tot_length += chromosome.size();
     return tot_length;
 }
 
-GenomicLocation Genome::random_genomic_location()
+std::shared_ptr<GenomicLocation> Genome::random_genomic_location()
 {
-    unsigned int rand_chromosome = rand() % chromosomes.size();
-    unsigned int rand_base       = rand() % chromosomes[rand_chromosome].size();
-    try
-    {
-        GenomicLocation loc(rand_base, chromosomes[rand_chromosome]);
-        return loc;
-    }
-    catch (std::exception e)
-    {
-        std::cout << e.what << std::endl;
-    }
+    uint rand_chromosome = rand() % chromosomes.size();
+    uint rand_base       = rand() % chromosomes[rand_chromosome].size();
+    return std::shared_ptr<GenomicLocation>(
+        new GenomicLocation(rand_base, chromosomes[rand_chromosome]));
 }
 
-GenomicLocation Genome::random_unreplicated_genomic_location()
+std::shared_ptr<GenomicLocation> Genome::random_unreplicated_genomic_location()
 {
     if (this->is_replicated())
         throw "There are no unreplicated bases available.";
 
-    unsigned int rand_chromosome, rand_base;
+    uint rand_chromosome, rand_base;
 
     do
         rand_chromosome = rand() % chromosomes.size();
@@ -55,15 +48,8 @@ GenomicLocation Genome::random_unreplicated_genomic_location()
         rand_base = rand() % chromosomes[rand_chromosome].size();
     while (chromosomes[rand_chromosome].base_is_replicated(rand_base));
 
-    try
-    {
-        GenomicLocation loc(rand_base, chromosomes[rand_chromosome]);
-        return loc;
-    }
-    catch (std::exception e)
-    {
-        std::cout << e.what << std::endl;
-    }
+    return std::shared_ptr<GenomicLocation>(
+        new GenomicLocation(rand_base, chromosomes[rand_chromosome]));
 }
 
 bool Genome::is_replicated()
@@ -77,16 +63,16 @@ bool Genome::is_replicated()
 
 float Genome::average_interorigin_distance()
 {
-    unsigned int n_interorigin_spaces = 0;
+    uint n_interorigin_spaces = 0;
     for (auto chromosome : chromosomes)
         n_interorigin_spaces += chromosome.n_fired_origins + 1;
 
     return (float)this->size() / n_interorigin_spaces;
 }
 
-unsigned int Genome::n_constitutive_origins()
+uint Genome::n_constitutive_origins()
 {
-    unsigned int n_origins = 0;
+    uint n_origins = 0;
     for (auto chromosome : chromosomes)
         n_origins += chromosome.n_constitutive_origins();
     return n_origins;

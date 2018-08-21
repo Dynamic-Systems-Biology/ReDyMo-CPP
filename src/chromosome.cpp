@@ -6,7 +6,7 @@
 Chromosome::Chromosome() {}
 
 Chromosome::Chromosome(
-    unsigned int code, unsigned int length,
+    uint code, uint length,
     std::vector<float> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
@@ -16,7 +16,7 @@ Chromosome::Chromosome(
 }
 
 void Chromosome::initialize(
-    unsigned int code, unsigned int length,
+    uint code, uint length,
     std::vector<float> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
@@ -31,10 +31,9 @@ void Chromosome::initialize(
     this->n_replicated_bases    = 0;
     this->n_fired_origins       = 0;
     this->strand.resize(length, -1);
-    this->fired_constitutive_origins.resize(length, false);
 }
 
-unsigned int Chromosome::size() { return this->length; }
+uint Chromosome::size() { return this->length; }
 
 std::string Chromosome::to_string()
 {
@@ -46,21 +45,21 @@ std::string Chromosome::to_string()
     return chromosome_string;
 }
 
-bool Chromosome::base_is_replicated(unsigned int base)
+bool Chromosome::base_is_replicated(uint base)
 {
     if (base < 0 || base >= this->length)
         throw std::out_of_range("Given base is outside Chromosome length.");
     return this->strand[base] != -1;
 }
 
-float Chromosome::activation_probability(unsigned int base)
+float Chromosome::activation_probability(uint base)
 {
     if (base < 0 || base >= this->length)
         throw std::out_of_range("Given base is outside Chromosome length.");
     return probability_landscape[base];
 }
 
-void Chromosome::set_dormant_activation_probability(unsigned int base)
+void Chromosome::set_dormant_activation_probability(uint base)
 {
     if (base < 0 || base >= this->length)
         throw std::out_of_range("Given base is outside Chromosome length.");
@@ -96,7 +95,7 @@ bool Chromosome::replicate(int start, int end, int time)
         normal_replication = true;
     }
 
-    for (unsigned int base = start; base != end;
+    for (uint base = start; base != end;
          base += (end - start > 0) ? 1 : -1)
     {
         if (strand[base] == -1)
@@ -114,11 +113,11 @@ bool Chromosome::is_replicated()
     return this->n_replicated_bases == this->length;
 }
 
-unsigned int Chromosome::get_code() { return this->code; }
+uint Chromosome::get_code() { return this->code; }
 
-unsigned int Chromosome::n_constitutive_origins()
+uint Chromosome::n_constitutive_origins()
 {
     return this->constitutive_origins.size();
 }
 
-unsigned int Chromosome::get_n_replicated_bases() { return n_replicated_bases; }
+uint Chromosome::get_n_replicated_bases() { return n_replicated_bases; }
