@@ -6,8 +6,7 @@
 Chromosome::Chromosome() {}
 
 Chromosome::Chromosome(
-    uint code, uint length,
-    std::vector<float> &probability_landscape,
+    uint code, uint length, std::vector<float> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
 {
@@ -16,8 +15,7 @@ Chromosome::Chromosome(
 }
 
 void Chromosome::initialize(
-    uint code, uint length,
-    std::vector<float> &probability_landscape,
+    uint code, uint length, std::vector<float> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
 {
@@ -95,8 +93,7 @@ bool Chromosome::replicate(int start, int end, int time)
         normal_replication = true;
     }
 
-    for (uint base = start; base != end;
-         base += (end - start > 0) ? 1 : -1)
+    for (uint base = start; base != end; base += (end - start > 0) ? 1 : -1)
     {
         if (strand[base] == -1)
         {
@@ -121,3 +118,7 @@ uint Chromosome::n_constitutive_origins()
 }
 
 uint Chromosome::get_n_replicated_bases() { return n_replicated_bases; }
+
+uint Chromosome::get_n_fired_origins() { return n_fired_origins; }
+
+void Chromosome::add_fired_origin() { n_fired_origins++; }

@@ -18,12 +18,12 @@ class Chromosome
     uint code;
     uint length;
     uint n_replicated_bases;
+    uint n_fired_origins;
     std::vector<int> strand;
     std::vector<float> probability_landscape;
     std::vector<transcription_region_t> transcription_regions;
 
   public:
-    uint n_fired_origins;
     std::vector<constitutive_origin_t> constitutive_origins;
     std::vector<constitutive_origin_t> fired_constitutive_origins;
 
@@ -129,6 +129,9 @@ class Chromosome
     uint get_n_replicated_bases();
 
     // TODO: getters for the public
+    uint get_n_fired_origins();
+
+    void add_fired_origin();
 };
 
 #endif

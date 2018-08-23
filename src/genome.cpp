@@ -65,7 +65,7 @@ float Genome::average_interorigin_distance()
 {
     uint n_interorigin_spaces = 0;
     for (auto chromosome : chromosomes)
-        n_interorigin_spaces += chromosome.n_fired_origins + 1;
+        n_interorigin_spaces += chromosome.get_n_fired_origins() + 1;
 
     return (float)this->size() / n_interorigin_spaces;
 }
