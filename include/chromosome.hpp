@@ -5,6 +5,7 @@
 #define __CHROMOSOME_HPP__
 
 #include "util.hpp"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -132,6 +133,9 @@ class Chromosome
     uint get_n_fired_origins();
 
     void add_fired_origin();
+
+    std::shared_ptr<std::vector<transcription_region_t>>
+    get_transcription_regions();
 };
 
 #endif

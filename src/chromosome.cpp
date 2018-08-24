@@ -1,5 +1,6 @@
 #include "chromosome.hpp"
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -122,3 +123,9 @@ uint Chromosome::get_n_replicated_bases() { return n_replicated_bases; }
 uint Chromosome::get_n_fired_origins() { return n_fired_origins; }
 
 void Chromosome::add_fired_origin() { n_fired_origins++; }
+
+std::shared_ptr<std::vector<transcription_region_t>>
+Chromosome::get_transcription_regions()
+{
+    std::shared_ptr<std::vector<transcription_region_t>>(transcription_regions);
+}
