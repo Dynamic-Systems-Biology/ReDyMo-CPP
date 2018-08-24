@@ -12,6 +12,7 @@ class ReplicationFork
     Chromosome &chromosome;
     uint speed;
     int base, direction;
+    bool just_unattached;
 
   public:
     /*! The constructor.
@@ -56,6 +57,17 @@ class ReplicationFork
      * @return True if the fork is attached to some base in any chromosome.
      */
     bool is_attached();
+
+    /*! This function queries if the fork was recently unattached and was not
+     * treated yet.
+     * @return bool True if the fork has not received post unattachement
+     * treatment.
+     */
+    bool get_just_unattached();
+
+    /*!Setter for the just_unattached property.
+    */
+    void set_just_unattached(bool new_value);
 };
 
 #endif
