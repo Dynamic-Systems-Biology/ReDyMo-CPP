@@ -59,9 +59,9 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                         chromosome.set_dormant_activation_probability(
                             fork->get_base());
                     }
-                    fork->unattach();
+                    fork->detach();
                     n_free_forks++;
-                    fork->set_just_unattached(false);
+                    fork->set_just_detached(false);
                     n_collisions++;
                     // This fork collided, so there is no need to check other
                     // regions with it
@@ -76,9 +76,9 @@ void ForkManager::advance_attached_forks(uint time)
 {
     for (auto fork : replication_forks)
     {
-        if (fork->get_just_unattached())
+        if (fork->get_just_detached())
         {
-            fork->set_just_unattached(false);
+            fork->set_just_detached(false);
             n_free_forks++;
         }
         else if (fork->is_attached())
@@ -95,7 +95,7 @@ void ForkManager::attach_forks(GenomicLocation &location, uint time)
 
     for (auto fork : replication_forks)
     {
-        if (!fork->is_attached() && !fork->get_just_unattached())
+        if (!fork->is_attached() && !fork->get_just_detached())
         {
             fork->attach(location, direction, time);
             n_forks_attached++;

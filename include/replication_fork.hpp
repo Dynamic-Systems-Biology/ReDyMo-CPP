@@ -12,7 +12,7 @@ class ReplicationFork
     Chromosome &chromosome;
     uint speed;
     int base, direction;
-    bool just_unattached;
+    bool just_detached;
 
   public:
     /*! The constructor.
@@ -43,7 +43,7 @@ class ReplicationFork
     std::shared_ptr<Chromosome> get_chromosome();
 
     /*! Unbinds the fork from the position where it was.*/
-    void unattach();
+    void detach();
 
     /*! Advances the fork proportionally to its speed and replicates the bases
      * in the path.
@@ -58,16 +58,16 @@ class ReplicationFork
      */
     bool is_attached();
 
-    /*! This function queries if the fork was recently unattached and was not
+    /*! This function queries if the fork was recently detached and was not
      * treated yet.
-     * @return bool True if the fork has not received post unattachement
+     * @return bool True if the fork has not received post detachement
      * treatment.
      */
-    bool get_just_unattached();
+    bool get_just_detached();
 
-    /*!Setter for the just_unattached property.
-    */
-    void set_just_unattached(bool new_value);
+    /*!Setter for the just_detached property.
+     */
+    void set_just_detached(bool new_value);
 };
 
 #endif

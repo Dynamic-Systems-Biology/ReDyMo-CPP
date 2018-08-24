@@ -5,10 +5,10 @@
 ReplicationFork::ReplicationFork(Genome &genome, uint speed)
     : genome(genome), chromosome(*(Chromosome *)nullptr)
 {
-    this->speed      = speed;
-    this->base       = -1;
-    this->direction  = 0;
-    this->just_unattached = false;
+    this->speed         = speed;
+    this->base          = -1;
+    this->direction     = 0;
+    this->just_detached = false;
 }
 
 void ReplicationFork::attach(GenomicLocation &gen_loc, int direction, uint time)
@@ -21,12 +21,12 @@ void ReplicationFork::attach(GenomicLocation &gen_loc, int direction, uint time)
     this->chromosome.replicate(this->base, this->base, time);
 }
 
-void ReplicationFork::unattach()
+void ReplicationFork::detach()
 {
-    this->base       = -1;
-    this->direction  = 0;
-    this->chromosome = *(Chromosome *)nullptr;
-    this->just_unattached = true;
+    this->base          = -1;
+    this->direction     = 0;
+    this->chromosome    = *(Chromosome *)nullptr;
+    this->just_detached = true;
 }
 
 bool ReplicationFork::advance(uint time)
@@ -34,7 +34,7 @@ bool ReplicationFork::advance(uint time)
     int end_base = base + speed * direction;
     if (chromosome.replicate(base, end_base, time))
     {
-        unattach();
+        detach();
         return false;
     }
 
@@ -53,12 +53,9 @@ std::shared_ptr<Chromosome> ReplicationFork::get_chromosome()
     return (std::shared_ptr<Chromosome>)&chromosome;
 }
 
-bool ReplicationFork::get_just_unattached()
-{
-    return just_unattached;
-}
+bool ReplicationFork::get_just_detached() { return just_detached; }
 
-void ReplicationFork::set_just_unattached(bool new_value)
+void ReplicationFork::set_just_detached(bool new_value)
 {
-    just_unattached = new_value;
+    just_detached = new_value;
 }

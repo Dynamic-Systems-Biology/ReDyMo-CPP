@@ -18,7 +18,7 @@ class ForkManager
     /*! This function checks if there is any fork (replication) colliding with
      * any RNAP (transcription) and handles the collision by rainsing the
      * collision counter, changing the activation probability landscape around
-     * the base affected and unattaching the affected fork.
+     * the base affected and detaching the affected fork.
      * @param time The simulation time when it was checked.
      * @param period The period of the RNAP carousel.
      * @param has_dormant Assigns if this chromosome has dormant origins.
@@ -28,7 +28,7 @@ class ForkManager
                                                    bool has_dormant);
 
     /*! This function moves all forks that are attached and prepares forks just
-     * unattached that were not treated and makes the available as free forks.
+     * detached that were not treated and makes the available as free forks.
      * @param time The time in the simulation when the forks were advanced.
      */
     void advance_attached_forks(uint time);
