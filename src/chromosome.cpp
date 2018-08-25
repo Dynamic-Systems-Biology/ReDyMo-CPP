@@ -1,5 +1,6 @@
 #include "chromosome.hpp"
 #include <cmath>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -90,7 +91,7 @@ bool Chromosome::replicate(int start, int end, int time)
 
     if (end < 0 || end >= strand.size())
     {
-        end                = end < 0 ? 0 : strand.size() - 1;
+        end                = end < 0 ? 0 : strand.size();
         normal_replication = true;
     }
 
@@ -124,8 +125,12 @@ uint Chromosome::get_n_fired_origins() { return n_fired_origins; }
 
 void Chromosome::add_fired_origin() { n_fired_origins++; }
 
-std::shared_ptr<std::vector<transcription_region_t>>
-Chromosome::get_transcription_regions()
+std::vector<transcription_region_t> &Chromosome::get_transcription_regions()
 {
-    std::shared_ptr<std::vector<transcription_region_t>>(transcription_regions);
+    return transcription_regions;
+}
+
+bool Chromosome::operator==(Chromosome &other)
+{
+    return this->code == other.get_code();
 }

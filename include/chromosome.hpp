@@ -129,13 +129,13 @@ class Chromosome
      */
     uint get_n_replicated_bases();
 
-    // TODO: getters for the public
     uint get_n_fired_origins();
 
     void add_fired_origin();
 
-    std::shared_ptr<std::vector<transcription_region_t>>
-    get_transcription_regions();
+    std::vector<transcription_region_t> &get_transcription_regions();
+
+    bool operator==(Chromosome &other);
 };
 
 #endif
