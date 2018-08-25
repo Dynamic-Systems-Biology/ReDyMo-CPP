@@ -16,17 +16,17 @@
 class Genome
 {
   public:
-    std::vector<Chromosome> chromosomes;
+    std::vector<Chromosome *> chromosomes;
 
   public:
     /*! Empty constructor */
     Genome();
 
     /*! Constructor */
-    Genome(std::vector<Chromosome> &chromosomes);
+    Genome(std::vector<Chromosome *> &chromosomes);
 
     /*! Initializer to fill a previously empty object*/
-    void initialize(std::vector<Chromosome> &chromosomes);
+    void initialize(std::vector<Chromosome *> &chromosomes);
 
     /*! The combined length of the Genome
      * @return uint The total number of bases in the genomes.
@@ -54,6 +54,7 @@ class Genome
      * @see Chromosome
      */
     bool is_replicated();
+
     /*! This function calculates the average inter-origin distance across all
      * Chromosomes in the Genome.
      * @return The average inter-origin distance measured in number of bases.
