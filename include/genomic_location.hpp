@@ -24,7 +24,7 @@ class GenomicLocation
      */
     GenomicLocation(uint base, Chromosome &chromosome);
 
-    /*! Queries if the particular base has been replicated.
+    /*! Queries if the genomic location base has been replicated.
      * @return True if the base is replicated.
      */
     bool is_replicated();
@@ -34,8 +34,7 @@ class GenomicLocation
      * @param int origins_range Considered range around a constitutive origin.
      * @return True if the base will be activated.
      */
-    bool will_activate(bool use_constitutive_origin,
-                       uint origins_range);
+    bool will_activate(bool use_constitutive_origin, uint origins_range);
 
     /*! Retrieve a constitutive origin located in this range.
      * @param int origins_range Considered range around a constitutive origin.

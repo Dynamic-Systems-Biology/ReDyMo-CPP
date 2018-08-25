@@ -22,7 +22,7 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
         if (fork->is_attached())
         {
             Chromosome &chromosome = *fork->get_chromosome();
-            for (auto region : *chromosome.get_transcription_regions())
+            for (auto region : chromosome.get_transcription_regions())
             {
                 uint replisome_position_within_region = 0;
                 uint region_size                      = 0;
