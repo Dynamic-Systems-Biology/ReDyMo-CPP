@@ -146,7 +146,12 @@ TEST_F(ChromosomeTest, Replicate)
         ASSERT_EQ(true, chrm.base_is_replicated(base));
 }
 
-TEST_F(ChromosomeTest, IsReplicated) { ASSERT_FALSE(chrm.is_replicated()); }
+TEST_F(ChromosomeTest, IsReplicated)
+{
+    ASSERT_FALSE(chrm.is_replicated());
+    chrm.replicate(0, 300, 1);
+    ASSERT_TRUE(chrm.is_replicated());
+}
 
 int main(int argc, char **argv)
 {
