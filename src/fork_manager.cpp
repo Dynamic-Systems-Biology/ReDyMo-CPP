@@ -61,7 +61,6 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                     }
                     fork->detach();
                     n_free_forks++;
-                    fork->set_just_detached(false);
                     n_collisions++;
                     // This fork collided, so there is no need to check other
                     // regions with it
