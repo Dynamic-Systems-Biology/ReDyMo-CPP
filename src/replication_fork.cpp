@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 ReplicationFork::ReplicationFork(Genome &genome, uint speed)
-    : genome(genome), chromosome(*(Chromosome *)nullptr)
+    : genome(genome), chromosome(nullptr)
 {
     this->speed         = speed;
     this->base          = -1;
@@ -14,27 +14,29 @@ ReplicationFork::ReplicationFork(Genome &genome, uint speed)
 void ReplicationFork::attach(GenomicLocation &gen_loc, int direction, uint time)
 {
     if (this->is_attached()) throw "This fork is already attached.";
+    if (this->get_just_detached())
+        throw "This fork has just detached and cannot be used right now.";
 
     this->base       = gen_loc.base;
-    this->chromosome = gen_loc.chromosome;
+    this->chromosome = &gen_loc.chromosome;
     this->direction  = direction;
-    this->chromosome.replicate(this->base, this->base, time);
+    this->chromosome->replicate(this->base, this->base, time);
 }
 
-void ReplicationFork::detach()
+void ReplicationFork::detach(bool problem)
 {
-    this->base          = -1;
-    this->direction     = 0;
-    this->chromosome    = *(Chromosome *)nullptr;
-    this->just_detached = true;
+    this->base       = -1;
+    this->direction  = 0;
+    this->chromosome = nullptr;
+    if (problem) this->just_detached = true;
 }
 
 bool ReplicationFork::advance(uint time)
 {
     int end_base = base + speed * direction;
-    if (chromosome.replicate(base, end_base, time))
+    if (!chromosome->replicate(base, end_base, time))
     {
-        detach();
+        detach(true);
         return false;
     }
 
@@ -50,7 +52,7 @@ int ReplicationFork::get_base() { return base; }
 
 std::shared_ptr<Chromosome> ReplicationFork::get_chromosome()
 {
-    return (std::shared_ptr<Chromosome>)&chromosome;
+    return std::shared_ptr<Chromosome>(chromosome);
 }
 
 bool ReplicationFork::get_just_detached() { return just_detached; }

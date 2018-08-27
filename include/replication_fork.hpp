@@ -9,7 +9,7 @@ class ReplicationFork
 {
   private:
     Genome &genome;
-    Chromosome &chromosome;
+    Chromosome *chromosome;
     uint speed;
     int base, direction;
     bool just_detached;
@@ -42,8 +42,11 @@ class ReplicationFork
     /*! chromosome getter.*/
     std::shared_ptr<Chromosome> get_chromosome();
 
-    /*! Unbinds the fork from the position where it was.*/
-    void detach();
+    /*! Unbinds the fork from the position where it was.
+     * @param problem If the detachent is caused by a problem in replication.
+     * Defaults to false.
+     */
+    void detach(bool problem = false);
 
     /*! Advances the fork proportionally to its speed and replicates the bases
      * in the path.
