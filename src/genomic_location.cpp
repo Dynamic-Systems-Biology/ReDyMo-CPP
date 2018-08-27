@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstdlib>
+#include <iostream>
 #include <stdexcept>
 
 #include "chromosome.hpp"
@@ -24,7 +25,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 {
     if (!use_constitutive_origin)
     {
-        float chance = rand() % 1;
+        float chance = (float)(rand() % 100) / 100;
         return chance < this->chromosome.activation_probability(this->base);
     }
     std::vector<constitutive_origin_t> not_fired_origins;
@@ -42,20 +43,21 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 }
 
 constitutive_origin_t *
-GenomicLocation::get_constitutive_origin(uint origins_range)
+GenomicLocation::get_constitutive_origin(int origins_range)
 {
-    constitutive_origin_t found_origin;
-    std::vector<constitutive_origin_t> not_fired_origins;
+    std::vector<constitutive_origin_t *> not_fired_origins;
+    origins_range /= 2;
 
     for (auto origin : chromosome.constitutive_origins)
         if (!chromosome.base_is_replicated(origin.base))
-            not_fired_origins.push_back(origin);
+            not_fired_origins.push_back(&origin);
 
     for (auto origin : not_fired_origins)
-        if (this->base >= (origin.base - origins_range / 2) &&
-            this->base <= (origin.base + origins_range / 2))
-            return &origin;
-
+    {
+        if ((int)this->base >= ((int)origin->base - origins_range) &&
+            (int)this->base <= ((int)origin->base + origins_range))
+            return origin;
+    }
     // If code reaches here, no nonfired origin was found
     throw std::range_error("There are no origins within range.");
 }
@@ -63,14 +65,14 @@ GenomicLocation::get_constitutive_origin(uint origins_range)
 bool GenomicLocation::put_fired_constitutive_origin(
     constitutive_origin_t &origin)
 {
+    bool found = false;
     for (auto curr_origin : chromosome.constitutive_origins)
-        if (curr_origin == origin)
-            if (std::find(chromosome.constitutive_origins.begin(),
-                          chromosome.constitutive_origins.end(),
-                          origin) == chromosome.constitutive_origins.end())
+        if (curr_origin == origin) found = true;
 
-                chromosome.fired_constitutive_origins.push_back(origin);
+    if (found)
+        chromosome.fired_constitutive_origins.push_back(origin);
+    else
+        throw std::invalid_argument("Origin not found.");
 
-    // If reaches here, the given origin was not found in the origins list
-    throw std::invalid_argument("Origin not found.");
+    return found;
 }

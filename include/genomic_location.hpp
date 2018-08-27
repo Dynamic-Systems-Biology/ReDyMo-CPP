@@ -41,7 +41,7 @@ class GenomicLocation
      * @return True if the base will be activate, False otherwise.
      * @throw range_error if no origin is found within the range.
      */
-    constitutive_origin_t *get_constitutive_origin(uint origins_range);
+    constitutive_origin_t *get_constitutive_origin(int origins_range);
 
     /*! Update the list of fired constitutive origins with an fired origin.
      * @param constitutive_origin_t location of the constitutive origin.
