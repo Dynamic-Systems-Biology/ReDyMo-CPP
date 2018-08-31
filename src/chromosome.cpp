@@ -99,7 +99,7 @@ bool Chromosome::replicate(int start, int end, int time)
         normal_replication = false;
     }
 
-    for (uint base = start; base <= end; base++)
+    for (uint base = start; base < end; base++)
     {
         if (strand[base] == -1)
         {

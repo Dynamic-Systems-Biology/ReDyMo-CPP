@@ -144,6 +144,7 @@ TEST_F(ChromosomeTest, Replicate)
     ASSERT_EQ(chrm.replicate(0, 30, 1), true);
     for (int base = 0; base < 30; base++)
         ASSERT_EQ(true, chrm.base_is_replicated(base));
+    ASSERT_EQ(chrm.get_n_replicated_bases(), 31);
 }
 
 TEST_F(ChromosomeTest, IsReplicated)
