@@ -45,6 +45,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 constitutive_origin_t *
 GenomicLocation::get_constitutive_origin(int origins_range)
 {
+    constitutive_origin_t *ret_origin;
     std::vector<constitutive_origin_t *> not_fired_origins;
     origins_range /= 2;
 
@@ -56,7 +57,10 @@ GenomicLocation::get_constitutive_origin(int origins_range)
     {
         if ((int)this->base >= ((int)origin->base - origins_range) &&
             (int)this->base <= ((int)origin->base + origins_range))
-            return origin;
+        {
+            ret_origin = origin;
+            return ret_origin;
+        }
     }
     // If code reaches here, no nonfired origin was found
     throw std::range_error("There are no origins within range.");

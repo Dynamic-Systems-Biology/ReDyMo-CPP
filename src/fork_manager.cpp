@@ -5,7 +5,7 @@ ForkManager::ForkManager(uint n_forks, Genome *genome, uint speed)
 {
     this->n_forks      = n_forks;
     this->n_free_forks = n_forks;
-    for (int i = 0; i < n_forks; i++)
+    for (int i = 0; i < (int)n_forks; i++)
     {
         replication_forks.push_back(new ReplicationFork(genome, speed));
     }
@@ -26,13 +26,12 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
             for (auto region : chromosome->get_transcription_regions())
             {
                 uint replisome_position_within_region = 0;
-                uint region_size                      = 0;
                 int RNAP_direction                    = 0;
 
                 if (region.start < region.end)
                 {
-                    if (fork->get_base() < region.start ||
-                        fork->get_base() > region.end)
+                    if (fork->get_base() < (int)region.start ||
+                        fork->get_base() > (int)region.end)
                         continue;
 
                     replisome_position_within_region =
@@ -41,8 +40,8 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                 }
                 else
                 {
-                    if (fork->get_base() > region.start ||
-                        fork->get_base() < region.end)
+                    if (fork->get_base() > (int)region.start ||
+                        fork->get_base() < (int)region.end)
                         continue;
                     replisome_position_within_region =
                         region.start - fork->get_base();

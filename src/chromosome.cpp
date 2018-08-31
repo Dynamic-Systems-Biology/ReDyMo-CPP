@@ -38,7 +38,7 @@ uint Chromosome::size() { return this->length; }
 std::string Chromosome::to_string()
 {
     std::string chromosome_string = "";
-    for (int base = 0; base < length; base++)
+    for (uint base = 0; base < length; base++)
     {
         chromosome_string += strand[base];
     }
@@ -67,7 +67,8 @@ void Chromosome::set_dormant_activation_probability(uint base)
     int left_base  = base - 2 * c;
     int right_base = base + 2 * c;
     left_base      = left_base < 0 ? 0 : left_base;
-    right_base     = right_base > this->length ? this->length : right_base;
+    right_base =
+        right_base > (int)this->length ? (int)this->length : right_base;
 
     for (int curr_base = left_base; curr_base < right_base; curr_base++)
     {
@@ -81,7 +82,7 @@ void Chromosome::set_dormant_activation_probability(uint base)
 
 bool Chromosome::replicate(int start, int end, int time)
 {
-    if (start < 0 || start > this->length)
+    if (start < 0 || start > (int)this->length)
         throw std::out_of_range("The start base is not inside the Chromosome");
 
     // A non normal replication refers to a replication which overlaps areas
@@ -93,13 +94,13 @@ bool Chromosome::replicate(int start, int end, int time)
 
     end++;
 
-    if (end < 0 || end >= strand.size())
+    if (end < 0 || end >= (int)strand.size())
     {
-        end                = end < 0 ? 0 : strand.size();
+        end                = end < 0 ? 0 : (int)strand.size();
         normal_replication = false;
     }
 
-    for (uint base = start; base < end; base++)
+    for (int base = start; base < end; base++)
     {
         if (strand[base] == -1)
         {

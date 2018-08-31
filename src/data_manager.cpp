@@ -106,14 +106,14 @@ std::vector<float> DataManager::generate_prob_landscape(std::string code,
 
     std::ofstream probs_file;
     probs_file.open(mfa_seq_data_path + code + "_probability.txt");
-    for (int i = 0; i < scores.size(); i++)
+    for (int i = 0; i < (int)scores.size(); i++)
     {
         float prob = a * scores[i] + b;
         probs_file << prob;
         for (int j = i * step; j < (i + 1) * step; j++)
         {
             probabilities[j] = prob;
-            if (j == length - 1) return probabilities;
+            if (j == (int)length - 1) return probabilities;
         }
     }
     probs_file.close();

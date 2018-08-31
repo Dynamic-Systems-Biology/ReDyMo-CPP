@@ -70,13 +70,13 @@ TEST_F(GenomicLocationTest, WillActivate)
 
     for (int i = 0; i < 1000; i++)
         sum += loc.will_activate(false, 1) ? 1 : 0;
-    ASSERT_NEAR(sum, (float)1 / (1 + 1) * 1000, 6);
+    ASSERT_NEAR(sum, (float)1 / (1 + 1) * 1000, 10);
 }
 
 TEST_F(GenomicLocationTest, GetConstitutiveOrigin)
 {
     ASSERT_TRUE(gen_loc->chromosome.constitutive_origins[0].base ==
-                gen_loc->get_constitutive_origin(301)->base);
+                gen_loc->get_constitutive_origin(600)->base);
 }
 
 TEST_F(GenomicLocationTest, PutFiredConstitutiveOrigin)

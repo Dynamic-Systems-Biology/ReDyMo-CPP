@@ -29,7 +29,7 @@ TEST_F(DataManagerTest, GenerateProbLandscape)
         0.6667000000000001,     0.6667000000000001, 0.3334000000000006,
         0.1667500000000004};
     std::vector<float> result = data->generate_prob_landscape("dummy_01", 7);
-    for (int i = 0; i < result.size(); i++)
+    for (int i = 0; i < (int)result.size(); i++)
         ASSERT_EQ(result[i], expected[i]);
 }
 
@@ -60,7 +60,7 @@ TEST_F(DataManagerTest, GetChromosomeData)
         ASSERT_EQ(chrm->get_transcription_regions()[0].start, 25);
         ASSERT_EQ(chrm->get_transcription_regions()[0].end, 80);
         ASSERT_EQ(chrm->constitutive_origins[0].base, 1234);
-        for (int i = 0; i < probabilities.size(); i++)
+        for (int i = 0; i < (int)probabilities.size(); i++)
             ASSERT_EQ(chrm->activation_probability(i), probabilities[i]);
     }
 }
