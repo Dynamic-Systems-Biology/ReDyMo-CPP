@@ -69,6 +69,7 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
             }
         }
     }
+    return n_collisions;
 }
 
 void ForkManager::advance_attached_forks(uint time)
