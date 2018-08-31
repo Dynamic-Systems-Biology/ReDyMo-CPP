@@ -10,10 +10,12 @@ class ForkManager
 {
   private:
     uint n_forks, n_free_forks;
+
+  public:
     std::vector<ReplicationFork *> replication_forks;
 
   public:
-    ForkManager(uint size, Genome &genome, uint speed);
+    ForkManager(uint n_forks, Genome *genome, uint speed);
 
     /*! This function checks if there is any fork (replication) colliding with
      * any RNAP (transcription) and handles the collision by rainsing the

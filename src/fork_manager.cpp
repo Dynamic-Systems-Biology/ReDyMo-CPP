@@ -1,10 +1,11 @@
 #include "fork_manager.hpp"
+#include <iostream>
 
-ForkManager::ForkManager(uint size, Genome &genome, uint speed)
+ForkManager::ForkManager(uint n_forks, Genome *genome, uint speed)
 {
-    this->n_forks      = size;
-    this->n_free_forks = size;
-    for (int i = 0; i < size; i++)
+    this->n_forks      = n_forks;
+    this->n_free_forks = n_forks;
+    for (int i = 0; i < n_forks; i++)
     {
         replication_forks.push_back(new ReplicationFork(genome, speed));
     }
@@ -14,15 +15,15 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                                                             uint period,
                                                             bool has_dormant)
 {
-    uint n_collisions;
+    uint n_collisions = 0;
 
     uint RNAP_position = time % period;
     for (auto fork : replication_forks)
     {
         if (fork->is_attached())
         {
-            Chromosome &chromosome = *fork->get_chromosome();
-            for (auto region : chromosome.get_transcription_regions())
+            Chromosome *chromosome = fork->get_chromosome();
+            for (auto region : chromosome->get_transcription_regions())
             {
                 uint replisome_position_within_region = 0;
                 uint region_size                      = 0;
@@ -56,7 +57,7 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                 {
                     if (has_dormant)
                     {
-                        chromosome.set_dormant_activation_probability(
+                        chromosome->set_dormant_activation_probability(
                             fork->get_base());
                     }
                     fork->detach();

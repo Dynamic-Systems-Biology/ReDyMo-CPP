@@ -4,6 +4,8 @@ project(ReDyMo)
 include(CTest)
 include(GoogleTest)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
 #######
 # Add the include folder
 #######
@@ -28,17 +30,20 @@ if(BUILD_TESTING)
     add_executable(test_genome test/test_genome.cpp)
     add_executable(test_genomic_location test/test_genomic_location.cpp)
     add_executable(test_replication_fork test/test_replication_fork.cpp)
+    add_executable(test_fork_manager test/test_fork_manager.cpp)
     add_executable(test_data_manager test/test_data_manager.cpp)
 
     target_link_libraries(test_chromosome deps gtest)
     target_link_libraries(test_genome deps gtest)
     target_link_libraries(test_genomic_location deps gtest)
     target_link_libraries(test_replication_fork deps gtest)
+    target_link_libraries(test_fork_manager deps gtest)
     target_link_libraries(test_data_manager deps gtest SQLiteCpp sqlite3 pthread dl)
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
     gtest_discover_tests(test_genomic_location)
     gtest_discover_tests(test_replication_fork)
+    gtest_discover_tests(test_fork_manager)
     gtest_discover_tests(test_data_manager)
 endif()
