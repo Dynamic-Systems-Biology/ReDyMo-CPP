@@ -2,7 +2,7 @@
 #include <memory>
 #include <stdexcept>
 
-ReplicationFork::ReplicationFork(Genome &genome, uint speed)
+ReplicationFork::ReplicationFork(Genome *genome, uint speed)
     : genome(genome), chromosome(nullptr)
 {
     this->speed         = speed;
@@ -50,10 +50,7 @@ int ReplicationFork::get_direction() { return direction; }
 
 int ReplicationFork::get_base() { return base; }
 
-std::shared_ptr<Chromosome> ReplicationFork::get_chromosome()
-{
-    return std::shared_ptr<Chromosome>(chromosome);
-}
+Chromosome *ReplicationFork::get_chromosome() { return chromosome; }
 
 bool ReplicationFork::get_just_detached() { return just_detached; }
 

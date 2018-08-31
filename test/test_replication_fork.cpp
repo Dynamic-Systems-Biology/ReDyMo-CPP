@@ -20,14 +20,11 @@ class ReplicationForkTest : public ::testing::Test
     {
         for (int i = 0; i < 100; i++)
             chrms.push_back(create_chromosome(300, std::to_string(i)));
-        Genome gen = Genome(chrms);
-        fork       = new ReplicationFork(gen, 40);
+        Genome *gen = new Genome(chrms);
+        fork        = new ReplicationFork(gen, 40);
     }
 
-    void TearDown()
-    {
-        delete fork;
-    }
+    void TearDown() { delete fork; }
 
     Chromosome *create_chromosome(uint size = 300, std::string id = "1")
     {
