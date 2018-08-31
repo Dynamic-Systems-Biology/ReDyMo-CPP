@@ -20,19 +20,15 @@ class DataManager
   public:
     DataManager(std::string database_path, std::string mfa_seq_data_path);
 
-    std::vector<std::shared_ptr<Chromosome>>
-    get_chromosome_data(std::string organism);
+    std::vector<Chromosome *> get_chromosome_data(std::string organism);
 
-    std::vector<float> generate_prob_landscape(uint code, uint length);
-
-    std::vector<std::shared_ptr<Chromosome>>
-    assemble_chromosomes(std::string organism);
+    std::vector<float> generate_prob_landscape(std::string code, uint length);
 
     std::vector<transcription_region_t>
-    get_transcription_regions(uint chromosome_code);
+    get_transcription_regions(std::string chromosome_code);
 
     std::vector<constitutive_origin_t>
-    get_constitutive_origins(uint chromosome_code);
+    get_constitutive_origins(std::string chromosome_code);
 };
 
 #endif
