@@ -19,7 +19,7 @@ class GenomicLocationTest : public ::testing::Test
         gen_loc          = new GenomicLocation(base, *chrm);
     }
 
-    Chromosome *create_chromosome(uint size = 300, uint id = 1)
+    Chromosome *create_chromosome(uint size = 300, std::string id = "1")
     {
         uint test_size = size;
         std::vector<float> prob_landscape;
@@ -65,7 +65,7 @@ TEST_F(GenomicLocationTest, IsReplicated)
 TEST_F(GenomicLocationTest, WillActivate)
 {
     float sum           = 0;
-    Chromosome chrm     = *create_chromosome(1, 2);
+    Chromosome chrm     = *create_chromosome(1, "2");
     GenomicLocation loc = GenomicLocation(0, chrm);
 
     for (int i = 0; i < 1000; i++)

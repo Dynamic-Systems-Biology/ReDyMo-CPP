@@ -19,7 +19,7 @@ class ReplicationForkTest : public ::testing::Test
     void SetUp()
     {
         for (int i = 0; i < 100; i++)
-            chrms.push_back(create_chromosome(300, i));
+            chrms.push_back(create_chromosome(300, std::to_string(i)));
         Genome gen = Genome(chrms);
         fork       = new ReplicationFork(gen, 40);
     }
@@ -29,7 +29,7 @@ class ReplicationForkTest : public ::testing::Test
         delete fork;
     }
 
-    Chromosome *create_chromosome(uint size = 300, uint id = 1)
+    Chromosome *create_chromosome(uint size = 300, std::string id = "1")
     {
         uint test_size = size;
         std::vector<float> prob_landscape;
@@ -118,8 +118,6 @@ TEST_F(ReplicationForkTest, JustDetached)
 
     ASSERT_TRUE(fork->get_just_detached());
 }
-
-
 
 int main(int argc, char **argv)
 {

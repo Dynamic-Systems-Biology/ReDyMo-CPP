@@ -8,7 +8,7 @@
 Chromosome::Chromosome() {}
 
 Chromosome::Chromosome(
-    uint code, uint length, std::vector<float> &probability_landscape,
+    std::string code, uint length, std::vector<float> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
 {
@@ -17,7 +17,7 @@ Chromosome::Chromosome(
 }
 
 void Chromosome::initialize(
-    uint code, uint length, std::vector<float> &probability_landscape,
+    std::string code, uint length, std::vector<float> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
 {
@@ -116,7 +116,7 @@ bool Chromosome::is_replicated()
     return this->n_replicated_bases == this->length;
 }
 
-uint Chromosome::get_code() { return this->code; }
+std::string Chromosome::get_code() { return this->code; }
 
 uint Chromosome::n_constitutive_origins()
 {

@@ -16,7 +16,7 @@
 class Chromosome
 {
   private:
-    uint code;
+    std::string code;
     uint length;
     uint n_replicated_bases;
     uint n_fired_origins;
@@ -50,14 +50,14 @@ class Chromosome
      * Chromosome.
      */
 
-    Chromosome(uint code, uint length,
+    Chromosome(std::string code, uint length,
                std::vector<float> &probability_landscape,
                std::vector<transcription_region_t> &transcription_regions,
                std::vector<constitutive_origin_t> &constitutive_origins);
 
     Chromosome();
 
-    void initialize(uint code, uint length,
+    void initialize(std::string code, uint length,
                     std::vector<float> &probability_landscape,
                     std::vector<transcription_region_t> &transcription_regions,
                     std::vector<constitutive_origin_t> &constitutive_origins);
@@ -117,7 +117,7 @@ class Chromosome
     /*! Query the id of the Chromosome.
      * @return The code of the Chromosome.
      */
-    uint get_code();
+    std::string get_code();
 
     /*! Retrieve the number of constitutive origins of this chromosome.
      * @return The number of constitutive origins.
