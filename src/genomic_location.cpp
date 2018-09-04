@@ -42,41 +42,53 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
     return false;
 }
 
-constitutive_origin_t *
+constitutive_origin_t
 GenomicLocation::get_constitutive_origin(int origins_range)
 {
-    constitutive_origin_t *ret_origin;
-    std::vector<constitutive_origin_t *> not_fired_origins;
+    constitutive_origin_t ret_origin;
+    std::vector<constitutive_origin_t> not_fired_origins;
     origins_range /= 2;
 
     for (auto origin : chromosome.constitutive_origins)
-        if (!chromosome.base_is_replicated(origin.base))
-            not_fired_origins.push_back(&origin);
+    {
+        if (std::find(chromosome.fired_constitutive_origins.begin(),
+                      chromosome.fired_constitutive_origins.end(),
+                      origin) == chromosome.fired_constitutive_origins.end())
+        { not_fired_origins.push_back(origin); } }
 
     for (auto origin : not_fired_origins)
     {
-        if ((int)this->base >= ((int)origin->base - origins_range) &&
-            (int)this->base <= ((int)origin->base + origins_range))
+        if ((int)this->base >= ((int)origin.base - origins_range) &&
+            (int)this->base <= ((int)origin.base + origins_range))
         {
             ret_origin = origin;
             return ret_origin;
         }
     }
     // If code reaches here, no nonfired origin was found
-    throw std::range_error("There are no origins within range.");
+    // throw std::range_error("There are no origins within range.");
+    ret_origin.base = -1;
+    return ret_origin;
 }
 
 bool GenomicLocation::put_fired_constitutive_origin(
-    constitutive_origin_t &origin)
+    constitutive_origin_t origin)
 {
-    bool found = false;
     for (auto curr_origin : chromosome.constitutive_origins)
-        if (curr_origin == origin) found = true;
-
-    if (found)
-        chromosome.fired_constitutive_origins.push_back(origin);
-    else
-        throw std::invalid_argument("Origin not found.");
-
-    return found;
+    {
+        // printf("%d == %d => \t%d\n",curr_origin, origin, curr_origin == origin);
+        if (curr_origin == origin)
+        {
+            for (auto fired_origin : chromosome.fired_constitutive_origins)
+                if (fired_origin == origin)
+                {
+                    // printf("Origin already rep = = = = = = = == == \n");
+                    return false;
+                }
+            chromosome.fired_constitutive_origins.push_back(origin);
+            return true;
+        }
+    }
+    // printf("Origin not found = = = = = = = == == \n");
+    return false;
 }

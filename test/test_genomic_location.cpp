@@ -76,7 +76,7 @@ TEST_F(GenomicLocationTest, WillActivate)
 TEST_F(GenomicLocationTest, GetConstitutiveOrigin)
 {
     ASSERT_TRUE(gen_loc->chromosome.constitutive_origins[0].base ==
-                gen_loc->get_constitutive_origin(600)->base);
+                gen_loc->get_constitutive_origin(600).base);
 }
 
 TEST_F(GenomicLocationTest, PutFiredConstitutiveOrigin)

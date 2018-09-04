@@ -54,24 +54,19 @@ void SPhase::simulate(int sim_number)
             {
                 GenomicLocation loc = *genome->random_genomic_location();
 
-                if (!loc.is_replicated() &&
+                if (!loc.is_replicated() && fork_manager->n_free_forks >= 2 &&
                     loc.will_activate(use_constitutive_origins, origins_range))
                 {
                     fork_manager->attach_forks(loc, time);
                     if (use_constitutive_origins)
                     {
-                        constitutive_origin_t *origin =
+                        constitutive_origin_t origin =
                             loc.get_constitutive_origin(origins_range);
-                        try
-                        {
-                            loc.put_fired_constitutive_origin(*origin);
-                        }
-                        catch (std::exception &e)
-                        {
-                            std::cout
-                                << "[WARN] Failed to add origin. Simulation "
-                                << sim_number << std::endl;
-                        }
+                        if (!loc.put_fired_constitutive_origin(origin))
+                            constitutive_origins += 0;
+                        // std::cout << "[WARN] Failed to add origin. "
+                        //  "Simulation "
+                        //   << sim_number << std::endl;
                         constitutive_origins--;
                     }
                 }
@@ -89,10 +84,11 @@ void SPhase::simulate(int sim_number)
 
     std::cout << "\t[INFO] Number of Collisions: " << n_collisions
               << " simulation " << sim_number << std::endl;
-
-    std::cout << "\t[INFO] Number of constitutive origins that did not fire: "
-              << constitutive_origins << " simulation " << sim_number
-              << std::endl;
+    if (use_constitutive_origins)
+        std::cout
+            << "\t[INFO] Number of constitutive origins that did not fire: "
+            << constitutive_origins << " simulation " << sim_number
+            << std::endl;
     output(sim_number, time, genome->average_interorigin_distance(), genome);
 }
 

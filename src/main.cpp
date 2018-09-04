@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     DataManager *data = new DataManager(
         "/home/brunobbs/Documents/IC/ReDyMo-CPP/data/simulation.sqlite",
-        "../data/MFA-Seq_TBrucei_TREU927/");
+        "../data/MFA-Seq_TBrucei_Senoid/");
 
     int transcription_period = 0;
     if (cmd_option_exists(argv, argv + argc, "--period"))

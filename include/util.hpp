@@ -5,14 +5,14 @@ typedef unsigned int uint;
 
 typedef struct
 {
-    uint start;
-    uint end;
+    int start;
+    int end;
 
 } transcription_region_t;
 
 typedef struct
 {
-    uint base;
+    int base;
 
 } constitutive_origin_t;
 
