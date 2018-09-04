@@ -38,9 +38,10 @@ uint Chromosome::size() { return this->length; }
 std::string Chromosome::to_string()
 {
     std::string chromosome_string = "";
-    for (uint base = 0; base < length; base++)
+    for (uint base = 0; base < length; base+=500)
     {
-        chromosome_string += strand[base];
+        chromosome_string += std::to_string(strand[base]);
+        chromosome_string += "\n";
     }
     return chromosome_string;
 }
@@ -94,9 +95,10 @@ bool Chromosome::replicate(int start, int end, int time)
 
     end++;
 
-    if (end < 0 || end >= (int)strand.size())
+    if (start < 0 || end >= (int)strand.size())
     {
-        end                = end < 0 ? 0 : (int)strand.size();
+        start = start < 0 ? 0 : start;
+        end   = end >= (int)strand.size() ? (int)strand.size() : end;
         normal_replication = false;
     }
 

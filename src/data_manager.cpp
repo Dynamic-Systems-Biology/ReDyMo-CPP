@@ -84,7 +84,7 @@ std::vector<float> DataManager::generate_prob_landscape(std::string code,
 {
     std::ifstream mfa_file;
     std::vector<float> scores;
-    std::vector<float> probabilities;
+    std::vector<float> probabilities(length);
     float curr_score;
 
     mfa_file.open(mfa_seq_data_path + code + ".txt");
