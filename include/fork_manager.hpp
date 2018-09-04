@@ -8,10 +8,8 @@
 
 class ForkManager
 {
-  private:
-    uint n_forks, n_free_forks;
-
   public:
+    uint n_forks, n_free_forks;
     std::vector<ReplicationFork *> replication_forks;
 
   public:

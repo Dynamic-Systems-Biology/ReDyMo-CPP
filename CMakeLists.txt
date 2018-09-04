@@ -4,7 +4,7 @@ project(ReDyMo)
 include(CTest)
 include(GoogleTest)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp")
 
 #######
 # Add the include folder
@@ -18,7 +18,9 @@ include_directories(
 #######
 # Compile componenets in libraries
 #######
-add_library(deps src/chromosome.cpp src/data_manager.cpp src/fork_manager.cpp src/genome.cpp src/genomic_location.cpp src/replication_fork.cpp src/util.cpp)
+add_library(deps src/chromosome.cpp src/data_manager.cpp src/fork_manager.cpp src/genome.cpp src/genomic_location.cpp src/replication_fork.cpp src/util.cpp src/s_phase.cpp) 
+add_executable(simulator src/main.cpp)
+target_link_libraries(simulator deps gtest SQLiteCpp sqlite3 pthread dl)
 
 #######
 # Testing
