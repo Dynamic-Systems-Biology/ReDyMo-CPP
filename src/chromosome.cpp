@@ -91,16 +91,21 @@ bool Chromosome::replicate(int start, int end, int time)
     // than zero or greater than the Chromosome itself).
     bool normal_replication = true;
 
-    if (start > end) std::swap(start, end);
-
-    end++;
-
-    if (start < 0 || end >= (int)strand.size())
+    if (end < 0 || end >= (int)strand.size())
     {
-        start = start < 0 ? 0 : start;
-        end   = end >= (int)strand.size() ? (int)strand.size() : end;
+        // limit the end to the strand size
+        end = end < 0 ? 0 : end;
+        end = end >= (int)strand.size() ? (int)strand.size() : end;
         normal_replication = false;
     }
+
+    bool swapped = false;
+    if (start > end)
+    {
+        swapped = true;
+        std::swap(start, end);
+    }
+    end++;
 
     for (int base = start; base < end; base++)
     {
@@ -109,9 +114,15 @@ bool Chromosome::replicate(int start, int end, int time)
             strand[base] = time;
             n_replicated_bases++;
         }
+        else if (!(base == start || ((base == (end - 1)) && swapped)))
+        {
+            normal_replication = false;
+            break;
+        }
     }
 
     return normal_replication;
+
 }
 
 bool Chromosome::is_replicated()
