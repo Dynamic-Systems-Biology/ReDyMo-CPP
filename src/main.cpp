@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     int timeout          = atoi(argv[index]);
 
     DataManager *data = new DataManager(
-        "/home/brunobbs/Documents/IC/ReDyMo-CPP/data/simulation.sqlite",
+        "../data/simulation.sqlite",
         "../data/MFA-Seq_TBrucei_TREU927/");
 
     int transcription_period = 0;
