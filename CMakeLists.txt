@@ -10,6 +10,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp")
 # Add the include folder
 #######
 include_directories(include)
+
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/googletest)
+include_directories(${gtest_SOURCE_DIR}/include)
+include_directories(${gmock_SOURCE_DIR}/include)
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp/include
@@ -35,7 +40,7 @@ if(BUILD_TESTING)
     add_executable(test_fork_manager test/test_fork_manager.cpp)
     add_executable(test_data_manager test/test_data_manager.cpp)
 
-    target_link_libraries(test_chromosome deps gtest)
+    target_link_libraries(test_chromosome deps gtest gmock)
     target_link_libraries(test_genome deps gtest)
     target_link_libraries(test_genomic_location deps gtest)
     target_link_libraries(test_replication_fork deps gtest)
