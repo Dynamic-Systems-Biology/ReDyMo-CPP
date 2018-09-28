@@ -119,4 +119,5 @@ std::vector<float> DataManager::generate_prob_landscape(std::string code,
         }
     }
     probs_file.close();
+    return probabilities;
 }

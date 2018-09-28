@@ -2,11 +2,13 @@
 #include <algorithm>
 #include <ctime>
 #include <iostream>
+#include <sstream>
 
 int get_cmd_option(char **input, int size, const std::string &option)
 {
     for (int i = 0; i < size; i++)
         if (option == input[i]) return ++i;
+    return -1;
 }
 
 bool cmd_option_exists(char **begin, char **end, const std::string &option)
@@ -16,13 +18,14 @@ bool cmd_option_exists(char **begin, char **end, const std::string &option)
 
 int main(int argc, char *argv[])
 {
-    std::vector<std::string> arg_options = {
-        "--cells", "--organism", "--resources", "--speed", "--timeout"};
+    std::vector<std::string> arg_options = {"--cells",     "--organism",
+                                            "--resources", "--speed",
+                                            "--timeout",   "--dormant"};
     for (auto option : arg_options)
     {
         if (!cmd_option_exists(argv, argv + argc, option))
         {
-            std::cout << "Usage :" << std::endl;
+            std::cout << "Incorrect arguments. For usage see README.md" << std::endl;
             exit(0);
         }
     }
@@ -37,6 +40,11 @@ int main(int argc, char *argv[])
     int speed            = atoi(argv[index]);
     index                = get_cmd_option(argv, argc, arg_options[4]);
     int timeout          = atoi(argv[index]);
+    index                = get_cmd_option(argv, argc, arg_options[5]);
+
+    bool dormant;
+    std::stringstream ss(argv[index]);
+    ss >> std::boolalpha >> dormant;
 
     std::shared_ptr<DataManager> data = std::make_shared<DataManager>(
         "../data/simulation.sqlite", "../data/MFA-Seq_TBrucei_TREU927/");
@@ -50,8 +58,6 @@ int main(int argc, char *argv[])
     if (cmd_option_exists(argv, argv + argc, "--constitutive"))
         origins_range =
             atoi(argv[get_cmd_option(argv, argc, "--constitutive")]);
-
-    bool dormant = cmd_option_exists(argv, argv + argc, "--dormant");
 
 #pragma omp parallel for
     for (int i = 0; i < n_cells; i++)
