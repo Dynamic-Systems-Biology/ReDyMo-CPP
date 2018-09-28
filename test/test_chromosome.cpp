@@ -34,8 +34,9 @@ class ChromosomeTest : public ::testing::Test
         origin.base = 0;
         cons_origins.resize(test_size, origin);
 
-        return std::shared_ptr<Chromosome>(new Chromosome(
-            "1", test_size, prob_landscape, transcription_regions, cons_origins));
+        return std::shared_ptr<Chromosome>(
+            new Chromosome("1", test_size, prob_landscape,
+                           transcription_regions, cons_origins));
     }
 
     void TearDown() {}

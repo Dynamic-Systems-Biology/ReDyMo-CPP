@@ -8,23 +8,24 @@
 class ForkManagerTest : public ::testing::Test
 {
   protected:
-    ForkManager *manager;
-    Genome *gen;
+    std::shared_ptr<ForkManager> manager;
+    std::shared_ptr<Genome> gen;
 
   protected:
     ForkManagerTest() {}
 
     void SetUp()
     {
-        std::vector<Chromosome *> chrms(1);
+        std::vector<std::shared_ptr<Chromosome>> chrms(1);
         chrms[0] = create_chromosome(3000, "2");
-        gen      = new Genome(chrms);
-        manager  = new ForkManager(3, gen, 15);
+        gen      = std::make_shared<Genome>(chrms);
+        manager  = std::make_shared<ForkManager>(3, gen, 15);
     }
 
     void TearDown() {}
 
-    Chromosome *create_chromosome(uint size = 3000, std::string id = "1")
+    std::shared_ptr<Chromosome> create_chromosome(uint size      = 3000,
+                                                  std::string id = "1")
     {
         uint test_size = size;
         std::vector<float> prob_landscape;
@@ -43,14 +44,14 @@ class ForkManagerTest : public ::testing::Test
         origin.base = 0;
         cons_origins.push_back(origin);
 
-        return new Chromosome(id, test_size, prob_landscape,
-                              transcription_regions, cons_origins);
+        return std::make_shared<Chromosome>(
+            id, test_size, prob_landscape, transcription_regions, cons_origins);
     }
 };
 
 TEST_F(ForkManagerTest, CheckConflicts)
 {
-    GenomicLocation loc(1400, *gen->chromosomes[0]);
+    GenomicLocation loc(1400, gen->chromosomes[0]);
     manager->attach_forks(loc, 10);
     ASSERT_EQ(
         manager->check_replication_transcription_conflicts(1400, 1000, true),
@@ -61,7 +62,7 @@ TEST_F(ForkManagerTest, CheckConflicts)
 
 TEST_F(ForkManagerTest, AdvanceAttachedForks)
 {
-    GenomicLocation loc(1800, *gen->chromosomes[0]);
+    GenomicLocation loc(1800, gen->chromosomes[0]);
     manager->attach_forks(loc, 10);
     manager->replication_forks[2]->set_just_detached(true);
     manager->advance_attached_forks(12);
@@ -74,7 +75,7 @@ TEST_F(ForkManagerTest, AdvanceAttachedForks)
 
 TEST_F(ForkManagerTest, AttachForks)
 {
-    GenomicLocation loc(1800, *gen->chromosomes[0]);
+    GenomicLocation loc(1800, gen->chromosomes[0]);
     manager->attach_forks(loc, 10);
     ASSERT_TRUE(manager->replication_forks[0]->is_attached());
     ASSERT_TRUE(manager->replication_forks[1]->is_attached());

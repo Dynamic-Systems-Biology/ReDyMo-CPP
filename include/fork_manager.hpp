@@ -10,10 +10,10 @@ class ForkManager
 {
   public:
     uint n_forks, n_free_forks;
-    std::vector<ReplicationFork *> replication_forks;
+    std::vector<std::shared_ptr<ReplicationFork>> replication_forks;
 
   public:
-    ForkManager(uint n_forks, Genome *genome, uint speed);
+    ForkManager(uint n_forks, std::shared_ptr<Genome> genome, uint speed);
 
     /*! This function checks if there is any fork (replication) colliding with
      * any RNAP (transcription) and handles the collision by rainsing the

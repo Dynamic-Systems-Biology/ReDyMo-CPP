@@ -1,13 +1,15 @@
 #include "fork_manager.hpp"
 #include <iostream>
 
-ForkManager::ForkManager(uint n_forks, Genome *genome, uint speed)
+ForkManager::ForkManager(uint n_forks, std::shared_ptr<Genome> genome,
+                         uint speed)
 {
     this->n_forks      = n_forks;
     this->n_free_forks = n_forks;
     for (int i = 0; i < (int)n_forks; i++)
     {
-        replication_forks.push_back(new ReplicationFork(genome, speed));
+        replication_forks.push_back(
+            std::make_shared<ReplicationFork>(genome, speed));
     }
 }
 
@@ -22,7 +24,7 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
     {
         if (fork->is_attached())
         {
-            Chromosome *chromosome = fork->get_chromosome();
+            std::shared_ptr<Chromosome> chromosome = fork->get_chromosome();
             for (auto region : chromosome->get_transcription_regions())
             {
                 uint replisome_position_within_region = 0;

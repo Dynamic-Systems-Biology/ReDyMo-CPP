@@ -20,7 +20,8 @@ class DataManager
   public:
     DataManager(std::string database_path, std::string mfa_seq_data_path);
 
-    std::vector<Chromosome *> get_chromosome_data(std::string organism);
+    std::vector<std::shared_ptr<Chromosome>>
+    get_chromosome_data(std::string organism);
 
     std::vector<float> generate_prob_landscape(std::string code, uint length);
 

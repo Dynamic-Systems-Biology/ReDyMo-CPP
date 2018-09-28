@@ -16,17 +16,17 @@
 class Genome
 {
   public:
-    std::vector<Chromosome *> chromosomes;
+    std::vector<std::shared_ptr<Chromosome>> chromosomes;
 
   public:
     /*! Empty constructor */
     Genome();
 
     /*! Constructor */
-    Genome(std::vector<Chromosome *> &chromosomes);
+    Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes);
 
     /*! Initializer to fill a previously empty object*/
-    void initialize(std::vector<Chromosome *> &chromosomes);
+    void initialize(std::vector<std::shared_ptr<Chromosome>> &chromosomes);
 
     /*! The combined length of the Genome
      * @return uint The total number of bases in the genomes.

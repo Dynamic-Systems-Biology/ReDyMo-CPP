@@ -6,10 +6,11 @@
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
 
-GenomicLocation::GenomicLocation(uint base, Chromosome &chromosome)
+GenomicLocation::GenomicLocation(uint base,
+                                 std::shared_ptr<Chromosome> chromosome)
     : chromosome(chromosome)
 {
-    if (base >= chromosome.size())
+    if (base >= chromosome->size())
         throw std::invalid_argument("Base is not inside given chromosome.");
 
     this->base = base;
@@ -17,7 +18,7 @@ GenomicLocation::GenomicLocation(uint base, Chromosome &chromosome)
 
 bool GenomicLocation::is_replicated()
 {
-    return this->chromosome.base_is_replicated(this->base);
+    return this->chromosome->base_is_replicated(this->base);
 }
 
 bool GenomicLocation::will_activate(bool use_constitutive_origin,
@@ -26,12 +27,12 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
     if (!use_constitutive_origin)
     {
         float chance = (float)(rand() % 100) / 100;
-        return chance < this->chromosome.activation_probability(this->base);
+        return chance < this->chromosome->activation_probability(this->base);
     }
     std::vector<constitutive_origin_t> not_fired_origins;
 
-    for (auto origin : chromosome.constitutive_origins)
-        if (!chromosome.base_is_replicated(origin.base))
+    for (auto origin : chromosome->constitutive_origins)
+        if (!chromosome->base_is_replicated(origin.base))
             not_fired_origins.push_back(origin);
 
     for (auto origin : not_fired_origins)
@@ -49,11 +50,11 @@ GenomicLocation::get_constitutive_origin(int origins_range)
     std::vector<constitutive_origin_t> not_fired_origins;
     origins_range /= 2;
 
-    for (auto origin : chromosome.constitutive_origins)
+    for (auto origin : chromosome->constitutive_origins)
     {
-        if (std::find(chromosome.fired_constitutive_origins.begin(),
-                      chromosome.fired_constitutive_origins.end(),
-                      origin) == chromosome.fired_constitutive_origins.end())
+        if (std::find(chromosome->fired_constitutive_origins.begin(),
+                      chromosome->fired_constitutive_origins.end(),
+                      origin) == chromosome->fired_constitutive_origins.end())
         { not_fired_origins.push_back(origin); } }
 
     for (auto origin : not_fired_origins)
@@ -74,21 +75,15 @@ GenomicLocation::get_constitutive_origin(int origins_range)
 bool GenomicLocation::put_fired_constitutive_origin(
     constitutive_origin_t origin)
 {
-    for (auto curr_origin : chromosome.constitutive_origins)
+    for (auto curr_origin : chromosome->constitutive_origins)
     {
-        // printf("%d == %d => \t%d\n",curr_origin, origin, curr_origin == origin);
         if (curr_origin == origin)
         {
-            for (auto fired_origin : chromosome.fired_constitutive_origins)
-                if (fired_origin == origin)
-                {
-                    // printf("Origin already rep = = = = = = = == == \n");
-                    return false;
-                }
-            chromosome.fired_constitutive_origins.push_back(origin);
+            for (auto fired_origin : chromosome->fired_constitutive_origins)
+                if (fired_origin == origin) return false;
+            chromosome->fired_constitutive_origins.push_back(origin);
             return true;
         }
     }
-    // printf("Origin not found = = = = = = = == == \n");
     return false;
 }

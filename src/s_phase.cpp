@@ -5,23 +5,21 @@
 
 SPhase::SPhase(int origins_range, int n_resources, int replication_speed,
                int timeout, int transcription_period, bool has_dormant,
-               DataManager *data, std::string organism)
+               std::shared_ptr<DataManager> data, std::string organism)
     : origins_range(origins_range), n_resources(n_resources),
       replication_speed(replication_speed), timeout(timeout),
       transcription_period(transcription_period), has_dormant(has_dormant),
       data(data), organism(organism)
 {
-    std::vector<Chromosome *> tmp = data->get_chromosome_data(organism);
-    chromosomes                   = &tmp;
-    genome                        = new Genome(*chromosomes);
-    fork_manager = new ForkManager(n_resources, genome, replication_speed);
+    std::vector<std::shared_ptr<Chromosome>> tmp =
+        data->get_chromosome_data(organism);
+    chromosomes = &tmp;
+    genome      = std::make_shared<Genome>(*chromosomes);
+    fork_manager =
+        std::make_shared<ForkManager>(n_resources, genome, replication_speed);
 }
 
-SPhase::~SPhase()
-{
-    delete fork_manager;
-    delete genome;
-}
+SPhase::~SPhase() {}
 
 void SPhase::simulate(int sim_number)
 {
@@ -34,7 +32,7 @@ void SPhase::simulate(int sim_number)
     std::cout << "[INFO] Starting simulation " << sim_number << std::endl;
     while (!genome->is_replicated() && time < timeout &&
            !(constitutive_origins == 0 &&
-             fork_manager->n_free_forks == n_resources))
+             (int)fork_manager->n_free_forks == n_resources))
     {
         time++;
 
@@ -50,7 +48,7 @@ void SPhase::simulate(int sim_number)
         // At an alpha iteration it makes one attempt for each detached fork
         if (time % alpha == 0 && !genome->is_replicated())
         {
-            for (int i = 0; i < fork_manager->n_free_forks; i++)
+            for (int i = 0; i < (int)fork_manager->n_free_forks; i++)
             {
                 GenomicLocation loc = *genome->random_genomic_location();
 
@@ -92,7 +90,8 @@ void SPhase::simulate(int sim_number)
     output(sim_number, time, genome->average_interorigin_distance(), genome);
 }
 
-void SPhase::output(int sim_number, int time, int iod, Genome *genome)
+void SPhase::output(int sim_number, int time, int iod,
+                    std::shared_ptr<Genome> genome)
 {
     system("mkdir -p output");
     std::string dir = "output/";

@@ -2,7 +2,7 @@
 #include <memory>
 #include <stdexcept>
 
-ReplicationFork::ReplicationFork(Genome *genome, uint speed)
+ReplicationFork::ReplicationFork(std::shared_ptr<Genome> genome, uint speed)
     : genome(genome), chromosome(nullptr)
 {
     this->speed         = speed;
@@ -18,7 +18,7 @@ void ReplicationFork::attach(GenomicLocation &gen_loc, int direction, uint time)
         throw "This fork has just detached and cannot be used right now.";
 
     this->base       = gen_loc.base;
-    this->chromosome = &gen_loc.chromosome;
+    this->chromosome = gen_loc.chromosome;
     this->direction  = direction;
     this->chromosome->replicate(this->base, this->base, time);
 }
@@ -50,7 +50,10 @@ int ReplicationFork::get_direction() { return direction; }
 
 int ReplicationFork::get_base() { return base; }
 
-Chromosome *ReplicationFork::get_chromosome() { return chromosome; }
+std::shared_ptr<Chromosome> ReplicationFork::get_chromosome()
+{
+    return chromosome;
+}
 
 bool ReplicationFork::get_just_detached() { return just_detached; }
 

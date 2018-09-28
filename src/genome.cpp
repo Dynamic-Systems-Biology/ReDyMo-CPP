@@ -7,12 +7,12 @@
 
 Genome::Genome() {}
 
-Genome::Genome(std::vector<Chromosome *> &chromosomes)
+Genome::Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes)
 {
     initialize(chromosomes);
 }
 
-void Genome::initialize(std::vector<Chromosome *> &chromosomes)
+void Genome::initialize(std::vector<std::shared_ptr<Chromosome>> &chromosomes)
 {
     this->chromosomes = chromosomes;
 }
@@ -29,8 +29,8 @@ std::shared_ptr<GenomicLocation> Genome::random_genomic_location()
 {
     uint rand_chromosome = rand() % chromosomes.size();
     uint rand_base       = rand() % chromosomes[rand_chromosome]->size();
-    return std::shared_ptr<GenomicLocation>(
-        new GenomicLocation(rand_base, *chromosomes[rand_chromosome]));
+    return std::shared_ptr<GenomicLocation>(std::make_shared<GenomicLocation>(
+        rand_base, chromosomes[rand_chromosome]));
 }
 
 std::shared_ptr<GenomicLocation> Genome::random_unreplicated_genomic_location()
@@ -48,8 +48,8 @@ std::shared_ptr<GenomicLocation> Genome::random_unreplicated_genomic_location()
         rand_base = rand() % chromosomes[rand_chromosome]->size();
     while (chromosomes[rand_chromosome]->base_is_replicated(rand_base));
 
-    return std::shared_ptr<GenomicLocation>(
-        new GenomicLocation(rand_base, *chromosomes[rand_chromosome]));
+    return std::shared_ptr<GenomicLocation>(std::make_shared<GenomicLocation>(
+        rand_base, chromosomes[rand_chromosome]));
 }
 
 bool Genome::is_replicated()

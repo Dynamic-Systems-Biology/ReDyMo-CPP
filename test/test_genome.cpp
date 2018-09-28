@@ -20,22 +20,23 @@
 class GenomeTest : public ::testing::Test
 {
   protected:
-    Genome *gen;
+    std::shared_ptr<Genome> gen;
 
   protected:
     GenomeTest() {}
 
     void SetUp()
     {
-        std::vector<Chromosome *> chrms;
+        std::vector<std::shared_ptr<Chromosome>> chrms;
         for (int i = 0; i < 200; i++)
         {
             chrms.push_back(create_chromosome(300, std::to_string(i)));
         }
-        gen = new Genome(chrms);
+        gen = std::make_shared<Genome>(chrms);
     }
 
-    Chromosome *create_chromosome(uint size = 300, std::string id = "1")
+    std::shared_ptr<Chromosome> create_chromosome(uint size      = 300,
+                                                  std::string id = "1")
     {
         uint test_size = size;
         std::vector<float> prob_landscape;
@@ -54,18 +55,11 @@ class GenomeTest : public ::testing::Test
         origin.base = 0;
         cons_origins.resize(test_size / 3, origin);
 
-        return new Chromosome(id, test_size, prob_landscape,
-                              transcription_regions, cons_origins);
+        return std::make_shared<Chromosome>(
+            id, test_size, prob_landscape, transcription_regions, cons_origins);
     }
 
-    void TearDown()
-    {
-        for (int i = 0; i < 200; i++)
-        {
-            delete gen->chromosomes[i];
-        }
-        delete gen;
-    }
+    void TearDown() {}
 };
 
 TEST_F(GenomeTest, Size) { ASSERT_EQ(200 * 300, gen->size()); }
@@ -78,7 +72,7 @@ TEST_F(GenomeTest, RandomGenomicLocation)
         bool found          = false;
         for (auto chrm : gen->chromosomes)
         {
-            if (*chrm == loc.chromosome) found = true;
+            if (chrm == loc.chromosome) found = true;
         }
         ASSERT_TRUE(found);
     }
@@ -93,10 +87,10 @@ TEST_F(GenomeTest, RandomUnreplicatedGenLoc)
         bool found          = false;
         for (auto chrm : gen->chromosomes)
         {
-            if (*chrm == loc.chromosome) found = true;
+            if (chrm == loc.chromosome) found = true;
         }
         ASSERT_TRUE(found);
-        ASSERT_FALSE(loc.chromosome.is_replicated());
+        ASSERT_FALSE(loc.chromosome->is_replicated());
     }
 }
 

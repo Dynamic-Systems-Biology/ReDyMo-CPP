@@ -15,9 +15,10 @@ DataManager::DataManager(std::string database_path,
 {
 }
 
-std::vector<Chromosome *> DataManager::get_chromosome_data(std::string organism)
+std::vector<std::shared_ptr<Chromosome>>
+DataManager::get_chromosome_data(std::string organism)
 {
-    std::vector<Chromosome *> chrms;
+    std::vector<std::shared_ptr<Chromosome>> chrms;
     SQLite::Database db(database_path, SQLite::OPEN_READONLY);
     SQLite::Statement query(db, "select * from Chromosome where organism = ?");
     query.bind(1, organism);
@@ -36,7 +37,8 @@ std::vector<Chromosome *> DataManager::get_chromosome_data(std::string organism)
         std::vector<constitutive_origin_t> origins =
             get_constitutive_origins(code);
 
-        Chromosome *chrm = new Chromosome(code, length, prob, regions, origins);
+        std::shared_ptr<Chromosome> chrm =
+            std::make_shared<Chromosome>(code, length, prob, regions, origins);
         chrms.push_back(chrm);
     }
     return chrms;

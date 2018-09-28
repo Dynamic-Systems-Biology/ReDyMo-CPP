@@ -8,18 +8,18 @@
 class DataManagerTest : public ::testing::Test
 {
   protected:
-    DataManager *data;
+    std::shared_ptr<DataManager> data;
 
   protected:
     DataManagerTest() {}
 
     void SetUp()
     {
-        data = new DataManager("../data/simulation.sqlite",
-                               "../data/MFA-Seq_dummy/");
+        data = std::make_shared<DataManager>("../data/simulation.sqlite",
+                                             "../data/MFA-Seq_dummy/");
     }
 
-    void TearDown() { delete data; }
+    void TearDown() {}
 };
 
 TEST_F(DataManagerTest, GenerateProbLandscape)
@@ -50,7 +50,8 @@ TEST_F(DataManagerTest, GetConstitutiveOrigin)
 
 TEST_F(DataManagerTest, GetChromosomeData)
 {
-    std::vector<Chromosome *> result = data->get_chromosome_data("dummy_01");
+    std::vector<std::shared_ptr<Chromosome>> result =
+        data->get_chromosome_data("dummy_01");
     std::vector<float> probabilities = {
         0.00010000000000021103, 0.3334000000000006, 1.0,
         0.6667000000000001,     0.6667000000000001, 0.3334000000000006,

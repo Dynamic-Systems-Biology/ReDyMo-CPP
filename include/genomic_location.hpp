@@ -12,7 +12,7 @@ class GenomicLocation
 {
   public:
     uint base;
-    Chromosome &chromosome;
+    std::shared_ptr<Chromosome> chromosome;
 
   public:
     /*! The constructor.
@@ -22,7 +22,7 @@ class GenomicLocation
      * @throw invalid_argument If base doesn't belong to chromosome.
      * @see Chromosome
      */
-    GenomicLocation(uint base, Chromosome &chromosome);
+    GenomicLocation(uint base, std::shared_ptr<Chromosome> chromosome);
 
     /*! Queries if the genomic location base has been replicated.
      * @return True if the base is replicated.
