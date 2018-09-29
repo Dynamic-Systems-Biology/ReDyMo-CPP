@@ -8,7 +8,7 @@
 Chromosome::Chromosome() {}
 
 Chromosome::Chromosome(
-    std::string code, uint length, std::vector<float> &probability_landscape,
+    std::string code, uint length, std::vector<double> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
 {
@@ -17,7 +17,7 @@ Chromosome::Chromosome(
 }
 
 void Chromosome::initialize(
-    std::string code, uint length, std::vector<float> &probability_landscape,
+    std::string code, uint length, std::vector<double> &probability_landscape,
     std::vector<transcription_region_t> &transcription_regions,
     std::vector<constitutive_origin_t> &constitutive_origins)
 {
@@ -53,7 +53,7 @@ bool Chromosome::base_is_replicated(uint base)
     return this->strand[base] != -1;
 }
 
-float Chromosome::activation_probability(uint base)
+double Chromosome::activation_probability(uint base)
 {
     if (base < 0 || base >= this->length)
         throw std::out_of_range("Given base is outside Chromosome length.");
@@ -74,7 +74,7 @@ void Chromosome::set_dormant_activation_probability(uint base)
     for (int curr_base = left_base; curr_base < right_base; curr_base++)
     {
         int offset           = curr_base - base;
-        float gaussian_value = exp(-pow(offset, 2) / (2 * pow(c, 2)));
+        double gaussian_value = exp(-pow(offset, 2) / (2 * pow(c, 2)));
         probability_landscape[curr_base] += gaussian_value;
         if (probability_landscape[curr_base] > 1)
             probability_landscape[curr_base] = 1;

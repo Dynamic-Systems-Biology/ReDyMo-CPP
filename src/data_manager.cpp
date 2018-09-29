@@ -31,7 +31,7 @@ DataManager::get_chromosome_data(std::string organism)
         code   = query.getColumn("code").getString();
         length = query.getColumn("length").getInt();
 
-        std::vector<float> prob = generate_prob_landscape(code, length);
+        std::vector<double> prob = generate_prob_landscape(code, length);
         std::vector<transcription_region_t> regions =
             get_transcription_regions(code);
         std::vector<constitutive_origin_t> origins =
@@ -81,13 +81,13 @@ DataManager::get_constitutive_origins(std::string chromosome_code)
     return origins;
 }
 
-std::vector<float> DataManager::generate_prob_landscape(std::string code,
-                                                        uint length)
+std::vector<double> DataManager::generate_prob_landscape(std::string code,
+                                                         uint length)
 {
     std::ifstream mfa_file;
-    std::vector<float> scores;
-    std::vector<float> probabilities(length);
-    float curr_score;
+    std::vector<double> scores;
+    std::vector<double> probabilities(length);
+    double curr_score;
 
     mfa_file.open(mfa_seq_data_path + code + ".txt");
 
@@ -98,26 +98,28 @@ std::vector<float> DataManager::generate_prob_landscape(std::string code,
     }
     mfa_file.close();
 
-    int step = (int)(std::ceil(length / scores.size()));
+    int step = (int)(std::ceil(length / (scores.size() - 1)));
 
-    float a =
+    double a =
         (1 - pow(10, -4)) / (*std::max_element(scores.begin(), scores.end()) -
                              *std::min_element(scores.begin(), scores.end()));
 
-    float b = 1 - (*std::max_element(scores.begin(), scores.end()) * a);
+    double b = 1 - (*std::max_element(scores.begin(), scores.end()) * a);
 
     std::ofstream probs_file;
     probs_file.open(mfa_seq_data_path + code + "_probability.txt");
-    for (int i = 0; i < (int)scores.size(); i++)
+    for (int i = 0; i < (int)scores.size() - 1; i++)
     {
-        float prob = a * scores[i] + b;
-        probs_file << prob;
+        double prob = a * scores[i] + b;
+        probs_file << prob << std::endl;
         for (int j = i * step; j < (i + 1) * step; j++)
         {
             probabilities[j] = prob;
-            if (j == (int)length - 1) return probabilities;
+            if (j == (int)length - 1)
+            {
+                probs_file.close();
+                return probabilities;
+            }
         }
     }
-    probs_file.close();
-    return probabilities;
 }

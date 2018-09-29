@@ -18,11 +18,11 @@ class ChromosomeTest : public ::testing::Test
     std::shared_ptr<Chromosome> create_chromosome(uint size = 300)
     {
         uint test_size = size;
-        std::vector<float> prob_landscape;
+        std::vector<double> prob_landscape;
         std::vector<transcription_region_t> transcription_regions;
         std::vector<constitutive_origin_t> cons_origins;
 
-        prob_landscape.resize(test_size, (float)1 / (test_size + 1));
+        prob_landscape.resize(test_size, (double)1 / (test_size + 1));
 
         transcription_region_t reg;
         reg.start = 0;
@@ -105,9 +105,9 @@ TEST_F(ChromosomeTest, InRangeActivationProbability)
 TEST_F(ChromosomeTest, ActivationProbability)
 {
     auto chrm_300 = create_chromosome(300);
-    ASSERT_EQ((float)1 / 301, chrm_300->activation_probability(0));
+    ASSERT_EQ((double)1 / 301, chrm_300->activation_probability(0));
     auto chrm_500 = create_chromosome(500);
-    ASSERT_EQ((float)1 / 501, chrm_500->activation_probability(4));
+    ASSERT_EQ((double)1 / 501, chrm_500->activation_probability(4));
 }
 
 /*! Tests if the method sets correctly(like a gaussian) the activation
@@ -120,7 +120,7 @@ TEST_F(ChromosomeTest, SetDormantActivationProbability)
     chrm_300k->set_dormant_activation_probability(size / 2);
     for (int i = 130000; i < 170000; i++)
     {
-        ASSERT_GT((float)1 / size + 1, chrm_300k->activation_probability(i));
+        ASSERT_GT((double)1 / size + 1, chrm_300k->activation_probability(i));
     }
 }
 

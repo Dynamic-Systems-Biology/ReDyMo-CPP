@@ -21,7 +21,7 @@ class Chromosome
     uint n_replicated_bases;
     uint n_fired_origins;
     std::vector<int> strand;
-    std::vector<float> probability_landscape;
+    std::vector<double> probability_landscape;
     std::vector<transcription_region_t> transcription_regions;
 
   public:
@@ -51,14 +51,14 @@ class Chromosome
      */
 
     Chromosome(std::string code, uint length,
-               std::vector<float> &probability_landscape,
+               std::vector<double> &probability_landscape,
                std::vector<transcription_region_t> &transcription_regions,
                std::vector<constitutive_origin_t> &constitutive_origins);
 
     Chromosome();
 
     void initialize(std::string code, uint length,
-                    std::vector<float> &probability_landscape,
+                    std::vector<double> &probability_landscape,
                     std::vector<transcription_region_t> &transcription_regions,
                     std::vector<constitutive_origin_t> &constitutive_origins);
 
@@ -84,7 +84,7 @@ class Chromosome
      * base based on the probability_landscape.
      * @see probability_landscape
      */
-    float activation_probability(uint base);
+    double activation_probability(uint base);
 
     /*! This method changes the probability landscape around the location of a
      * head-to-head collision. It sets the probability landscape with a
@@ -100,7 +100,7 @@ class Chromosome
      * @see number_of_replicated_bases.
      * @param int start The index of the first base to replicate.
      * @param int end The index of the last base to replicate(exclusive).
-     * @param float time The simulation iteration (time) when the replication
+     * @param double time The simulation iteration (time) when the replication
      * occurrs.
      * @return true if the replication did not overlap an already
      * replicated area, nor included bases outside the Chromosome.

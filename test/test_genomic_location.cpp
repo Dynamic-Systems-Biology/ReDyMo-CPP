@@ -23,11 +23,11 @@ class GenomicLocationTest : public ::testing::Test
                                                   std::string id = "1")
     {
         uint test_size = size;
-        std::vector<float> prob_landscape;
+        std::vector<double> prob_landscape;
         std::vector<transcription_region_t> transcription_regions;
         std::vector<constitutive_origin_t> cons_origins;
 
-        prob_landscape.resize(test_size, (float)1 / (test_size + 1));
+        prob_landscape.resize(test_size, (double)1 / (test_size + 1));
 
         transcription_region_t reg;
         reg.start = 0;
@@ -61,13 +61,13 @@ TEST_F(GenomicLocationTest, IsReplicated)
 
 TEST_F(GenomicLocationTest, WillActivate)
 {
-    float sum                        = 0;
+    double sum                        = 0;
     std::shared_ptr<Chromosome> chrm = create_chromosome(1, "2");
     GenomicLocation loc              = GenomicLocation(0, chrm);
 
     for (int i = 0; i < 1000; i++)
         sum += loc.will_activate(false, 1) ? 1 : 0;
-    ASSERT_NEAR(sum, (float)1 / (1 + 1) * 1000, 10);
+    ASSERT_NEAR(sum, (double)1 / (1 + 1) * 1000, 10);
 }
 
 TEST_F(GenomicLocationTest, GetConstitutiveOrigin)

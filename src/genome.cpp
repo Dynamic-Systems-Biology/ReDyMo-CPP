@@ -61,13 +61,13 @@ bool Genome::is_replicated()
     return replicated;
 }
 
-float Genome::average_interorigin_distance()
+double Genome::average_interorigin_distance()
 {
     uint n_interorigin_spaces = 0;
     for (auto chromosome : chromosomes)
         n_interorigin_spaces += chromosome->get_n_fired_origins() + 1;
 
-    return (float)this->size() / n_interorigin_spaces;
+    return (double)this->size() / n_interorigin_spaces;
 }
 
 uint Genome::n_constitutive_origins()

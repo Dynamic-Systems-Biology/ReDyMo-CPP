@@ -28,11 +28,11 @@ class ForkManagerTest : public ::testing::Test
                                                   std::string id = "1")
     {
         uint test_size = size;
-        std::vector<float> prob_landscape;
+        std::vector<double> prob_landscape;
         std::vector<transcription_region_t> transcription_regions;
         std::vector<constitutive_origin_t> cons_origins;
 
-        prob_landscape.resize(test_size, (float)1 / (test_size + 1));
+        prob_landscape.resize(test_size, (double)1 / (test_size + 1));
 
         transcription_region_t reg;
         reg.start = 1000;

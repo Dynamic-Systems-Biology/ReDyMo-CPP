@@ -59,7 +59,7 @@ class Genome
      * Chromosomes in the Genome.
      * @return The average inter-origin distance measured in number of bases.
      */
-    float average_interorigin_distance();
+    double average_interorigin_distance();
 
     /*! Retrieve the number of constitutive origins in the whole genome.
      * @return The number of constitutive origins in the whole genome.

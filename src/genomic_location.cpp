@@ -26,7 +26,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 {
     if (!use_constitutive_origin)
     {
-        float chance = (float)(rand() % 100) / 100;
+        double chance = (double)(rand() % 100) / 100;
         return chance < this->chromosome->activation_probability(this->base);
     }
     std::vector<constitutive_origin_t> not_fired_origins;

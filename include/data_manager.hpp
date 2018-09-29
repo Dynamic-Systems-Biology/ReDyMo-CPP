@@ -23,7 +23,7 @@ class DataManager
     std::vector<std::shared_ptr<Chromosome>>
     get_chromosome_data(std::string organism);
 
-    std::vector<float> generate_prob_landscape(std::string code, uint length);
+    std::vector<double> generate_prob_landscape(std::string code, uint length);
 
     std::vector<transcription_region_t>
     get_transcription_regions(std::string chromosome_code);

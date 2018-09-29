@@ -24,13 +24,13 @@ class DataManagerTest : public ::testing::Test
 
 TEST_F(DataManagerTest, GenerateProbLandscape)
 {
-    std::vector<float> expected = {
+    std::vector<double> expected = {
         0.00010000000000021103, 0.3334000000000006, 1.0,
         0.6667000000000001,     0.6667000000000001, 0.3334000000000006,
         0.1667500000000004};
-    std::vector<float> result = data->generate_prob_landscape("dummy_01", 7);
+    std::vector<double> result = data->generate_prob_landscape("dummy_01", 7);
     for (int i = 0; i < (int)result.size(); i++)
-        ASSERT_EQ(result[i], expected[i]);
+        ASSERT_NEAR(result[i], expected[i], 1e10);
 }
 
 TEST_F(DataManagerTest, GetTranscriptionRegions)
@@ -52,7 +52,7 @@ TEST_F(DataManagerTest, GetChromosomeData)
 {
     std::vector<std::shared_ptr<Chromosome>> result =
         data->get_chromosome_data("dummy_01");
-    std::vector<float> probabilities = {
+    std::vector<double> probabilities = {
         0.00010000000000021103, 0.3334000000000006, 1.0,
         0.6667000000000001,     0.6667000000000001, 0.3334000000000006,
         0.1667500000000004};
