@@ -2,7 +2,9 @@
 #include <algorithm>
 #include <ctime>
 #include <iostream>
+#include <omp.h>
 #include <sstream>
+#include <unistd.h>
 
 int get_cmd_option(char **input, int size, const std::string &option)
 {
@@ -25,7 +27,8 @@ int main(int argc, char *argv[])
     {
         if (!cmd_option_exists(argv, argv + argc, option))
         {
-            std::cout << "Incorrect arguments. For usage see README.md" << std::endl;
+            std::cout << "Incorrect arguments. For usage see README.md"
+                      << std::endl;
             exit(0);
         }
     }
@@ -59,12 +62,46 @@ int main(int argc, char *argv[])
         origins_range =
             atoi(argv[get_cmd_option(argv, argc, "--constitutive")]);
 
-#pragma omp parallel for
-    for (int i = 0; i < n_cells; i++)
+    std::vector<std::shared_ptr<SPhase>> cells;
+    int simulations_done = 0;
+
+#pragma omp parallel
     {
-        srand(time(NULL));
-        SPhase s_phase(origins_range, n_resources, speed, timeout,
-                       transcription_period, dormant, data, organism);
-        s_phase.simulate(i);
+        if (omp_get_thread_num() == 0)
+        {
+            bool all_empty = false;
+            while (!all_empty || simulations_done < n_cells)
+            {
+                all_empty = true;
+                for (int i = 0; i < cells.size(); i++)
+                {
+                    if (cells[i])
+                    {
+                        all_empty = false;
+                        if (cells[i]->ended)
+                        {
+                            SPhase::output(cells[i]);
+                            cells[i] = 0;
+                        }
+                    }
+                }
+                usleep(30000);
+            }
+        }
+        else
+        {
+#pragma omp for nowait
+            for (int i = 0; i < n_cells + 1; i++)
+            {
+                srand(time(NULL));
+                std::shared_ptr<SPhase> s_phase = std::make_shared<SPhase>(
+                    origins_range, n_resources, speed, timeout,
+                    transcription_period, dormant, data, organism, i);
+                cells.push_back(s_phase);
+                s_phase->simulate();
+#pragma omp atomic
+                simulations_done++;
+            }
+        }
     }
 }

@@ -5,11 +5,12 @@
 
 SPhase::SPhase(int origins_range, int n_resources, int replication_speed,
                int timeout, int transcription_period, bool has_dormant,
-               std::shared_ptr<DataManager> data, std::string organism)
+               std::shared_ptr<DataManager> data, std::string organism,
+               int sim_number)
     : origins_range(origins_range), n_resources(n_resources),
       replication_speed(replication_speed), timeout(timeout),
       transcription_period(transcription_period), has_dormant(has_dormant),
-      data(data), organism(organism)
+      data(data), organism(organism), sim_number(sim_number)
 {
     std::vector<std::shared_ptr<Chromosome>> tmp =
         data->get_chromosome_data(organism);
@@ -21,10 +22,9 @@ SPhase::SPhase(int origins_range, int n_resources, int replication_speed,
 
 SPhase::~SPhase() {}
 
-void SPhase::simulate(int sim_number)
+void SPhase::simulate()
 {
     int alpha                     = 1;
-    int time                      = 0;
     int constitutive_origins      = (int)genome->n_constitutive_origins();
     int n_collisions              = 0;
     bool use_constitutive_origins = origins_range > 0;
@@ -71,7 +71,7 @@ void SPhase::simulate(int sim_number)
             }
         }
     }
-
+    ended = true;
     std::cout << "[INFO] Ended simulation " << sim_number << std::endl;
 
     if (genome->is_replicated())
@@ -87,34 +87,34 @@ void SPhase::simulate(int sim_number)
             << "\t[INFO] Number of constitutive origins that did not fire: "
             << constitutive_origins << " simulation " << sim_number
             << std::endl;
-    output(sim_number, time, genome->average_interorigin_distance(), genome);
+    // output(sim_number, time, genome->average_interorigin_distance(), this);
 }
 
-void SPhase::output(int sim_number, int time, int iod,
-                    std::shared_ptr<Genome> genome)
+void SPhase::output(std::shared_ptr<SPhase> s_phase)
 {
     system("mkdir -p output");
     std::string dir = "output/";
-    if (has_dormant)
+    if (s_phase->has_dormant)
         dir += "true";
     else
         dir += "false";
     dir += "_";
-    dir += std::to_string(n_resources);
+    dir += std::to_string(s_phase->n_resources);
     dir += "_";
-    dir += std::to_string(transcription_period);
+    dir += std::to_string(s_phase->transcription_period);
     dir += "/";
     system(("mkdir -p " + dir).c_str());
-    std::string simulation = "simulation_" + std::to_string(sim_number);
+    std::string simulation = "simulation_" + std::to_string(s_phase->sim_number);
     simulation += "/";
     system(("mkdir  -p " + dir + simulation).c_str());
 
     std::ofstream output_file;
     output_file.open((dir + simulation + "cell.txt").c_str());
-    output_file << n_resources << "\t" << this->replication_speed << "\t"
-                << time << "\t" << iod << "\t\n";
+    output_file << s_phase->n_resources << "\t" << s_phase->replication_speed
+                << "\t" << s_phase->time << "\t"
+                << s_phase->genome->average_interorigin_distance() << "\t\n";
     output_file.close();
-    for (auto chromosome : this->genome->chromosomes)
+    for (auto chromosome : s_phase->genome->chromosomes)
     {
         std::string code = chromosome->get_code() + ".txt";
         output_file.open((dir + simulation + code).c_str());
