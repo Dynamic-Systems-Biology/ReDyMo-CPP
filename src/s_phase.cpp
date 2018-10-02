@@ -48,7 +48,8 @@ void SPhase::simulate(int sim_number)
         // At an alpha iteration it makes one attempt for each detached fork
         if (time % alpha == 0 && !genome->is_replicated())
         {
-            for (int i = 0; i < (int)fork_manager->n_free_forks; i++)
+            int n_forks = (int)fork_manager->n_free_forks;
+            for (int i = 0; i < n_forks; i++)
             {
                 GenomicLocation loc = *genome->random_genomic_location();
 
