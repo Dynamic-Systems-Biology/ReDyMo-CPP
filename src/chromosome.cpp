@@ -110,7 +110,6 @@ bool Chromosome::replicate(int start, int end, int time)
         }
         else if (base != start)
         {
-            printf("bad replication at %d from %d to %d\n", base, start, end);
             normal_replication = false;
             break;
         }

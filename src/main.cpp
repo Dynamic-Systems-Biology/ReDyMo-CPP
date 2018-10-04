@@ -59,10 +59,11 @@ int main(int argc, char *argv[])
         origins_range =
             atoi(argv[get_cmd_option(argv, argc, "--constitutive")]);
 
+    srand(time(NULL));
+
 #pragma omp parallel for
     for (int i = 0; i < n_cells; i++)
     {
-        srand(time(NULL));
         SPhase s_phase(origins_range, n_resources, speed, timeout,
                        transcription_period, dormant, data, organism);
         s_phase.simulate(i);
