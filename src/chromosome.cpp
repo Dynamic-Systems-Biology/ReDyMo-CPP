@@ -73,7 +73,7 @@ void Chromosome::set_dormant_activation_probability(uint base)
 
     for (int curr_base = left_base; curr_base < right_base; curr_base++)
     {
-        int offset           = curr_base - base;
+        int offset            = curr_base - base;
         double gaussian_value = exp(-pow(offset, 2) / (2 * pow(c, 2)));
         probability_landscape[curr_base] += gaussian_value;
         if (probability_landscape[curr_base] > 1)
@@ -99,23 +99,18 @@ bool Chromosome::replicate(int start, int end, int time)
         normal_replication = false;
     }
 
-    bool swapped = false;
-    if (start > end)
-    {
-        swapped = true;
-        std::swap(start, end);
-    }
-    end++;
-
-    for (int base = start; base < end; base++)
+    bool inverted = end < start;
+    for (int base = start; inverted ? base > end - 1 : base < end + 1;
+         inverted ? base-- : base++)
     {
         if (strand[base] == -1)
         {
             strand[base] = time;
             n_replicated_bases++;
         }
-        else if (!(base == start || ((base == (end - 1)) && swapped)))
+        else if (base != start)
         {
+            printf("bad replication at %d from %d to %d\n", base, start, end);
             normal_replication = false;
             break;
         }
