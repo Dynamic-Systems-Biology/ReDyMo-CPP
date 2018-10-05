@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 DataManager::DataManager(std::string database_path,
                          std::string mfa_seq_data_path)
@@ -86,7 +87,7 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
 {
     std::ifstream mfa_file;
     std::vector<double> scores;
-    std::vector<double> probabilities(length);
+    std::vector<double> probabilities(length, 0.0);
     double curr_score;
 
     mfa_file.open(mfa_seq_data_path + code + ".txt");
@@ -94,11 +95,12 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
     while (!mfa_file.eof())
     {
         mfa_file >> curr_score;
-        scores.push_back(curr_score);
+        if (curr_score != EOF) scores.push_back(curr_score);
+        curr_score = EOF;
     }
     mfa_file.close();
 
-    int step = (int)(std::ceil(length / (scores.size() - 1)));
+    int step = (int)(std::ceil(length / (float)(scores.size())));
 
     double a =
         (1 - pow(10, -4)) / (*std::max_element(scores.begin(), scores.end()) -
@@ -108,10 +110,10 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
 
     std::ofstream probs_file;
     probs_file.open(mfa_seq_data_path + code + "_probability.txt");
-    for (int i = 0; i < (int)scores.size() - 1; i++)
+    for (int i = 0; i < (int)scores.size(); i++)
     {
         double prob = a * scores[i] + b;
-        probs_file << prob << std::endl;
+        probs_file << std::fixed << std::setprecision(17) << prob << std::endl;
         for (int j = i * step; j < (i + 1) * step; j++)
         {
             probabilities[j] = prob;
@@ -122,4 +124,5 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
             }
         }
     }
+    return probabilities;
 }
