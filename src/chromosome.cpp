@@ -95,7 +95,7 @@ bool Chromosome::replicate(int start, int end, int time)
     {
         // limit the end to the strand size
         end = end < 0 ? 0 : end;
-        end = end >= (int)strand.size() ? (int)strand.size() : end;
+        end = end >= (int)strand.size() ? (int)strand.size() - 1 : end;
         normal_replication = false;
     }
 
