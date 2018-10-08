@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iostream>
 #include <sstream>
+#include <omp.h>
 
 int get_cmd_option(char **input, int size, const std::string &option)
 {
@@ -60,6 +61,7 @@ int main(int argc, char *argv[])
             atoi(argv[get_cmd_option(argv, argc, "--constitutive")]);
 
     srand(time(NULL));
+    omp_set_num_threads(40);
 
 #pragma omp parallel for
     for (int i = 0; i < n_cells; i++)
