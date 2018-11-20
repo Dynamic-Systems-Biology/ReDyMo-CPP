@@ -23,6 +23,7 @@ SPhase::~SPhase() {}
 
 void SPhase::simulate(int sim_number)
 {
+
     int alpha                     = 1;
     int time                      = 0;
     int constitutive_origins      = (int)genome->n_constitutive_origins();

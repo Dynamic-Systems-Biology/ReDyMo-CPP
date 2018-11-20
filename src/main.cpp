@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
             atoi(argv[get_cmd_option(argv, argc, "--constitutive")]);
 
     srand(time(NULL));
+
     omp_set_num_threads(40);
 
 #pragma omp parallel for

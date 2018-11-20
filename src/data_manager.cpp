@@ -107,6 +107,9 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
                              *std::min_element(scores.begin(), scores.end()));
 
     double b = 1 - (*std::max_element(scores.begin(), scores.end()) * a);
+    
+    double sum = 0;
+    double mean = 0;
 
     std::ofstream probs_file;
     probs_file.open(mfa_seq_data_path + code + "_probability.txt");
@@ -117,9 +120,15 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
         for (int j = i * step; j < (i + 1) * step; j++)
         {
             probabilities[j] = prob;
+            sum += prob;
             if (j == (int)length - 1)
             {
                 probs_file.close();
+                mean  = sum/probabilities.size(); 
+                for (int k = 0; k < probabilities.size(); k++)
+                {
+                    probabilities[k] = mean;
+                }
                 return probabilities;
             }
         }

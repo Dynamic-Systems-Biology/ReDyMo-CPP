@@ -65,8 +65,10 @@ double Genome::average_interorigin_distance()
 {
     uint n_interorigin_spaces = 0;
     for (auto chromosome : chromosomes)
+    {
         n_interorigin_spaces += chromosome->get_n_fired_origins() + 1;
-
+    }
+    if (n_interorigin_spaces == 0) return 0;
     return (double)this->size() / n_interorigin_spaces;
 }
 
