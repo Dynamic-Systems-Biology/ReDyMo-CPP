@@ -3,6 +3,7 @@
 
 #include "chromosome.hpp"
 #include "util.hpp"
+#include <random>
 
 /*! This class represents a base from a chromosome called a Genomic Location.
  * It stores a set of Chromosomes and has methods to check and query a base
@@ -10,6 +11,10 @@
  */
 class GenomicLocation
 {
+  private:
+    static std::mt19937 rand_generator;
+    static std::uniform_real_distribution<double> rand_distribution;
+
   public:
     uint base;
     std::shared_ptr<Chromosome> chromosome;

@@ -7,6 +7,7 @@
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
 #include <memory>
+#include <random>
 #include <vector>
 
 /*! This class represents a Genome.
@@ -15,6 +16,10 @@
  */
 class Genome
 {
+  private:
+    std::mt19937 rand_generator;
+    std::uniform_int_distribution<int> rand_distribution;
+
   public:
     std::vector<std::shared_ptr<Chromosome>> chromosomes;
 

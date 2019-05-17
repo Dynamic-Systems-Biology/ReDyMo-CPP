@@ -6,6 +6,10 @@
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
 
+std::random_device rand_device;
+std::mt19937 GenomicLocation::rand_generator = std::mt19937(rand_device());
+std::uniform_real_distribution<double> GenomicLocation::rand_distribution = std::uniform_real_distribution<double>(0, 1);
+
 GenomicLocation::GenomicLocation(uint base,
                                  std::shared_ptr<Chromosome> chromosome)
     : chromosome(chromosome)
@@ -26,7 +30,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 {
     if (!use_constitutive_origin)
     {
-        double chance = (double)(rand() % 100) / 100;
+        double chance = rand_distribution(rand_generator);
         return chance < this->chromosome->activation_probability(this->base);
     }
     std::vector<constitutive_origin_t> not_fired_origins;
