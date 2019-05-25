@@ -8,7 +8,8 @@
 
 std::random_device rand_device;
 std::mt19937 GenomicLocation::rand_generator = std::mt19937(rand_device());
-std::uniform_real_distribution<double> GenomicLocation::rand_distribution = std::uniform_real_distribution<double>(0, 1);
+std::uniform_real_distribution<double> GenomicLocation::rand_distribution =
+    std::uniform_real_distribution<double>(0, 1);
 
 GenomicLocation::GenomicLocation(uint base,
                                  std::shared_ptr<Chromosome> chromosome)
@@ -36,8 +37,14 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
     std::vector<constitutive_origin_t> not_fired_origins;
 
     for (auto origin : chromosome->constitutive_origins)
-        if (!chromosome->base_is_replicated(origin.base))
-            not_fired_origins.push_back(origin);
+    {
+        bool fired = false;
+        for (auto fired_origin : chromosome->fired_constitutive_origins)
+        {
+            if (fired_origin.base == origin.base) fired = true;
+        }
+        if (!fired) not_fired_origins.push_back(origin);
+    }
 
     for (auto origin : not_fired_origins)
         if (this->base >= (origin.base - origins_range / 2) &&
@@ -56,11 +63,13 @@ GenomicLocation::get_constitutive_origin(int origins_range)
 
     for (auto origin : chromosome->constitutive_origins)
     {
-        if (std::find(chromosome->fired_constitutive_origins.begin(),
-                      chromosome->fired_constitutive_origins.end(),
-                      origin) == chromosome->fired_constitutive_origins.end())
-        { not_fired_origins.push_back(origin); } }
-
+        bool fired = false;
+        for (auto fired_origin : chromosome->fired_constitutive_origins)
+        {
+            if (fired_origin.base == origin.base) fired = true;
+        }
+        if (!fired) not_fired_origins.push_back(origin);
+    }
     for (auto origin : not_fired_origins)
     {
         if ((int)this->base >= ((int)origin.base - origins_range) &&

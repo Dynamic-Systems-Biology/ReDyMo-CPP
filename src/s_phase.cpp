@@ -74,21 +74,21 @@ void SPhase::simulate(int sim_number)
         }
     }
 
-    std::cout << "[INFO] Ended simulation " << sim_number << std::endl;
+    std::cout << "[INFO] " << sim_number << " Ended simulation" << std::endl;
 
     if (genome->is_replicated())
-        std::cout << "\t[INFO] Genome fully replicated. Simulation "
-                  << sim_number << std::endl;
+        std::cout << "\t[INFO] " << sim_number
+                  << " Genome fully replicated." << std::endl;
     else if (time == timeout)
-        std::cout << "\t[WARN] Timeout simulation: " << sim_number << std::endl;
+        std::cout << "\t[WARN] " << sim_number
+                  << " Timeout simulation: " << std::endl;
 
-    std::cout << "\t[INFO] Number of Collisions: " << n_collisions
-              << " simulation " << sim_number << std::endl;
+    std::cout << "\t[INFO] " << sim_number
+              << " Number of Collisions: " << n_collisions << std::endl;
     if (use_constitutive_origins)
-        std::cout
-            << "\t[INFO] Number of constitutive origins that did not fire: "
-            << constitutive_origins << " simulation " << sim_number
-            << std::endl;
+        std::cout << "\t[INFO] " << sim_number
+                  << " Number of constitutive origins that did not fire: "
+                  << constitutive_origins << std::endl;
     output(sim_number, time, genome->average_interorigin_distance(), genome);
 }
 
