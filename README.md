@@ -9,6 +9,31 @@ In order to compile and run this model, one must have installed:
 - gcc compatible with the C++14 standard
 - doxygen (Optional) for generating documentation
 
+## Using docker
+There is an included Dockerfile as an option to manual compilation.
+Before using this method, first make shure to have docker installed, the **right permissions** to use it, and internet connection to download the necessary docker images.
+
+1. Go to the ReDyMo-CPP folder
+```
+cd ReDyMo-CPP
+```
+2. Build the container
+```
+docker build -t <desired container name> .
+
+e.g.
+docker build -t redymo-runtime .
+```
+After this command, the necessary images will be downloaded, the ReDyMo-CPP will be compiled and the tests will be run.
+Assuming all went sucessfully, now we run the model inside docker and get the outputs in a folder locally.
+
+3. Run ReDyMo-CPP inside docker
+docker run -it --rm -v <local output folder>:/usr/src/ReDyMo-CPP/build/output --name <container name> redymo ./simulator <arguments to the model>
+
+e.g.
+docker run -it --rm -v "$(pwd)"/output:/usr/src/ReDyMo-CPP/build/output --name redymo-runtime redymo ./simulator --cells 100 --organism 'Trypanosoma brucei brucei TREU927' --resources 10000 --speed 1 --period 100 --timeout 100000000 --dormant true
+```
+
 ## Compiling
 After cloning this repository, in order to compile, one needs to create a new directory to separate compilation output files and source files.
 1. Go to the ReDyMo-CPP folder
