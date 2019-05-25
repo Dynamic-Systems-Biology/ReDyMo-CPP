@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+// Interval between bases in the output
+#define CHRM_OUTPUT_STEP 1
+
 /*! The Chromosome class stores relevant data like length, number of bases
  * replicated, transcription regins and has methods to query and modify the
  * Chromosome.

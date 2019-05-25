@@ -38,7 +38,7 @@ uint Chromosome::size() { return this->length; }
 std::string Chromosome::to_string()
 {
     std::string chromosome_string = "";
-    for (uint base = 0; base < length; base += 500)
+    for (uint base = 0; base < length; base += CHRM_OUTPUT_STEP)
     {
         chromosome_string += std::to_string(strand[base]);
         chromosome_string += "\n";
