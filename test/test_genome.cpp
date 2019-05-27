@@ -33,6 +33,7 @@ class GenomeTest : public ::testing::Test
             chrms.push_back(create_chromosome(300, std::to_string(i)));
         }
         gen = std::make_shared<Genome>(chrms);
+        rand_generator.seed(42069);
     }
 
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 300,

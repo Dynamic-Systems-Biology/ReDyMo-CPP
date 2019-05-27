@@ -1,4 +1,5 @@
 #include "s_phase.hpp"
+#include "util.hpp"
 #include <algorithm>
 #include <ctime>
 #include <iomanip>
@@ -38,37 +39,37 @@ int main(int argc, char *argv[])
               << std::endl;
     int index   = get_cmd_option(argv, argc, arg_options[0]);
     int n_cells = atoi(argv[index]);
-    std::cout << std::left << std::setw(21) << "Number of cells: " << std::right
+    std::cout << std::left << std::setw(27) << "Number of cells: " << std::right
               << std::setw(40) << n_cells << std::endl;
 
     index                = get_cmd_option(argv, argc, arg_options[1]);
     std::string organism = argv[index];
-    std::cout << std::left << std::setw(21) << "Organism: " << std::right
+    std::cout << std::left << std::setw(27) << "Organism: " << std::right
               << std::setw(40) << organism << std::endl;
 
     index           = get_cmd_option(argv, argc, arg_options[2]);
     int n_resources = atoi(argv[index]);
-    std::cout << std::left << std::setw(21) << "Number of forks: " << std::right
+    std::cout << std::left << std::setw(27) << "Number of forks: " << std::right
               << std::setw(40) << n_resources << std::endl;
 
     index     = get_cmd_option(argv, argc, arg_options[3]);
     int speed = atoi(argv[index]);
-    std::cout << std::left << std::setw(21)
+    std::cout << std::left << std::setw(27)
               << "Steps per iteration: " << std::right << std::setw(40) << speed
               << std::endl;
 
     index       = get_cmd_option(argv, argc, arg_options[4]);
     int timeout = atoi(argv[index]);
-    std::cout << std::left << std::setw(21) << "Max iterations: " << std::right
+    std::cout << std::left << std::setw(27) << "Max iterations: " << std::right
               << std::setw(40) << timeout << std::endl;
 
     index = get_cmd_option(argv, argc, arg_options[5]);
     bool dormant;
     std::stringstream ss(argv[index]);
     ss >> std::boolalpha >> dormant;
-    std::cout << std::left << std::setw(21)
+    std::cout << std::left << std::setw(27)
               << "Use dormant origins: " << std::right << std::setw(40)
-              << dormant << std::endl << std::endl;
+              << dormant << std::endl;
 
     std::shared_ptr<DataManager> data = std::make_shared<DataManager>(
         "../data/simulation.sqlite", "../data/MFA-Seq_TBrucei_TREU927/");
@@ -77,13 +78,26 @@ int main(int argc, char *argv[])
     if (cmd_option_exists(argv, argv + argc, "--period"))
         transcription_period =
             atoi(argv[get_cmd_option(argv, argc, "--period")]);
+    std::cout << std::left << std::setw(27)
+              << "Transcription period: " << std::right << std::setw(40)
+              << transcription_period << std::endl;
 
     int origins_range = 0;
     if (cmd_option_exists(argv, argv + argc, "--constitutive"))
         origins_range =
             atoi(argv[get_cmd_option(argv, argc, "--constitutive")]);
+    std::cout << std::left << std::setw(27)
+              << "Use constitutive origins: " << std::right << std::setw(40)
+              << origins_range << std::endl;
 
-    srand(time(NULL));
+    std::random_device rand_device;
+    uint seed = rand_device();
+    if (cmd_option_exists(argv, argv + argc, "--seed"))
+        seed = atoi(argv[get_cmd_option(argv, argc, "--seed")]);
+    rand_generator.seed(seed);
+    std::cout << std::left << std::setw(27) << "Random seed: " << std::right
+              << std::setw(40) << seed << std::endl
+              << std::endl;
 
     omp_set_num_threads(40);
 

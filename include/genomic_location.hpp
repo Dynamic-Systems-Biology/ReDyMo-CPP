@@ -12,7 +12,6 @@
 class GenomicLocation
 {
   private:
-    static std::mt19937 rand_generator;
     static std::uniform_real_distribution<double> rand_distribution;
 
   public:

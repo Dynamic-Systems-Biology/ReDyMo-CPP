@@ -17,6 +17,7 @@ class GenomicLocationTest : public ::testing::Test
         std::shared_ptr<Chromosome> chrm = create_chromosome();
         uint base                        = rand() % chrm->size();
         gen_loc = std::make_shared<GenomicLocation>(base, chrm);
+        rand_generator.seed(42069);
     }
 
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 300,
@@ -61,13 +62,15 @@ TEST_F(GenomicLocationTest, IsReplicated)
 
 TEST_F(GenomicLocationTest, WillActivate)
 {
-    double sum                        = 0;
+    int test_count                   = 1000;
+    double sum                       = 0;
+    double expected_ratio            = .5;
     std::shared_ptr<Chromosome> chrm = create_chromosome(1, "2");
     GenomicLocation loc              = GenomicLocation(0, chrm);
 
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < test_count; i++)
         sum += loc.will_activate(false, 1) ? 1 : 0;
-    ASSERT_NEAR(sum, (double)1 / (1 + 1) * 1000, 10);
+    ASSERT_NEAR(sum / test_count, expected_ratio, 0.05);
 }
 
 TEST_F(GenomicLocationTest, GetConstitutiveOrigin)

@@ -1,4 +1,5 @@
 #include "genome.hpp"
+#include "util.hpp"
 #include "genomic_location.hpp"
 #include <cstdlib>
 #include <exception>
@@ -14,8 +15,6 @@ Genome::Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes)
 
 void Genome::initialize(std::vector<std::shared_ptr<Chromosome>> &chromosomes)
 {
-    std::random_device rand_device;
-    this->rand_generator    = std::mt19937(rand_device());
     this->rand_distribution = std::uniform_int_distribution<int>();
     this->chromosomes       = chromosomes;
 }
