@@ -28,6 +28,7 @@ After this command, the necessary images will be downloaded, the ReDyMo-CPP will
 Assuming all went sucessfully, now we run the model inside docker and get the outputs in a folder locally.
 
 3. Run ReDyMo-CPP inside docker
+```
 docker run -it --rm -v <local output folder>:/usr/src/ReDyMo-CPP/build/output --name <container name> redymo ./simulator <arguments to the model>
 
 e.g.
@@ -69,23 +70,25 @@ make test
 ## Parameters
 In this version of ReDyMo, most parameters are mandatory and are listed below:
 
-- __--cells__ <number_of_cells>: Number of independent simulations to be made. number_of_cells is a positive integer.
+- __\-\-cells__ <number_of_cells>: Number of independent simulations to be made. number_of_cells is a positive integer.
 
-- __--dormant__ <dormant_flag>: Flag that either activates ('true') or disables ('false') the firing of dormant origins. dormant_value is a Boolean flag. It is noteworthy that the dormant origing firing does not work when constitutive origins are used (parameter --constitutive).
+- __\-\-dormant__ <dormant_flag>: Flag that either activates ('true') or disables ('false') the firing of dormant origins. dormant_value is a Boolean flag. It is noteworthy that the dormant origing firing does not work when constitutive origins are used (parameter --constitutive).
 
-- __--organism__ <'organism_name'>: Name of the parasite species, as saved in the database. 'organism_name' is a string (in space-separated names, use single quotation marks).
+- __\-\-organism__ <'organism_name'>: Name of the parasite species, as saved in the database. 'organism_name' is a string (in space-separated names, use single quotation marks).
 
-- __--resources__ <number_of_forks>: Number of available forks for the replication process. number_of_forks is a positive integer.
+- __\-\-resources__ <number_of_forks>: Number of available forks for the replication process. number_of_forks is a positive integer.
 
-- __--speed__ <speed_value>: Velocity of each replication fork (in number of nucleotides per iteration). speed_value is a positive integer.
+- __\-\-speed__ <speed_value>: Velocity of each replication fork (in number of nucleotides per iteration). speed_value is a positive integer.
 
-- __--timeout__ <timeout_value>: Maximum allowed number of iterations of a simulation; if this value is reached, then a simulation is ended even if DNA replication is not completed yet.
+- __\-\-timeout__ <timeout_value>: Maximum allowed number of iterations of a simulation; if this value is reached, then a simulation is ended even if DNA replication is not completed yet.
 
-The two optional parameters are:
+The three optional parameters are:
 
-- __--constitutive__ <range>: When this parameter is provided, a DNA replication must use the set of constitutive origins within the database instead of the probability landscape. range is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
+- __\-\-constitutive__ <range>: When this parameter is provided, a DNA replication must use the set of constitutive origins within the database instead of the probability landscape. range is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
 
-- __--period__ <period_value>: Period (in number of simulation iterations) between two consecutive activations (i.e. RNAP binding) of a transcription region. period_value is a positive integer. If this parameter is not set, then the simulation is carried out without transcription.
+- __\-\-period__ <period_value>: Period (in number of simulation iterations) between two consecutive activations (i.e. RNAP binding) of a transcription region. period_value is a positive integer. If this parameter is not set, then the simulation is carried out without transcription.
+
+- __\-\-seed__ \<seed\>: Changes the random generator seed to the given one. This is useful to reproduce an experiment. If this parameter is not used, a random seed will be used.
 
 ## Running the simulation
 
