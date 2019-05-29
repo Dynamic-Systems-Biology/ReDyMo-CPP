@@ -6,6 +6,8 @@
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
 
+std::random_device rand_device;
+std::mt19937 GenomicLocation::rand_generator = std::mt19937(rand_device());
 std::uniform_real_distribution<double> GenomicLocation::rand_distribution =
     std::uniform_real_distribution<double>(0, 1);
 

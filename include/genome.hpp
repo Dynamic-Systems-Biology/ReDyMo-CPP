@@ -17,6 +17,7 @@
 class Genome
 {
   private:
+    std::mt19937 rand_generator;
     std::uniform_int_distribution<int> rand_distribution;
 
   public:
