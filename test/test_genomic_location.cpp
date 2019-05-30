@@ -67,7 +67,7 @@ TEST_F(GenomicLocationTest, WillActivate)
 
     for (int i = 0; i < 1000; i++)
         sum += loc.will_activate(false, 1) ? 1 : 0;
-    ASSERT_NEAR(sum, (double)1 / (1 + 1) * 1000, 10);
+    ASSERT_NEAR(sum, (double)1 / (1 + 1) * 1000, 100);
 }
 
 TEST_F(GenomicLocationTest, GetConstitutiveOrigin)
