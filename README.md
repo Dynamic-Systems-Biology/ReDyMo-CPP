@@ -117,6 +117,22 @@ and then open the documentation index with a web browser:
 <browser> docs/html/index.html
 ```
 
+## Outputs
+### Simulator
+The output folder contains the outputs o each run in separate folders which names contain information about the parameters of the **run**.
+If a simulation is run with the same parameters, the folder will be **overwritten**.
+Inside each run folder are located each individual cell output which comprise of a **cell.txt** and the last state of every chromosome.
+The **cell.txt** file contains, respectively, values for **number of forks**, **steps per iteration**, **total iterations**, **average inter origin distance**
+
+### cell_output_aggregator.py
+The cell_output_agregator.py script outputs a file with name equal to the **run** and txt format with the following attributes: **number of forks**, **steps per iteration**, **average number of iteration between all cells of the run**, **the standard deviation of iterations**, **average inter origin distance**, **standard deviation of IOD**, **number of cells in the run**
+
+### collision_distance_median.py
+Calculates **median**, **mean** and *std deviation* of the distances between replication origins and conflicts with RNAP by processing the output files of each simulation.
+
+### collision_distance_median_parallel.py
+Does the same as collision_distance_median.py but in a parallel fashion.
+
 ## License
 This program is distributed under the GPL v3 license, see the __LICENSE__ file.
 
