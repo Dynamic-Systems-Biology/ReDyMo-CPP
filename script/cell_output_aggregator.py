@@ -54,7 +54,7 @@ for key, value in aggregated_data.items():
   inter_sd = 0 if value[4] == 1 else ((value[3] / value[4] -\
   (value[1] / value[4]) ** 2) * (value[4] / (value[4] - 1))) ** (1 / 2)
 
-  line = "{}\t{}\t{}\t{}\t{}\t{}\t{}".format(key[0], key[1], time_avg,\
+  line = "{}\t{}\t{:.02f}\t{:.02f}\t{:.02f}\t{:.02f}\t{}".format(key[0], key[1], time_avg,\
   time_sd, inter_avg, inter_sd, value[4])
 
   print(line, end="\t")
