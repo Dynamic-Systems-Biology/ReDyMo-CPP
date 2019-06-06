@@ -22,10 +22,10 @@
 
 use strict;
 
-# The simulations were carried out with a very big timeout (== 10,000,000!),
+# The simulations were carried out with a very big timeout (== 1,000,000,000!),
 # in order to allow full replication.
-#
-my $TIMEOUT = 10000000;
+# 1,000,000,000
+my $TIMEOUT = 1000000000;
 
 # Number of simulations per set of parameters (i.e., each simulation is
 # considered to be the S-phase of an independent cell).
