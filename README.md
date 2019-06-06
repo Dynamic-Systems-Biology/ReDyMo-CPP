@@ -17,6 +17,7 @@ Before using this method, first make shure to have docker installed, the **right
 ```
 cd ReDyMo-CPP
 ```
+
 2. Build the container
 ```
 docker build -t <desired container name> .
@@ -24,10 +25,12 @@ docker build -t <desired container name> .
 e.g.
 docker build -t redymo-runtime .
 ```
+
 After this command, the necessary images will be downloaded, the ReDyMo-CPP will be compiled and the tests will be run.
-Assuming all went sucessfully, now we run the model inside docker and get the outputs in a folder locally.
+Assuming all went successfully, now we run the model inside docker and get the outputs in a folder locally.
 
 3. Run ReDyMo-CPP inside docker
+```
 docker run -it --rm -v <local output folder>:/usr/src/ReDyMo-CPP/build/output --name <container name> redymo ./simulator <arguments to the model>
 
 e.g.
