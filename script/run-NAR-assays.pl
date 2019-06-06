@@ -81,7 +81,6 @@ foreach my $period (0, 90, 300, 900, 9000, 90000)
             . $F . "_" . $period . ".txt");
 
     print "[done]\n";
-    exit 0;
   }
 
 }
