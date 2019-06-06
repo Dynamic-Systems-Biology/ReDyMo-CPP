@@ -50,10 +50,7 @@ def process(chrm):
 
 
 def main():
-    if mp.cpu_count() > 11:
-        n_procs = 11
-    else:
-        n_procs = mp.cpu_count()
+    n_procs = 11
     pool = mp.Pool(n_procs)
     global collisions
     chrms = range(1, 3)
