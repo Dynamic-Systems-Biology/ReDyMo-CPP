@@ -1,8 +1,15 @@
 FROM rikorose/gcc-cmake:latest
-COPY . /usr/src/ReDyMo-CPP
-RUN mkdir build
-WORKDIR /usr/src/ReDyMo-CPP/build
-RUN cmake ..
-RUN make
-RUN make test
-CMD ["./simulator"]
+
+ENV SRC_PATH=/usr/src/ReDyMo-CPP
+
+WORKDIR ${SRC_PATH}
+
+COPY . .
+
+WORKDIR ./build
+
+RUN cmake .. && \
+    make && \
+    make test
+
+CMD ./simulator
