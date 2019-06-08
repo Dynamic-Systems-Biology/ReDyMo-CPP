@@ -53,7 +53,7 @@ def main():
     n_procs = 11
     pool = mp.Pool(n_procs)
     global collisions
-    chrms = range(1, 3)
+    chrms = range(1, 12)
     overall_distances = pool.map(process, chrms)
     # inefficient but we only do this for 11 elements
     overall_distances = sum(overall_distances, [])
