@@ -22,10 +22,9 @@
 
 use strict;
 
-# The simulations were carried out with a very big timeout (== 1,000,000,000!),
+# The simulations were carried out with a very big timeout (== 100,000,000!),
 # in order to allow full replication.
-# 1,000,000,000
-my $TIMEOUT = 1000000000;
+my $TIMEOUT = 100000000;
 
 # Number of simulations per set of parameters (i.e., each simulation is
 # considered to be the S-phase of an independent cell).
@@ -45,7 +44,7 @@ my $PATH = "./output/";
 system ("rm -rf $PATH");
 system ("mkdir $PATH");
 
-foreach my $period (0, 90, 300, 900, 9000, 90000)
+foreach my $period (0, 100, 1000, 10000, 100000)
 {
   for (my $F = 10; $F <= 100; $F += 5)
   {
@@ -59,14 +58,13 @@ foreach my $period (0, 90, 300, 900, 9000, 90000)
                  "with dormant origin firing (%d cells)... ",
                  $NUMBER_OF_CELLS;
 
-    system("time ./simulator " .
+    system("./simulator " .
             "--organism 'Trypanosoma brucei brucei TREU927' " .
             "--dormant $has_dormant " .
             "--resources $F " .
             "--speed 1 " .
             "--period $period " .
             "--timeout $TIMEOUT " .
-            "--constitutive $RANGE " .
             "--cells $NUMBER_OF_CELLS " .
             "1> " . $PATH . $has_dormant . "_" . $F . "_" . $period . "_out ".
             "2> " . $PATH . $has_dormant . "_" . $F . "_" . $period . "_err");
