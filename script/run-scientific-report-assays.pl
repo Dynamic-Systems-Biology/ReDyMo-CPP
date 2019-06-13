@@ -29,7 +29,7 @@ my $TIMEOUT = 100000000;
 # Number of simulations per set of parameters (i.e., each simulation is
 # considered to be the S-phase of an independent cell).
 #
-my $NUMBER_OF_CELLS = 30;
+my $NUMBER_OF_CELLS = 100;
 
 # Range of nucleotides for the constitutive origin firing.
 #
