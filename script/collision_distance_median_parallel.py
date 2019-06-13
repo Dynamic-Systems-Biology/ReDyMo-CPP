@@ -72,12 +72,17 @@ def main():
     # inefficient but we only do this for 11 elements
     overall_distances = sum(overall_distances, [])
 
-    median = stat.median(overall_distances)
-    mean = stat.mean(overall_distances)
-    stdev = stat.stdev(overall_distances)
+    if overall_distances != []: 
+        median = stat.median(overall_distances)
+        mean = stat.mean(overall_distances)
+        stdev = stat.stdev(overall_distances)
+    else:
+        median = 0
+        mean = 0
+        stdev = 0
 
     if testing:
-        if overall_distances != testing_sample:
+        if set(overall_distances) != set(testing_sample):
             print("Detection of streaks failed!")
             exit()
         if not math.isclose(median, testing_metrics[0], rel_tol=0.1):
