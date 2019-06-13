@@ -105,5 +105,7 @@ void ForkManager::attach_forks(GenomicLocation &location, uint time)
             if (n_forks_attached == 2) break;
         }
     }
+    if (n_forks_attached == 2)
+        location.chromosome->add_fired_origin();
     n_free_forks -= n_forks_attached;
 }
