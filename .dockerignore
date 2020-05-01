@@ -2,3 +2,7 @@
 .vscode
 build
 output
+Dockerfile
+Doxyfile
+LICENSE
+README
