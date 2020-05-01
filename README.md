@@ -84,17 +84,19 @@ In this version of ReDyMo, most parameters are mandatory and are listed below:
 
 - __--timeout__ <timeout_value>: Maximum allowed number of iterations of a simulation; if this value is reached, then a simulation is ended even if DNA replication is not completed yet.
 
-The two optional parameters are:
+The three optional parameters are:
 
-- __--constitutive__ <range>: When this parameter is provided, a DNA replication must use the set of constitutive origins within the database instead of the probability landscape. range is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
+- __--constitutive__ <range>: When this parameter is provided, a DNA replication must use the set of constitutive origins within the database instead of the probability landscape. `range` is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
 
 - __--period__ <period_value>: Period (in number of simulation iterations) between two consecutive activations (i.e. RNAP binding) of a transcription region. period_value is a positive integer. If this parameter is not set, then the simulation is carried out without transcription.
+
+- __--data-dir__ <data_directory>: The directory containing the MFA-Seq_TBrucei_TREU927 folder for the organism and the database file. The database file must be named __database.sqlite__.
 
 ## Running the simulation
 
 To run the program, the syntax of the main simulator program is the following one:
 ```
-$ ./simulator --cells number_of_cells --dormant dormant_flag --organism 'organism_name' --resources number_of_forks --speed speed_value --timeout timeout_value [--constitutive range] [--period period_value]
+$ ./simulator --cells number_of_cells --dormant dormant_flag --organism 'organism_name' --resources number_of_forks --speed speed_value --timeout timeout_value [--constitutive range] [--period period_value] [--data-dir directory_with_data]
 ```
 
 The command above must be executed within the project main directory. For example, to run a simulation of 7 cells of *T. brucei TREU927*, with 10 forks, replisome speed of 65 bp/iteration, transcription period of 150 iterations between two transcription initiations, a timeout of one million iterations and with dormant origin firing, one must type at the project main directory:
