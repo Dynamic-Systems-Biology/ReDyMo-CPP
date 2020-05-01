@@ -10,32 +10,26 @@ In order to compile and run this model, one must have installed:
 - doxygen (Optional) for generating documentation
 
 ## Using docker
-There is an included Dockerfile as an option to manual compilation.
-Before using this method, first make shure to have docker installed, the **right permissions** to use it, and internet connection to download the necessary docker images.
+Before using this method, first make sure to have docker installed, the **right permissions** to use it, and internet connection to download the necessary docker images.
 
-1. Go to the ReDyMo-CPP folder
-```
-cd ReDyMo-CPP
-```
 
-2. Build the container
+1. Run ReDyMo-CPP image in a container
 ```
-docker build -t <desired container name> .
-
-e.g.
-docker build -t redymo-runtime .
+docker run -it --rm -v <local_output_folder>:/opt/redymo/output --name <container name> brunobbs/redymo:tbrucei
 ```
+Assuming all went successfully, the model runs inside a docker container and get the outputs in a folder locally.
+This command runs the simulator with example params.
 
-After this command, the necessary images will be downloaded, the ReDyMo-CPP will be compiled and the tests will be run.
-Assuming all went successfully, now we run the model inside docker and get the outputs in a folder locally.
+__IMPORTANT__ The local_output_folder __must__ have write permission to other users.
 
-3. Run ReDyMo-CPP inside docker
+2. Run the image with custom parameters
 ```
-docker run -it --rm -v <local output folder>:/usr/src/ReDyMo-CPP/build/output --name <container name> redymo ./simulator <arguments to the model>
+docker run -it --rm -v <local output folder>:/opt/redymo/output --name <container name> brunobbs/redymo:tbrucei ./simulator <arguments to the model>
 
 e.g.
-docker run -it --rm -v "$(pwd)"/output:/usr/src/ReDyMo-CPP/build/output --name redymo-runtime redymo ./simulator --cells 100 --organism 'Trypanosoma brucei brucei TREU927' --resources 10000 --speed 1 --period 100 --timeout 100000000 --dormant true
+docker run -it --rm -v "$(pwd)"/output:/opt/redymo/output --name redymo-runtime brunobbs/redymo:tbrucei ./simulator --cells 100 --organism 'Trypanosoma brucei brucei TREU927' --resources 10000 --speed 1 --period 100 --timeout 100000000 --dormant true --data-dir ./data
 ```
+__IMPORTANT__ in docker the _data_ folder is not in the default location, so it must be specified like in the example above. The _data_ folder is located at `/opt/redymo/data` and can be referenced as just `./data`.
 
 ## Compiling
 After cloning this repository, in order to compile, one needs to create a new directory to separate compilation output files and source files.
@@ -93,7 +87,6 @@ The three optional parameters are:
 - __--data-dir__ <data_directory>: The directory containing the MFA-Seq_TBrucei_TREU927 folder for the organism and the database file. The database file must be named __database.sqlite__.
 
 ## Running the simulation
-
 To run the program, the syntax of the main simulator program is the following one:
 ```
 $ ./simulator --cells number_of_cells --dormant dormant_flag --organism 'organism_name' --resources number_of_forks --speed speed_value --timeout timeout_value [--constitutive range] [--period period_value] [--data-dir directory_with_data]
@@ -142,7 +135,6 @@ Does the same as collision_distance_median.py but in a parallel fashion.
 This program is distributed under the GPL v3 license, see the __LICENSE__ file.
 
 ## Bug report and contact
-
 If you have any bug report and/or want to contact for other subjects (e.g., to collaborate in this project), please do not hesitate to contact us!
 
 Please, address your message to:
