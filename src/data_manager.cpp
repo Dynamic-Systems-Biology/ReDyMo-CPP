@@ -4,11 +4,11 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
-#include <iomanip>
 
 DataManager::DataManager(std::string database_path,
                          std::string mfa_seq_data_path)
@@ -48,38 +48,57 @@ DataManager::get_chromosome_data(std::string organism)
 std::vector<transcription_region_t>
 DataManager::get_transcription_regions(std::string chromosome_code)
 {
-    SQLite::Database db(database_path, SQLite::OPEN_READONLY);
-    SQLite::Statement query(
-        db, "SELECT * FROM TranscriptionRegion WHERE chromosome_code = ?");
-    query.bind(1, chromosome_code);
-
-    std::vector<transcription_region_t> regions;
-    while (query.executeStep())
+    try
     {
-        transcription_region_t region;
-        region.start = query.getColumn("start").getInt();
-        region.end   = query.getColumn("end").getInt();
-        regions.push_back(region);
+        SQLite::Database db(database_path, SQLite::OPEN_READONLY);
+        SQLite::Statement query(
+            db, "SELECT * FROM TranscriptionRegion WHERE chromosome_code = ?");
+        query.bind(1, chromosome_code);
+
+        std::vector<transcription_region_t> regions;
+        while (query.executeStep())
+        {
+            transcription_region_t region;
+            region.start = query.getColumn("start").getInt();
+            region.end   = query.getColumn("end").getInt();
+            regions.push_back(region);
+        }
+        return regions;
     }
-    return regions;
+    catch (int e)
+    {
+        std::cout << "An error ocurred while loading database data. Error " << e
+                  << std::endl
+                  << std::fflush(nullptr);
+        exit(1);
+    }
 }
 
 std::vector<constitutive_origin_t>
 DataManager::get_constitutive_origins(std::string chromosome_code)
 {
-    SQLite::Database db(database_path, SQLite::OPEN_READONLY);
-    SQLite::Statement query(
-        db, "SELECT * FROM ReplicationOrigin WHERE chromosome_code = ?");
-    query.bind(1, chromosome_code);
-
-    std::vector<constitutive_origin_t> origins;
-    while (query.executeStep())
+    try
     {
-        constitutive_origin_t origin;
-        origin.base = query.getColumn("position").getInt();
-        origins.push_back(origin);
+        SQLite::Database db(database_path, SQLite::OPEN_READONLY);
+        SQLite::Statement query(
+            db, "SELECT * FROM ReplicationOrigin WHERE chromosome_code = ?");
+        query.bind(1, chromosome_code);
+        std::vector<constitutive_origin_t> origins;
+        while (query.executeStep())
+        {
+            constitutive_origin_t origin;
+            origin.base = query.getColumn("position").getInt();
+            origins.push_back(origin);
+        }
+        return origins;
     }
-    return origins;
+    catch (int e)
+    {
+        std::cout << "An error ocurred while loading database data. Error " << e
+                  << std::endl
+                  << std::fflush(nullptr);
+        exit(1);
+    }
 }
 
 std::vector<double> DataManager::generate_prob_landscape(std::string code,
@@ -90,7 +109,18 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
     std::vector<double> probabilities(length, 0.0);
     double curr_score;
 
-    mfa_file.open(mfa_seq_data_path + code + ".txt");
+    try
+    {
+
+        mfa_file.open(mfa_seq_data_path + code + ".txt");
+    }
+    catch (int e)
+    {
+        std::cout << "An error ocurred while loading MFA_Seq data. Error " << e
+                  << std::endl
+                  << std::fflush(nullptr);
+        exit(1);
+    }
 
     while (!mfa_file.eof())
     {
@@ -107,8 +137,8 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
                              *std::min_element(scores.begin(), scores.end()));
 
     double b = 1 - (*std::max_element(scores.begin(), scores.end()) * a);
-    
-    double sum = 0;
+
+    double sum  = 0;
     double mean = 0;
 
     std::ofstream probs_file;
@@ -124,7 +154,7 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
             if (j == (int)length - 1)
             {
                 probs_file.close();
-                mean  = sum/probabilities.size(); 
+                mean = sum / probabilities.size();
                 for (int k = 0; k < probabilities.size(); k++)
                 {
                     probabilities[k] = mean;
