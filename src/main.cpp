@@ -29,10 +29,10 @@ std::vector<std::string> configure_cmd_options(int argc, char *argv[])
     std::vector<std::string> arg_options = {
         "--cells",  "--organism",     "--resources",
         "--speed",  "--timeout",      "--dormant",
-        "--period", "--constitutive", "--data-folder"};
+        "--period", "--constitutive", "--data-dir"};
 
     std::vector<std::string> optional_args = {"--period", "--constitutive",
-                                              "--data-folder"};
+                                              "--data-dir"};
 
     std::vector<std::string> arg_texts = {"Number of cells: ",
                                           "Organism: ",
@@ -42,7 +42,7 @@ std::vector<std::string> configure_cmd_options(int argc, char *argv[])
                                           "Use dormant origins: ",
                                           "Transcription period: ",
                                           "Use constitutive origins: ",
-                                          "Data path: "};
+                                          "Data directory: "};
 
     std::vector<std::string> arg_values(arg_options.size());
 
