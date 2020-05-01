@@ -15,7 +15,7 @@ class DataManagerTest : public ::testing::Test
 
     void SetUp()
     {
-        data = std::make_shared<DataManager>("../data/simulation.sqlite",
+        data = std::make_shared<DataManager>("../data/database.sqlite",
                                              "../data/MFA-Seq_dummy/");
     }
 
