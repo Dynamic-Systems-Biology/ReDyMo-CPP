@@ -20,13 +20,15 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp/include
 )
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/build/cmake)
+include_directories( ${CMAKE_CURRENT_LIST_DIR}/thirdparty/lib)
 
 #######
 # Compile componenets in libraries
 #######
 add_library(deps src/chromosome.cpp src/data_manager.cpp src/fork_manager.cpp src/genome.cpp src/genomic_location.cpp src/replication_fork.cpp src/util.cpp src/s_phase.cpp) 
 add_executable(simulator src/main.cpp)
-target_link_libraries(simulator deps gtest SQLiteCpp sqlite3 pthread dl)
+target_link_libraries(simulator deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl)
 
 #######
 # Testing
