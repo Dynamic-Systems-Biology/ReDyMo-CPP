@@ -21,7 +21,7 @@ include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp/include
 )
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/build/cmake)
-include_directories( ${CMAKE_CURRENT_LIST_DIR}/thirdparty/lib)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/lib)
 
 #######
 # Compile componenets in libraries

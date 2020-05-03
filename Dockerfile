@@ -15,7 +15,6 @@ RUN cmake .. && \
     make test
 
 # Multi-stage build
-
 FROM alpine:latest
 
 ENV SRC_PATH=/usr/src/ReDyMo-CPP
