@@ -77,8 +77,8 @@ void SPhase::simulate(int sim_number)
     std::cout << "[INFO] " << sim_number << " Ended simulation" << std::endl;
 
     if (genome->is_replicated())
-        std::cout << "\t[INFO] " << sim_number
-                  << " Genome fully replicated." << std::endl;
+        std::cout << "\t[INFO] " << sim_number << " Genome fully replicated."
+                  << std::endl;
     else if (time == timeout)
         std::cout << "\t[WARN] " << sim_number
                   << " Timeout simulation: " << std::endl;
@@ -118,9 +118,14 @@ void SPhase::output(int sim_number, int time, int iod,
     output_file.close();
     for (auto chromosome : this->genome->chromosomes)
     {
-        std::string code = chromosome->get_code() + ".txt";
-        output_file.open((dir + simulation + code).c_str());
-        output_file << chromosome->to_string();
-        output_file.close();
+        std::string code = chromosome->get_code() + ".txt.zst";
+        FILE *out_file   = fopen((dir + simulation + code).c_str(), "w+b");
+        size_t compressed_size = 0;
+        void *compressed_data =
+            compress_cpp_string(chromosome->to_string(), compressed_size);
+        size_t written = fwrite(compressed_data, 1, compressed_size, out_file);
+        if (written == 0) std::__throw_ios_failure("Failed to write to file.");
+        fclose(out_file);
+        free(compressed_data);
     }
 }
