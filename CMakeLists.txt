@@ -26,7 +26,7 @@ include_directories( ${CMAKE_CURRENT_LIST_DIR}/thirdparty/lib)
 #######
 # Compile componenets in libraries
 #######
-add_library(deps src/chromosome.cpp src/data_manager.cpp src/fork_manager.cpp src/genome.cpp src/genomic_location.cpp src/replication_fork.cpp src/util.cpp src/s_phase.cpp) 
+add_library(deps src/chromosome.cpp src/data_manager.cpp src/fork_manager.cpp src/genome.cpp src/genomic_location.cpp src/replication_fork.cpp src/util.cpp src/s_phase.cpp)
 add_executable(simulator src/main.cpp)
 target_link_libraries(simulator deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl)
 
@@ -44,11 +44,11 @@ if(BUILD_TESTING)
     add_executable(test_data_manager test/test_data_manager.cpp)
 
     target_link_libraries(test_chromosome deps gtest gmock)
-    target_link_libraries(test_genome deps gtest)
-    target_link_libraries(test_genomic_location deps gtest)
-    target_link_libraries(test_replication_fork deps gtest)
-    target_link_libraries(test_fork_manager deps gtest)
-    target_link_libraries(test_data_manager deps gtest SQLiteCpp sqlite3 pthread dl)
+    target_link_libraries(test_genome deps libzstd_static gtest)
+    target_link_libraries(test_genomic_location deps libzstd_static gtest)
+    target_link_libraries(test_replication_fork deps libzstd_static gtest)
+    target_link_libraries(test_fork_manager deps libzstd_static gtest)
+    target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl)
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
