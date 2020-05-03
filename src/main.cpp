@@ -1,6 +1,7 @@
 #include "s_phase.hpp"
 #include <algorithm>
 #include <ctime>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <omp.h>
@@ -27,22 +28,18 @@ void print_arg_opt(std::string opt, std::string value)
 std::vector<std::string> configure_cmd_options(int argc, char *argv[])
 {
     std::vector<std::string> arg_options = {
-        "--cells",  "--organism",     "--resources",
-        "--speed",  "--timeout",      "--dormant",
-        "--period", "--constitutive", "--data-dir"};
+        "--cells",   "--organism", "--resources",    "--speed",   "--timeout",
+        "--dormant", "--period",   "--constitutive", "--data-dir"};
 
     std::vector<std::string> optional_args = {"--period", "--constitutive",
                                               "--data-dir"};
 
-    std::vector<std::string> arg_texts = {"Number of cells: ",
-                                          "Organism: ",
-                                          "Number of forks: ",
-                                          "Steps per iteration: ",
-                                          "Max Iterations: ",
-                                          "Use dormant origins: ",
-                                          "Transcription period: ",
-                                          "Use constitutive origins: ",
-                                          "Data directory: "};
+    std::vector<std::string> arg_texts = {
+        "Number of cells: ",      "Organism: ",
+        "Number of forks: ",      "Steps per iteration: ",
+        "Max Iterations: ",       "Use dormant origins: ",
+        "Transcription period: ", "Use constitutive origins: ",
+        "Data directory: "};
 
     std::vector<std::string> arg_values(arg_options.size());
 
