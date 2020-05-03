@@ -2,6 +2,7 @@
 .vscode
 build
 output
+docs
 Dockerfile
 Doxyfile
 LICENSE
