@@ -3,13 +3,15 @@ project(ReDyMo)
 include(CTest)
 include(GoogleTest)
 
-if(CMAKE_BUILD_TYPE STREQUAL Debug)
+SET(CUSTOM_BUILD_TYPE "" CACHE STRING "Sets custom comp flags")
+
+if(CUSTOM_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g -pg")
 
-elseif(CMAKE_BUILD_TYPE STREQUAL Performance)
+elseif(CUSTOM_BUILD_TYPE STREQUAL Performance)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native -frename-registers")
 
-elseif(CMAKE_BUILD_TYPE STREQUAL Development)
+elseif(CUSTOM_BUILD_TYPE STREQUAL Development)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
 
 else()
