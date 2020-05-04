@@ -1,11 +1,21 @@
 cmake_minimum_required(VERSION 3.0)
-set(CMAKE_BUILD_TYPE Release)
 project(ReDyMo)
 include(CTest)
 include(GoogleTest)
 
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -O3 -frename-registers")
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g -pg")
+
+elseif(CMAKE_BUILD_TYPE STREQUAL Performance)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native -frename-registers")
+
+elseif(CMAKE_BUILD_TYPE STREQUAL Development)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
+
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -O3 -frename-registers")
+
+endif()
 
 #######
 # Add the include folder
