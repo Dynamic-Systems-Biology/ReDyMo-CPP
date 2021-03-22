@@ -5,6 +5,12 @@ import subprocess
 import os
 from matplotlib import pyplot as plt
 
+if len(sys.argv) < 2:
+  print("File not specified")
+  print("Usage: visualize.py FILE")
+  print("Example: visualize.py path/to/file.txt.zst")
+  exit(0)
+
 compressed_file_name=os.path.abspath(sys.argv[1])
 uncompressed_file_name=compressed_file_name[:-4]
 
