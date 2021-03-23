@@ -5,6 +5,56 @@
 #include "../include/fork_manager.hpp"
 #include "../include/util.hpp"
 
+class TestingProvider : public DataProvider
+{
+  private:
+    int size;
+    std::vector<double> prob_landscape;
+    std::vector<transcription_region_t> transcription_regions;
+    std::vector<constitutive_origin_t> cons_origins;
+
+  public:
+    TestingProvider(uint size) : size(size)
+    {
+        prob_landscape.resize(size, (double)1 / (size + 1));
+
+        transcription_region_t reg;
+        reg.start = 1000;
+        reg.end   = 2600;
+
+        transcription_regions.push_back(reg);
+
+        constitutive_origin_t origin;
+        origin.base = 0;
+        cons_origins.push_back(origin);
+    }
+
+    const std::vector<std::string> &get_codes()
+    {
+        std::vector<std::string> codes;
+        return codes;
+    }
+
+    int get_length(std::string code) { return size; }
+
+    const std::vector<double> &get_probability_landscape(std::string code)
+    {
+        return prob_landscape;
+    }
+
+    const std::vector<transcription_region_t> &
+    get_transcription_regions(std::string code)
+    {
+        return transcription_regions;
+    }
+
+    const std::vector<constitutive_origin_t> &
+    get_constitutive_origins(std::string code)
+    {
+        return cons_origins;
+    }
+};
+
 class ForkManagerTest : public ::testing::Test
 {
   protected:
@@ -27,25 +77,9 @@ class ForkManagerTest : public ::testing::Test
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 3000,
                                                   std::string id = "1")
     {
-        uint test_size = size;
-        std::vector<double> prob_landscape;
-        std::vector<transcription_region_t> transcription_regions;
-        std::vector<constitutive_origin_t> cons_origins;
+        std::shared_ptr<TestingProvider> provider(new TestingProvider(size));
 
-        prob_landscape.resize(test_size, (double)1 / (test_size + 1));
-
-        transcription_region_t reg;
-        reg.start = 1000;
-        reg.end   = 2600;
-
-        transcription_regions.push_back(reg);
-
-        constitutive_origin_t origin;
-        origin.base = 0;
-        cons_origins.push_back(origin);
-
-        return std::make_shared<Chromosome>(
-            id, test_size, prob_landscape, transcription_regions, cons_origins);
+        return std::make_shared<Chromosome>(id, *provider);
     }
 };
 

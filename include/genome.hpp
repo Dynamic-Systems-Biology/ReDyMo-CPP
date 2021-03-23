@@ -18,7 +18,8 @@ class Genome
 {
   private:
     std::mt19937 rand_generator;
-    std::uniform_int_distribution<int> rand_distribution;
+    std::discrete_distribution<int> chromosome_distribution;
+    std::uniform_int_distribution<int> base_distribution;
 
   public:
     std::vector<std::shared_ptr<Chromosome>> chromosomes;
@@ -28,7 +29,7 @@ class Genome
     Genome();
 
     /*! Constructor */
-    Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes);
+    Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes, int seed = 0);
 
     /*! Initializer to fill a previously empty object*/
     void initialize(std::vector<std::shared_ptr<Chromosome>> &chromosomes);

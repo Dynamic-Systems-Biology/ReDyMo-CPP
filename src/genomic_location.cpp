@@ -100,3 +100,27 @@ bool GenomicLocation::put_fired_constitutive_origin(
     }
     return false;
 }
+
+GenomicLocation &GenomicLocation::operator+=(int bases)
+{
+    long tmp = base + bases;
+    if (tmp < 0)
+        tmp = 0;
+    else if (tmp >= chromosome->length)
+        tmp = chromosome->length - 1;
+
+    base = (uint)tmp;
+
+    return *this;
+}
+
+GenomicLocation GenomicLocation::operator+(int bases)
+{
+    long tmp = base + bases;
+    if (tmp < 0)
+        tmp = 0;
+    else if (tmp >= chromosome->length)
+        tmp = chromosome->length - 1;
+
+    return GenomicLocation(tmp, chromosome);
+}

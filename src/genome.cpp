@@ -7,17 +7,27 @@
 
 Genome::Genome() {}
 
-Genome::Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes)
+Genome::Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes, int seed)
 {
+    rand_generator.seed(seed);
     initialize(chromosomes);
 }
 
 void Genome::initialize(std::vector<std::shared_ptr<Chromosome>> &chromosomes)
 {
     std::random_device rand_device;
-    this->rand_generator    = std::mt19937(rand_device());
-    this->rand_distribution = std::uniform_int_distribution<int>();
-    this->chromosomes       = chromosomes;
+    this->rand_generator = std::mt19937(rand_device());
+
+    std::vector<int> chromosome_sizes;
+
+    for (auto chromosome = 0; chromosome < chromosomes.size(); chromosome++)
+    {
+        this->chromosomes.push_back(chromosomes[chromosome]);
+        chromosome_sizes.push_back(chromosomes[chromosome]->size());
+    }
+
+    this->chromosome_distribution = std::discrete_distribution<int>(
+        chromosome_sizes.begin(), chromosome_sizes.end());
 }
 
 uint Genome::size()
@@ -30,24 +40,17 @@ uint Genome::size()
 
 std::shared_ptr<GenomicLocation> Genome::random_genomic_location()
 {
-    std::uniform_int_distribution<int>::param_type chrm_dist(
-        0, chromosomes.size() - 1);
-
-    // Change the distribution parameters to match the numer of possible
-    // chromosomes
-    rand_distribution.param(chrm_dist);
-
-    uint rand_chromosome = rand_distribution(rand_generator);
+    uint rand_chromosome = chromosome_distribution(rand_generator);
 
     std::uniform_int_distribution<int>::param_type bases_dist(
         0, chromosomes[rand_chromosome]->size() - 1);
 
     // Change the distribution parameters to match the numer of possible bases
-    rand_distribution.param(bases_dist);
+    base_distribution.param(bases_dist);
 
-    uint rand_base = rand_distribution(rand_generator);
-    return std::shared_ptr<GenomicLocation>(std::make_shared<GenomicLocation>(
-        rand_base, chromosomes[rand_chromosome]));
+    uint rand_base = base_distribution(rand_generator);
+    return std::make_shared<GenomicLocation>(rand_base,
+                                             chromosomes[rand_chromosome]);
 }
 
 // Actually never used, still here for eventual future use
@@ -66,8 +69,8 @@ std::shared_ptr<GenomicLocation> Genome::random_unreplicated_genomic_location()
         rand_base = rand() % chromosomes[rand_chromosome]->size();
     while (chromosomes[rand_chromosome]->base_is_replicated(rand_base));
 
-    return std::shared_ptr<GenomicLocation>(std::make_shared<GenomicLocation>(
-        rand_base, chromosomes[rand_chromosome]));
+    return std::make_shared<GenomicLocation>(rand_base,
+                                             chromosomes[rand_chromosome]);
 }
 
 bool Genome::is_replicated()
@@ -94,6 +97,8 @@ uint Genome::n_constitutive_origins()
 {
     uint n_origins = 0;
     for (auto chromosome : chromosomes)
+    {
         n_origins += chromosome->n_constitutive_origins();
+    }
     return n_origins;
 }
