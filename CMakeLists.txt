@@ -20,6 +20,20 @@ else()
 endif()
 
 #######
+# OpenCL
+#######
+find_package(OpenCL REQUIRED)
+include_directories(${OpenCL_INCLUDE_DIRS})
+link_directories(${OpenCL_LIBRARY})
+
+#######
+# Rapid YAML
+#######
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml ryml)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml/ext/c4core/src)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml/src)
+
+#######
 # Add the include folder
 #######
 include_directories(include)
@@ -38,9 +52,25 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/lib)
 #######
 # Compile componenets in libraries
 #######
-add_library(deps src/chromosome.cpp src/data_manager.cpp src/fork_manager.cpp src/genome.cpp src/genomic_location.cpp src/replication_fork.cpp src/util.cpp src/s_phase.cpp)
+add_library(
+    deps
+    src/chromosome.cpp
+    src/data_manager.cpp
+    src/fork_manager.cpp
+    src/genome.cpp
+    src/genomic_location.cpp
+    src/replication_fork.cpp
+    src/util.cpp
+    src/s_phase.cpp
+    
+    src/configuration.cpp
+    src/evolution_data_provider.cpp
+    src/evolution.cpp
+#    src/gpu_s_phase.cpp
+#    src/gpu_chromosome.cpp
+)
 add_executable(simulator src/main.cpp)
-target_link_libraries(simulator deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl)
+target_link_libraries(simulator deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl ryml ${OpenCL_LIBRARY})
 
 #######
 # Testing

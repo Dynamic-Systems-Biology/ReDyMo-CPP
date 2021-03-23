@@ -10,60 +10,68 @@
 #include <string>
 #include <vector>
 
-DataManager::DataManager(std::string database_path,
-                         std::string mfa_seq_data_path)
-    : database_path(database_path), mfa_seq_data_path(mfa_seq_data_path)
+DataManager::DataManager(std::string organism, std::string database_path,
+                         std::string mfa_seq_data_path, double p)
+    : database_path(database_path), mfa_seq_data_path(mfa_seq_data_path),
+      uniform(p)
 {
-}
-
-std::vector<std::shared_ptr<Chromosome>>
-DataManager::get_chromosome_data(std::string organism)
-{
-    std::vector<std::shared_ptr<Chromosome>> chrms;
     SQLite::Database db(database_path, SQLite::OPEN_READONLY);
     SQLite::Statement query(db, "select * from Chromosome where organism = ?");
     query.bind(1, organism);
 
-    std::string code;
-    int length;
-
     while (query.executeStep())
     {
-        code   = query.getColumn("code").getString();
-        length = query.getColumn("length").getInt();
+        std::string code = query.getColumn("code").getString();
+        int length       = query.getColumn("length").getInt();
 
-        std::vector<double> prob = generate_prob_landscape(code, length);
-        std::vector<transcription_region_t> regions =
-            get_transcription_regions(code);
-        std::vector<constitutive_origin_t> origins =
-            get_constitutive_origins(code);
+        lengths.insert(std::pair<std::string, int>(code, length));
 
-        std::shared_ptr<Chromosome> chrm =
-            std::make_shared<Chromosome>(code, length, prob, regions, origins);
-        chrms.push_back(chrm);
+        codes.push_back(code);
+
+        try
+        {
+            generate_prob_landscape(code, length);
+            generate_constitutive_origins(code);
+            generate_transcription_regions(code);
+        }
+        catch (std::out_of_range &e)
+        {
+            std::cerr << e.what() << std::endl;
+            exit(-1);
+        }
     }
-    return chrms;
 }
 
-std::vector<transcription_region_t>
-DataManager::get_transcription_regions(std::string chromosome_code)
+DataManager::~DataManager()
+{
+    std::cout << "[LIFE] Data Manager deleted!" << std::endl << std::flush;
+}
+
+const std::vector<std::string> &DataManager::get_codes() { return codes; }
+
+void DataManager::generate_transcription_regions(std::string code)
 {
     try
     {
         SQLite::Database db(database_path, SQLite::OPEN_READONLY);
         SQLite::Statement query(
             db, "SELECT * FROM TranscriptionRegion WHERE chromosome_code = ?");
-        query.bind(1, chromosome_code);
+        query.bind(1, code);
 
-        std::vector<transcription_region_t> regions;
+        transcription_regions.insert(
+            std::pair<std::string, std::vector<transcription_region_t>>(
+                code, std::vector<transcription_region_t>()));
+
+        auto &regions = transcription_regions.at(code);
+
         while (query.executeStep())
         {
             transcription_region_t region;
             region.start = query.getColumn("start").getInt();
             region.end   = query.getColumn("end").getInt();
+
             regions.push_back(region);
         }
-        return regions;
     }
     catch (int e)
     {
@@ -74,23 +82,27 @@ DataManager::get_transcription_regions(std::string chromosome_code)
     }
 }
 
-std::vector<constitutive_origin_t>
-DataManager::get_constitutive_origins(std::string chromosome_code)
+void DataManager::generate_constitutive_origins(std::string code)
 {
     try
     {
         SQLite::Database db(database_path, SQLite::OPEN_READONLY);
         SQLite::Statement query(
             db, "SELECT * FROM ReplicationOrigin WHERE chromosome_code = ?");
-        query.bind(1, chromosome_code);
-        std::vector<constitutive_origin_t> origins;
+        query.bind(1, code);
+
+        constitutive_origins.insert(
+            std::pair<std::string, std::vector<constitutive_origin_t>>(
+                code, std::vector<constitutive_origin_t>()));
+
+        auto &origins = constitutive_origins.at(code);
+
         while (query.executeStep())
         {
             constitutive_origin_t origin;
             origin.base = query.getColumn("position").getInt();
             origins.push_back(origin);
         }
-        return origins;
     }
     catch (int e)
     {
@@ -101,23 +113,26 @@ DataManager::get_constitutive_origins(std::string chromosome_code)
     }
 }
 
-std::vector<double> DataManager::generate_prob_landscape(std::string code,
-                                                         uint length)
+void DataManager::generate_prob_landscape(std::string code, uint length)
 {
     std::ifstream mfa_file;
     std::vector<double> scores;
-    std::vector<double> probabilities(length, 0.0);
+    probability_landscape.insert(std::pair<std::string, std::vector<double>>(
+        code, std::vector<double>(length, 0.0)));
+
+    auto &landscape = probability_landscape.at(code);
     double curr_score;
 
     try
     {
-
         mfa_file.open(mfa_seq_data_path + code + ".txt");
+        if (!mfa_file.is_open()) { throw 1; }
     }
     catch (int e)
     {
-        std::cout << "An error ocurred while loading MFA_Seq data. Error " << e
-                  << std::endl
+        std::cout << "An error ocurred while loading MFA_Seq["
+                  << mfa_seq_data_path + code + ".txt"
+                  << "] data. Error " << e << std::endl
                   << std::fflush(nullptr);
         exit(1);
     }
@@ -146,22 +161,98 @@ std::vector<double> DataManager::generate_prob_landscape(std::string code,
     for (int i = 0; i < (int)scores.size(); i++)
     {
         double prob = a * scores[i] + b;
+
+        if (uniform) prob = uniform;
+
         probs_file << std::fixed << std::setprecision(17) << prob << std::endl;
         for (int j = i * step; j < (i + 1) * step; j++)
         {
-            probabilities[j] = prob;
+            landscape[j] = prob;
             sum += prob;
             if (j == (int)length - 1)
             {
                 probs_file.close();
-                mean = sum / probabilities.size();
-                for (int k = 0; k < probabilities.size(); k++)
+                mean = sum / landscape.size();
+                for (int k = 0; k < landscape.size(); k++)
                 {
-                    probabilities[k] = mean;
+                    landscape[k] = mean;
                 }
-                return probabilities;
+                return;
             }
         }
     }
-    return probabilities;
+}
+
+int DataManager::get_length(std::string code)
+{
+    std::lock_guard<std::mutex> guard(lengths_mutex);
+    try
+    {
+        return lengths.at(code);
+    }
+    catch (std::out_of_range &e)
+    {
+        std::cerr << code << ": " << e.what() << std::endl;
+        exit(-1);
+    }
+}
+
+const std::vector<double> &
+DataManager::get_probability_landscape(std::string code)
+{
+    std::lock_guard<std::mutex> guard(prob_landscape_mutex);
+
+    try
+    {
+        return probability_landscape.at(code);
+    }
+    catch (std::out_of_range &e)
+    {
+        auto codes = get_codes();
+        for (auto code = codes.begin(); code != codes.end(); code++)
+            std::cerr << *code << std::endl << std::flush;
+
+        std::cerr << code << "[P]: " << e.what() << " "
+                  << probability_landscape.size() << std::endl;
+        exit(-1);
+    }
+}
+
+const std::vector<transcription_region_t> &
+DataManager::get_transcription_regions(std::string code)
+{
+    std::lock_guard<std::mutex> guard(transcription_regions_mutex);
+    try
+    {
+        return transcription_regions.at(code);
+    }
+    catch (std::out_of_range &e)
+    {
+        auto codes = get_codes();
+        for (auto code = codes.begin(); code != codes.end(); code++)
+            std::cerr << *code << std::endl << std::flush;
+
+        std::cerr << code << "[T]: " << e.what() << std::endl;
+        exit(-1);
+    }
+}
+
+const std::vector<constitutive_origin_t> &
+DataManager::get_constitutive_origins(std::string code)
+{
+    std::lock_guard<std::mutex> guard(constitutive_origins_mutex);
+    try
+    {
+        return constitutive_origins.at(code);
+    }
+    catch (std::out_of_range &e)
+    {
+
+        auto codes = get_codes();
+        for (auto code = codes.begin(); code != codes.end(); code++)
+            std::cerr << *code << std::endl << std::flush;
+
+        std::cerr << code << "[C]: " << test << std::endl;
+        exit(-1);
+    }
 }

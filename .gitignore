@@ -34,4 +34,5 @@
 .vscode
 build
 docs
-data/**/*probability.txt
+data/**/*_probability.txt
+data/test_output/

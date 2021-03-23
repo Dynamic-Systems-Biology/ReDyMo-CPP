@@ -5,38 +5,71 @@
 
 #include "../include/chromosome.hpp"
 
-class ChromosomeTest : public ::testing::Test
+class TestingProvider : public DataProvider
 {
-  protected:
-    Chromosome chrm;
+  private:
+    int size;
+    std::vector<double> prob_landscape;
+    std::vector<transcription_region_t> transcription_regions;
+    std::vector<constitutive_origin_t> cons_origins;
 
-  protected:
-    ChromosomeTest() {}
-
-    void SetUp() { chrm = *create_chromosome(); }
-
-    std::shared_ptr<Chromosome> create_chromosome(uint size = 300)
+  public:
+    TestingProvider(uint size) : size(size)
     {
-        uint test_size = size;
-        std::vector<double> prob_landscape;
-        std::vector<transcription_region_t> transcription_regions;
-        std::vector<constitutive_origin_t> cons_origins;
-
-        prob_landscape.resize(test_size, (double)1 / (test_size + 1));
+        prob_landscape.resize(size, (double)1 / (size + 1));
 
         transcription_region_t reg;
         reg.start = 0;
         reg.end   = 10;
 
-        transcription_regions.resize(test_size, reg);
+        transcription_regions.resize(size, reg);
 
         constitutive_origin_t origin;
         origin.base = 0;
-        cons_origins.resize(test_size, origin);
+        cons_origins.resize(size, origin);
+    }
 
-        return std::shared_ptr<Chromosome>(
-            new Chromosome("1", test_size, prob_landscape,
-                           transcription_regions, cons_origins));
+    const std::vector<std::string> &get_codes()
+    {
+        std::vector<std::string> codes;
+        return codes;
+    }
+
+    int get_length(std::string code) { return size; }
+
+    const std::vector<double> &get_probability_landscape(std::string code)
+    {
+        return prob_landscape;
+    }
+
+    const std::vector<transcription_region_t> &
+    get_transcription_regions(std::string code)
+    {
+        return transcription_regions;
+    }
+
+    const std::vector<constitutive_origin_t> &
+    get_constitutive_origins(std::string code)
+    {
+        return cons_origins;
+    }
+};
+
+class ChromosomeTest : public ::testing::Test
+{
+  protected:
+    std::shared_ptr<Chromosome> chrm;
+
+  protected:
+    ChromosomeTest() {}
+
+    void SetUp() { chrm = create_chromosome(); }
+
+    std::shared_ptr<Chromosome> create_chromosome(uint size = 300)
+    {
+        std::shared_ptr<TestingProvider> provider(new TestingProvider(size));
+
+        return std::make_shared<Chromosome>("1", *provider);
     }
 
     void TearDown() {}
@@ -59,12 +92,12 @@ TEST_F(ChromosomeTest, Size)
     ASSERT_EQ(500, chrm_500->size());
 }
 
-/*! Tests if an exception is thrown in case of non existant base.
+/*! Tests if an exception is thrown in case of non existent base.
  */
 TEST_F(ChromosomeTest, OutOfRangeBaseIsReplicated)
 {
-    ASSERT_THROW(chrm.base_is_replicated(400), std::out_of_range);
-    ASSERT_THROW(chrm.base_is_replicated(301), std::out_of_range);
+    ASSERT_THROW(chrm->base_is_replicated(400), std::out_of_range);
+    ASSERT_THROW(chrm->base_is_replicated(301), std::out_of_range);
 }
 
 /*! Tests if a newly created Chromosome has no replicated bases and throws no
@@ -72,32 +105,32 @@ TEST_F(ChromosomeTest, OutOfRangeBaseIsReplicated)
  */
 TEST_F(ChromosomeTest, BaseIsReplicated)
 {
-    ASSERT_NO_THROW(chrm.base_is_replicated(0));
-    ASSERT_NO_THROW(chrm.base_is_replicated(299));
+    ASSERT_NO_THROW(chrm->base_is_replicated(0));
+    ASSERT_NO_THROW(chrm->base_is_replicated(299));
 
     for (int i = 0; i < 300; i++)
-        ASSERT_FALSE(chrm.base_is_replicated(i));
+        ASSERT_FALSE(chrm->base_is_replicated(i));
 
-    ASSERT_NO_THROW(chrm.replicate(4, 6, 1));
+    ASSERT_NO_THROW(chrm->replicate(4, 6, 1));
 
-    ASSERT_TRUE(chrm.base_is_replicated(4));
-    ASSERT_TRUE(chrm.base_is_replicated(5));
+    ASSERT_TRUE(chrm->base_is_replicated(4));
+    ASSERT_TRUE(chrm->base_is_replicated(5));
 }
 
 /*! Tests if the method throws exception when the base is invalid.
  */
 TEST_F(ChromosomeTest, OutOfRangeActivationProbability)
 {
-    ASSERT_THROW(chrm.activation_probability(301), std::out_of_range);
-    ASSERT_THROW(chrm.activation_probability(400), std::out_of_range);
+    ASSERT_THROW(chrm->activation_probability(301), std::out_of_range);
+    ASSERT_THROW(chrm->activation_probability(400), std::out_of_range);
 }
 
 /*! Tests if the method does not throw exceptions when the base is valid.
  */
 TEST_F(ChromosomeTest, InRangeActivationProbability)
 {
-    ASSERT_NO_THROW(chrm.activation_probability(0));
-    ASSERT_NO_THROW(chrm.activation_probability(10));
+    ASSERT_NO_THROW(chrm->activation_probability(0));
+    ASSERT_NO_THROW(chrm->activation_probability(10));
 }
 
 /*! Tests if the method returns the right activation probability.
@@ -128,31 +161,31 @@ TEST_F(ChromosomeTest, SetDormantActivationProbability)
  */
 TEST_F(ChromosomeTest, OutOfRangeReplicate)
 {
-    ASSERT_THROW(chrm.replicate(-3, 6, 30), std::out_of_range);
-    ASSERT_THROW(chrm.replicate(301, 150, 30), std::out_of_range);
+    ASSERT_THROW(chrm->replicate(-3, 6, 30), std::out_of_range);
+    ASSERT_THROW(chrm->replicate(301, 150, 30), std::out_of_range);
 }
 
 /*! Tests if the method does not throw exceptions when the start base is valid.
  */
 TEST_F(ChromosomeTest, InRangeReplicate)
 {
-    ASSERT_NO_THROW(chrm.replicate(3, 1500, 30));
-    ASSERT_NO_THROW(chrm.replicate(3, 15, 30));
+    ASSERT_NO_THROW(chrm->replicate(3, 1500, 30));
+    ASSERT_NO_THROW(chrm->replicate(3, 15, 30));
 }
 
 TEST_F(ChromosomeTest, Replicate)
 {
-    ASSERT_EQ(chrm.replicate(0, 30, 1), true);
+    ASSERT_EQ(chrm->replicate(0, 30, 1), true);
     for (int base = 0; base < 30; base++)
-        ASSERT_EQ(true, chrm.base_is_replicated(base));
-    ASSERT_EQ(chrm.get_n_replicated_bases(), 31);
+        ASSERT_EQ(true, chrm->base_is_replicated(base));
+    ASSERT_EQ(chrm->get_n_replicated_bases(), 31);
 }
 
 TEST_F(ChromosomeTest, IsReplicated)
 {
-    ASSERT_FALSE(chrm.is_replicated());
-    chrm.replicate(0, 300, 1);
-    ASSERT_TRUE(chrm.is_replicated());
+    ASSERT_FALSE(chrm->is_replicated());
+    chrm->replicate(0, 300, 1);
+    ASSERT_TRUE(chrm->is_replicated());
 }
 
 int main(int argc, char **argv)

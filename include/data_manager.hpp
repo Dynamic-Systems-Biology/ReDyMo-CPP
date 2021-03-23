@@ -2,34 +2,58 @@
 #define __DATA_MANAGER_HPP__
 
 #include "chromosome.hpp"
+#include "data_provider.hpp"
 #include "util.hpp"
 #include <memory>
+#include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-/*! The DataManager class handles all input and loading of data.
- * It stores Chromosome data, activation probabilities of replication origins
- * and information about Transcription Regions.
+/*! The DataManager class is a data provider that loads data from the sqlite
+ * database and MFA-Seq files to provide information to the Genomes.
  */
-class DataManager
+class DataManager : public DataProvider
 {
   private:
+    long long unsigned test = 0;
     std::string database_path;
     std::string mfa_seq_data_path;
+    double uniform;
+
+    std::vector<std::string> codes;
+    std::unordered_map<std::string, int> lengths;
+
+    void generate_prob_landscape(std::string code, uint length);
+
+    void generate_transcription_regions(std::string code);
+
+    void generate_constitutive_origins(std::string code);
+
+  protected:
+    std::mutex lengths_mutex;
+    std::mutex prob_landscape_mutex;
+    std::mutex transcription_regions_mutex;
+    std::mutex constitutive_origins_mutex;
+
+    std::unordered_map<std::string, std::vector<double>> probability_landscape;
+    std::unordered_map<std::string, std::vector<constitutive_origin_t>>
+        constitutive_origins;
+    std::unordered_map<std::string, std::vector<transcription_region_t>>
+        transcription_regions;
 
   public:
-    DataManager(std::string database_path, std::string mfa_seq_data_path);
+    DataManager(std::string organism, std::string database_path,
+                std::string mfa_seq_data_path, double p = 0);
+    ~DataManager();
 
-    std::vector<std::shared_ptr<Chromosome>>
-    get_chromosome_data(std::string organism);
-
-    std::vector<double> generate_prob_landscape(std::string code, uint length);
-
-    std::vector<transcription_region_t>
-    get_transcription_regions(std::string chromosome_code);
-
-    std::vector<constitutive_origin_t>
-    get_constitutive_origins(std::string chromosome_code);
+    const std::vector<std::string> &get_codes();
+    int get_length(std::string code);
+    const std::vector<double> &get_probability_landscape(std::string code);
+    const std::vector<transcription_region_t> &
+    get_transcription_regions(std::string code);
+    const std::vector<constitutive_origin_t> &
+    get_constitutive_origins(std::string code);
 };
 
 #endif

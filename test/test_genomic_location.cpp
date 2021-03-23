@@ -5,6 +5,56 @@
 #include "../include/genomic_location.hpp"
 #include "../include/util.hpp"
 
+class TestingProvider : public DataProvider
+{
+  private:
+    int size;
+    std::vector<double> prob_landscape;
+    std::vector<transcription_region_t> transcription_regions;
+    std::vector<constitutive_origin_t> cons_origins;
+
+  public:
+    TestingProvider(uint size) : size(size)
+    {
+        prob_landscape.resize(size, (double)1 / (size + 1));
+
+        transcription_region_t reg;
+        reg.start = 0;
+        reg.end   = 10;
+
+        transcription_regions.resize(size / 4, reg);
+
+        constitutive_origin_t origin;
+        origin.base = 70;
+        cons_origins.resize(1, origin);
+    }
+
+    const std::vector<std::string> &get_codes()
+    {
+        std::vector<std::string> codes;
+        return codes;
+    }
+
+    int get_length(std::string code) { return size; }
+
+    const std::vector<double> &get_probability_landscape(std::string code)
+    {
+        return prob_landscape;
+    }
+
+    const std::vector<transcription_region_t> &
+    get_transcription_regions(std::string code)
+    {
+        return transcription_regions;
+    }
+
+    const std::vector<constitutive_origin_t> &
+    get_constitutive_origins(std::string code)
+    {
+        return cons_origins;
+    }
+};
+
 class GenomicLocationTest : public ::testing::Test
 {
   protected:
@@ -22,25 +72,9 @@ class GenomicLocationTest : public ::testing::Test
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 300,
                                                   std::string id = "1")
     {
-        uint test_size = size;
-        std::vector<double> prob_landscape;
-        std::vector<transcription_region_t> transcription_regions;
-        std::vector<constitutive_origin_t> cons_origins;
+        std::shared_ptr<TestingProvider> provider(new TestingProvider(size));
 
-        prob_landscape.resize(test_size, (double)1 / (test_size + 1));
-
-        transcription_region_t reg;
-        reg.start = 0;
-        reg.end   = 10;
-
-        transcription_regions.resize(test_size / 4, reg);
-
-        constitutive_origin_t origin;
-        origin.base = 70;
-        cons_origins.resize(1, origin);
-
-        return std::make_shared<Chromosome>(
-            id, test_size, prob_landscape, transcription_regions, cons_origins);
+        return std::make_shared<Chromosome>(id, *provider);
     }
     void TearDown() {}
 };
@@ -61,7 +95,7 @@ TEST_F(GenomicLocationTest, IsReplicated)
 
 TEST_F(GenomicLocationTest, WillActivate)
 {
-    double sum                        = 0;
+    double sum                       = 0;
     std::shared_ptr<Chromosome> chrm = create_chromosome(1, "2");
     GenomicLocation loc              = GenomicLocation(0, chrm);
 
