@@ -3,13 +3,24 @@ project(ReDyMo)
 include(CTest)
 include(GoogleTest)
 
+
+execute_process(COMMAND git submodule init)
+execute_process(COMMAND git submodule update)
+execute_process(COMMAND git submodule foreach --recursive git submodule init)
+execute_process(COMMAND git submodule foreach --recursive git submodule update)
+
+
 SET(CUSTOM_BUILD_TYPE "" CACHE STRING "Sets custom comp flags")
+OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
 
 if(CUSTOM_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g -pg")
 
 elseif(CUSTOM_BUILD_TYPE STREQUAL Performance)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native -frename-registers")
+
+elseif(CUSTOM_BUILD_TYPE STREQUAL Coverage)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -Wall -fopenmp")
 
 elseif(CUSTOM_BUILD_TYPE STREQUAL Development)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
@@ -22,9 +33,11 @@ endif()
 #######
 # OpenCL
 #######
-find_package(OpenCL REQUIRED)
-include_directories(${OpenCL_INCLUDE_DIRS})
-link_directories(${OpenCL_LIBRARY})
+if (BUILD_GPGPU)
+    find_package(OpenCL REQUIRED)
+    include_directories(${OpenCL_INCLUDE_DIRS})
+    link_directories(${OpenCL_LIBRARY})
+endif()
 
 #######
 # Rapid YAML
@@ -34,20 +47,30 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml/ext/c4core/sr
 include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml/src)
 
 #######
-# Add the include folder
+# Google Test
 #######
-include_directories(include)
-
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/googletest)
 include_directories(${gtest_SOURCE_DIR}/include)
 include_directories(${gmock_SOURCE_DIR}/include)
 
+#######
+# SQLite Cpp
+#######
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp/include
 )
+
+#######
+# Zstd
+#######
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/build/cmake)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/lib)
+
+#######
+# Add the ReDyMo include folder
+#######
+include_directories(include)
 
 #######
 # Compile componenets in libraries
@@ -62,15 +85,32 @@ add_library(
     src/replication_fork.cpp
     src/util.cpp
     src/s_phase.cpp
-    
+
     src/configuration.cpp
     src/evolution_data_provider.cpp
     src/evolution.cpp
-#    src/gpu_s_phase.cpp
-#    src/gpu_chromosome.cpp
 )
+
+if (BUILD_GPGPU)
+    add_library(
+        gpudeps
+        src/gpu_s_phase.cpp
+        src/gpu_chromosome.cpp
+    )
+endif()
+
+message("")
+message("================")
+message("Current CXX flags: ${CMAKE_CXX_FLAGS}")
+message("================")
+message("")
+
 add_executable(simulator src/main.cpp)
-target_link_libraries(simulator deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl ryml ${OpenCL_LIBRARY})
+target_link_libraries(simulator deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl ryml)
+
+if (BUILD_GPGPU)
+    target_link_libraries(simulator gpudeps ${OpenCL_LIBRARY})
+endif()
 
 #######
 # Testing
