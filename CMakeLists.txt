@@ -138,7 +138,10 @@ if(BUILD_TESTING)
     gtest_discover_tests(test_fork_manager)
     gtest_discover_tests(test_data_manager)
 
-    if(CUSTOM_BUILD_TYPE STREQUAL Coverage AND CMAKE_COMPILER_IS_GNUCXX)
+    #######
+    # Coverage report
+    #######
+    if(CMAKE_COMPILER_IS_GNUCXX)
         LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/thirdparty/CMakeModules")
 
         include(CodeCoverage)
