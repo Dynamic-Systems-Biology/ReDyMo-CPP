@@ -1,36 +1,26 @@
 #include "chromosome.hpp"
+#include "mem_manager.hpp"
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
 
-Chromosome::Chromosome() {}
-
-Chromosome::Chromosome(
-    std::string code, uint length, std::vector<double> &probability_landscape,
-    std::vector<transcription_region_t> &transcription_regions,
-    std::vector<constitutive_origin_t> &constitutive_origins)
+Chromosome::Chromosome(std::string code, DataProvider &provider)
+    : probability_landscape(provider.get_probability_landscape(code)),
+      transcription_regions(provider.get_transcription_regions(code)),
+      constitutive_origins(provider.get_constitutive_origins(code)),
+      strand(provider.get_length(code), -1)
 {
-    initialize(code, length, probability_landscape, transcription_regions,
-               constitutive_origins);
-}
+    long long int length = provider.get_length(code);
 
-void Chromosome::initialize(
-    std::string code, uint length, std::vector<double> &probability_landscape,
-    std::vector<transcription_region_t> &transcription_regions,
-    std::vector<constitutive_origin_t> &constitutive_origins)
-{
     if (length <= 0)
         throw std::invalid_argument("Given length is not a positive number.");
-    this->code                  = code;
-    this->length                = length;
-    this->probability_landscape = probability_landscape;
-    this->transcription_regions = transcription_regions;
-    this->constitutive_origins  = constitutive_origins;
-    this->n_replicated_bases    = 0;
-    this->n_fired_origins       = 0;
-    this->strand.resize(length, -1);
+    this->code               = code;
+    this->length             = length;
+    this->n_replicated_bases = 0;
+    this->n_fired_origins    = 0;
 }
 
 uint Chromosome::size() { return this->length; }
@@ -84,7 +74,10 @@ void Chromosome::set_dormant_activation_probability(uint base)
 bool Chromosome::replicate(int start, int end, int time)
 {
     if (start < 0 || start > (int)this->length)
+    {
+        printf("Start: %d, Base: %d\n", start, this->length);
         throw std::out_of_range("The start base is not inside the Chromosome");
+    }
 
     // A non normal replication refers to a replication which overlaps areas
     // already replicated or which the end base is outside the Chromosome(less
@@ -136,7 +129,8 @@ uint Chromosome::get_n_fired_origins() { return n_fired_origins; }
 
 void Chromosome::add_fired_origin() { n_fired_origins++; }
 
-std::vector<transcription_region_t> &Chromosome::get_transcription_regions()
+const std::vector<transcription_region_t> &
+Chromosome::get_transcription_regions() const
 {
     return transcription_regions;
 }
@@ -145,3 +139,5 @@ bool Chromosome::operator==(Chromosome &other)
 {
     return this->code == other.get_code();
 }
+
+int Chromosome::operator[](int index) { return strand[index]; }

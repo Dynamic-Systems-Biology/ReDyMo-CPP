@@ -54,6 +54,9 @@ class GenomicLocation
      * @throw invalid_argument if origin doesn't exist in list of origins.
      */
     bool put_fired_constitutive_origin(constitutive_origin_t origin);
+
+    GenomicLocation &operator+=(int bases);
+    GenomicLocation operator+(int bases);
 };
 
 #endif

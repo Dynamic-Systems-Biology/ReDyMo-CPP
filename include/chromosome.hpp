@@ -4,6 +4,7 @@
 #ifndef __CHROMOSOME_HPP__
 #define __CHROMOSOME_HPP__
 
+#include "data_provider.hpp"
 #include "util.hpp"
 #include <memory>
 #include <string>
@@ -12,24 +13,30 @@
 // Interval between bases in the output
 #define CHRM_OUTPUT_STEP 1
 
+class GenomicLocation;
+
 /*! The Chromosome class stores relevant data like length, number of bases
  * replicated, transcription regins and has methods to query and modify the
  * Chromosome.
  */
 class Chromosome
 {
+    friend class GenomicLocation;
+    friend class TestDataManager;
+
   private:
     std::string code;
     uint length;
     uint n_replicated_bases;
     uint n_fired_origins;
     std::vector<int> strand;
+
     std::vector<double> probability_landscape;
-    std::vector<transcription_region_t> transcription_regions;
+    const std::vector<transcription_region_t> &transcription_regions;
 
   public:
-    std::vector<constitutive_origin_t> constitutive_origins;
     std::vector<constitutive_origin_t> fired_constitutive_origins;
+    const std::vector<constitutive_origin_t> &constitutive_origins;
 
   public:
     /*! @var int number_of_replicated_bases
@@ -53,17 +60,7 @@ class Chromosome
      * Chromosome.
      */
 
-    Chromosome(std::string code, uint length,
-               std::vector<double> &probability_landscape,
-               std::vector<transcription_region_t> &transcription_regions,
-               std::vector<constitutive_origin_t> &constitutive_origins);
-
-    Chromosome();
-
-    void initialize(std::string code, uint length,
-                    std::vector<double> &probability_landscape,
-                    std::vector<transcription_region_t> &transcription_regions,
-                    std::vector<constitutive_origin_t> &constitutive_origins);
+    Chromosome(std::string code, DataProvider &provider);
 
     /*! Query the length of the Chromosome.
      * @return The length of the Chromosome.
@@ -136,9 +133,13 @@ class Chromosome
 
     void add_fired_origin();
 
-    std::vector<transcription_region_t> &get_transcription_regions();
+    const std::vector<transcription_region_t> &
+    get_transcription_regions() const;
 
     bool operator==(Chromosome &other);
+
+    // Strand accessor
+    int operator[](int index);
 };
 
 #endif
