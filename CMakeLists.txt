@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.0)
 project(ReDyMo)
-include(CTest)
-include(GoogleTest)
 
-
+#######
+# Make sure libs are available locally
+#######
 execute_process(COMMAND git submodule init)
 execute_process(COMMAND git submodule update)
 execute_process(COMMAND git submodule foreach --recursive git submodule init)
 execute_process(COMMAND git submodule foreach --recursive git submodule update)
-
 
 SET(CUSTOM_BUILD_TYPE "" CACHE STRING "Sets custom comp flags")
 OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
@@ -18,9 +17,6 @@ if(CUSTOM_BUILD_TYPE STREQUAL Debug)
 
 elseif(CUSTOM_BUILD_TYPE STREQUAL Performance)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native -frename-registers")
-
-elseif(CUSTOM_BUILD_TYPE STREQUAL Coverage)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -Wall -fopenmp")
 
 elseif(CUSTOM_BUILD_TYPE STREQUAL Development)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
@@ -45,13 +41,6 @@ endif()
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml ryml)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml/ext/c4core/src)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/rapidyaml/src)
-
-#######
-# Google Test
-#######
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/googletest)
-include_directories(${gtest_SOURCE_DIR}/include)
-include_directories(${gmock_SOURCE_DIR}/include)
 
 #######
 # SQLite Cpp
@@ -116,6 +105,16 @@ endif()
 # Testing
 #######
 if(BUILD_TESTING)
+    include(CTest)
+    include(GoogleTest)
+
+    #######
+    # Google Test
+    #######
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/googletest)
+    include_directories(${gtest_SOURCE_DIR}/include)
+    include_directories(${gmock_SOURCE_DIR}/include)
+
     enable_testing()
 
     add_executable(test_chromosome test/test_chromosome.cpp)
@@ -125,12 +124,12 @@ if(BUILD_TESTING)
     add_executable(test_fork_manager test/test_fork_manager.cpp)
     add_executable(test_data_manager test/test_data_manager.cpp)
 
-    target_link_libraries(test_chromosome deps gtest gmock)
-    target_link_libraries(test_genome deps libzstd_static gtest)
-    target_link_libraries(test_genomic_location deps libzstd_static gtest)
-    target_link_libraries(test_replication_fork deps libzstd_static gtest)
-    target_link_libraries(test_fork_manager deps libzstd_static gtest)
-    target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl)
+    target_link_libraries(test_chromosome deps gtest gmock gcov)
+    target_link_libraries(test_genome deps libzstd_static gtest gcov)
+    target_link_libraries(test_genomic_location deps libzstd_static gtest gcov)
+    target_link_libraries(test_replication_fork deps libzstd_static gtest gcov)
+    target_link_libraries(test_fork_manager deps libzstd_static gtest gcov)
+    target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl gcov)
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
@@ -138,4 +137,25 @@ if(BUILD_TESTING)
     gtest_discover_tests(test_replication_fork)
     gtest_discover_tests(test_fork_manager)
     gtest_discover_tests(test_data_manager)
+
+    #######
+    # Coverage report
+    #######
+    if(CMAKE_COMPILER_IS_GNUCXX)
+        LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/thirdparty/CMakeModules")
+
+        include(CodeCoverage)
+        APPEND_COVERAGE_COMPILER_FLAGS()
+        set(COVERAGE_GCOVR_EXCLUDES "thirdparty/*")
+
+        # The ctest_no_fail.sh is used because the coverage tests won't
+        # continue if the ctest returns non zero. Ctest will returns 0 only if
+        # all tests pass.
+        setup_target_for_coverage_gcovr_html(
+            NAME coverage
+            EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/script/ctest_no_fail.sh
+            EXCLUDE "thirdparty/*"
+            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager
+        )
+    endif()
 endif()
