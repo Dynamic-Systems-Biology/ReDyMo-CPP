@@ -11,6 +11,7 @@ execute_process(COMMAND git submodule foreach --recursive git submodule update)
 
 SET(CUSTOM_BUILD_TYPE "" CACHE STRING "Sets custom comp flags")
 OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
+OPTION(BUILD_TESTING "Wether to build the tests." ON)
 
 if(CUSTOM_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g -pg")
@@ -95,7 +96,7 @@ message("================")
 message("")
 
 add_executable(simulator src/main.cpp)
-target_link_libraries(simulator deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl ryml)
+target_link_libraries(simulator deps SQLiteCpp libzstd_static sqlite3 pthread dl ryml)
 
 if (BUILD_GPGPU)
     target_link_libraries(simulator gpudeps ${OpenCL_LIBRARY})
@@ -123,6 +124,8 @@ if(BUILD_TESTING)
     add_executable(test_replication_fork test/test_replication_fork.cpp)
     add_executable(test_fork_manager test/test_fork_manager.cpp)
     add_executable(test_data_manager test/test_data_manager.cpp)
+
+    target_link_libraries(simulator deps gtest)
 
     target_link_libraries(test_chromosome deps gtest gmock gcov)
     target_link_libraries(test_genome deps libzstd_static gtest gcov)
