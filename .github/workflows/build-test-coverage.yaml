@@ -55,7 +55,9 @@ jobs:
         working-directory: ${{github.workspace}}/build
         shell: bash
         run: make coverage
-        uses: codecov/codecov-action@v1
+
+        # Upload coverage results to Codecov
+      - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml

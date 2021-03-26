@@ -4,10 +4,11 @@ project(ReDyMo)
 #######
 # Make sure libs are available locally
 #######
-execute_process(COMMAND git submodule init)
-execute_process(COMMAND git submodule update)
-execute_process(COMMAND git submodule foreach --recursive git submodule init)
-execute_process(COMMAND git submodule foreach --recursive git submodule update)
+execute_process(COMMAND git submodule update --init)
+# We have to run these commands twice because of submodules that have
+# submodules. They will be accounted for only after the first command.
+execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
+execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
 
 SET(CUSTOM_BUILD_TYPE "" CACHE STRING "Sets custom comp flags")
 OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
