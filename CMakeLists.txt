@@ -10,22 +10,26 @@ execute_process(COMMAND git submodule update --init)
 execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
 execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
 
-SET(CUSTOM_BUILD_TYPE "" CACHE STRING "Sets custom comp flags")
+#######
+# Declare our custom options
+#######
+SET(CUSTOM_BUILD_TYPE "Release" CACHE STRING "Sets custom comp flags")
 OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
 OPTION(BUILD_TESTING "Wether to build the tests." ON)
+OPTION(COVERAGE "Wether to configure test coverage report." OFF)
 
+#######
+# Set flags for our custom build types
+#######
 if(CUSTOM_BUILD_TYPE STREQUAL Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g -pg")
-
 elseif(CUSTOM_BUILD_TYPE STREQUAL Performance)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native -frename-registers")
-
+    set(COVERAGE OFF)
 elseif(CUSTOM_BUILD_TYPE STREQUAL Development)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
-
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fopenmp -O3 -frename-registers")
-
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fopenmp -O3")
 endif()
 
 #######
@@ -145,7 +149,7 @@ if(BUILD_TESTING)
     #######
     # Coverage report
     #######
-    if(CMAKE_COMPILER_IS_GNUCXX)
+    if(COVERAGE AND CMAKE_COMPILER_IS_GNUCXX)
         LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/thirdparty/CMakeModules")
 
         include(CodeCoverage)

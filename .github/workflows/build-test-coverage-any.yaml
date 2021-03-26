@@ -7,7 +7,7 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
 
 jobs:
   build:
@@ -19,6 +19,35 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+
+      # Since this workflow runs for all commits, use cache to speed up the
+      # libraries git clone process.
+      - name: Restore libraries cache
+        uses: actions/cache@v2
+        env:
+          cache-name: libraries-cache
+        with:
+          path: ${{github.workspace}}/thirdparty
+          # Create a cache for each branch
+          key: libraries-cache-${{github.ref}}
+          # Use any other cache if not found for that branch
+          restore-keys: |
+            libraries-cache-
+
+      # Since this build runs for all commits, use cache to speed up the
+      # process.
+      - name: Restore build cache
+        uses: actions/cache@v2
+        env:
+          cache-name: build-files-cache
+        with:
+          path: ${{github.workspace}}/build
+          # Create a cache for each branch
+          key: build-cache-${{github.ref}}
+          # Use any other cache if not found for that branch
+          restore-keys: |
+            build-cache-
 
       - name: Create Build Environment
         # Some projects don't allow in-source building, so create a separate build directory
@@ -37,7 +66,7 @@ jobs:
         # Note the current convention is to use the -S and -B options here to specify source
         # and build directories, but this is only available with CMake 3.13 and higher.
         # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-        run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        run: cmake $GITHUB_WORKSPACE -DCUSTOM_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTING=ON -DCOVERAGE=ON -DBUILD_GPGPU=OFF
 
         # Always a clean build. If it uses too much CI credits we can introduce
         # caching. See
@@ -46,7 +75,23 @@ jobs:
         working-directory: ${{github.workspace}}/build
         shell: bash
         # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build . --config $BUILD_TYPE
+        run: cmake --build .
+
+        # Run coverage before tests so if tests fail, coverage report is still
+        # generated.
+      - name: Coverage
+        working-directory: ${{github.workspace}}/build
+        shell: bash
+        run: make coverage
+
+        # Upload coverage results to Codecov
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests # optional
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Test
         working-directory: ${{github.workspace}}/build
