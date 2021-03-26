@@ -24,7 +24,7 @@ elseif(CUSTOM_BUILD_TYPE STREQUAL Development)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
 
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -O3 -frename-registers")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fopenmp -O3 -frename-registers")
 
 endif()
 
