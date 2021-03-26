@@ -75,7 +75,7 @@ jobs:
         working-directory: ${{github.workspace}}/build
         shell: bash
         # Execute the build.  You can specify a specific target with "--target <NAME>"
-        run: cmake --build .
+        run: cmake --build . --config $BUILD_TYPE
 
         # Run coverage before tests so if tests fail, coverage report is still
         # generated.

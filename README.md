@@ -1,6 +1,7 @@
 # ReDyMo-CPP
 
 ![Build and Test](https://github.com/msreis/ReDyMo-CPP/actions/workflows/build-test-coverage.yaml/badge.svg)
+[![codecov](https://codecov.io/gh/Dynamic-Systems-Biology-Group/ReDyMo-CPP/branch/master/graph/badge.svg?token=TtcbL2EvLU)](https://codecov.io/gh/Dynamic-Systems-Biology-Group/ReDyMo-CPP)
 
 This is the C++ implementation of the ReDyMo model.
 ReDyMo is a Python-coded, stochastic dynamic model simulator that reproduces the DNA replication process of cellular organisms belonging to the kinetoplastida group. Initially, we focused on Trypanosoma brucei strain TREU927.
