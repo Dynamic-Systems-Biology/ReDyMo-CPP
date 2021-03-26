@@ -1,9 +1,9 @@
-name: CMake
+name: Test any commit
 
 on:
   push:
-    branches:
-      - "!master"
+    branches-ignore:
+      - master
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
