@@ -88,7 +88,7 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{github.workspace}}/coverage.xml
+          files: ${{github.workspace}}/build/coverage.xml
           flags: unittests # optional
           fail_ci_if_error: false
           verbose: true
