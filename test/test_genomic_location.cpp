@@ -72,9 +72,9 @@ class GenomicLocationTest : public ::testing::Test
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 300,
                                                   std::string id = "1")
     {
-        std::shared_ptr<TestingProvider> provider(new TestingProvider(size));
+        TestingProvider provider = TestingProvider(size);
 
-        return std::make_shared<Chromosome>(id, *provider);
+        return std::make_shared<Chromosome>(id, provider);
     }
     void TearDown() {}
 };
