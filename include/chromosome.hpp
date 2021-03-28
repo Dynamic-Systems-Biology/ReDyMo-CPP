@@ -32,11 +32,13 @@ class Chromosome
     std::vector<int> strand;
 
     std::vector<double> probability_landscape;
-    const std::vector<transcription_region_t> &transcription_regions;
+    const std::shared_ptr<std::vector<transcription_region_t>>
+        transcription_regions;
 
   public:
     std::vector<constitutive_origin_t> fired_constitutive_origins;
-    const std::shared_ptr<std::vector<constitutive_origin_t>> constitutive_origins;
+    const std::shared_ptr<std::vector<constitutive_origin_t>>
+        constitutive_origins;
 
   public:
     /*! @var int number_of_replicated_bases
@@ -133,7 +135,7 @@ class Chromosome
 
     void add_fired_origin();
 
-    const std::vector<transcription_region_t> &
+    const std::shared_ptr<std::vector<transcription_region_t>>
     get_transcription_regions() const;
 
     bool operator==(Chromosome &other);

@@ -43,10 +43,11 @@ class TestingProvider : public DataProvider
         return prob_landscape;
     }
 
-    const std::vector<transcription_region_t> &
+    const std::shared_ptr<std::vector<transcription_region_t>>
     get_transcription_regions(std::string code)
     {
-        return transcription_regions;
+        return std::make_shared<std::vector<transcription_region_t>>(
+            transcription_regions);
     }
 
     const std::shared_ptr<std::vector<constitutive_origin_t>>

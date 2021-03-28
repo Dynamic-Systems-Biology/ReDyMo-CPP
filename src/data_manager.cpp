@@ -218,13 +218,13 @@ DataManager::get_probability_landscape(std::string code)
     }
 }
 
-const std::vector<transcription_region_t> &
+const std::shared_ptr<std::vector<transcription_region_t>>
 DataManager::get_transcription_regions(std::string code)
 {
     std::lock_guard<std::mutex> guard(transcription_regions_mutex);
     try
     {
-        return transcription_regions.at(code);
+        return std::make_shared<std::vector<transcription_region_t>>(transcription_regions.at(code));
     }
     catch (std::out_of_range &e)
     {

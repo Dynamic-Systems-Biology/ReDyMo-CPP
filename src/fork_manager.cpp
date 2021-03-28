@@ -25,7 +25,7 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
         if (fork->is_attached())
         {
             std::shared_ptr<Chromosome> chromosome = fork->get_chromosome();
-            for (auto region : chromosome->get_transcription_regions())
+            for (auto region : *chromosome->get_transcription_regions())
             {
                 uint replisome_position_within_region = 0;
                 int RNAP_direction                    = 0;
@@ -105,7 +105,6 @@ void ForkManager::attach_forks(GenomicLocation &location, uint time)
             if (n_forks_attached == 2) break;
         }
     }
-    if (n_forks_attached == 2)
-        location.chromosome->add_fired_origin();
+    if (n_forks_attached == 2) location.chromosome->add_fired_origin();
     n_free_forks -= n_forks_attached;
 }

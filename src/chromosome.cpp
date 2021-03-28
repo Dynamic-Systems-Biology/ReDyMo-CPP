@@ -15,8 +15,6 @@ Chromosome::Chromosome(std::string code, std::shared_ptr<DataProvider> provider)
 {
     long long int length = provider->get_length(code);
 
-    
-
     if (length <= 0)
         throw std::invalid_argument("Given length is not a positive number.");
     this->code               = code;
@@ -131,7 +129,7 @@ uint Chromosome::get_n_fired_origins() { return n_fired_origins; }
 
 void Chromosome::add_fired_origin() { n_fired_origins++; }
 
-const std::vector<transcription_region_t> &
+const std::shared_ptr<std::vector<transcription_region_t>>
 Chromosome::get_transcription_regions() const
 {
     return transcription_regions;

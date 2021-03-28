@@ -36,7 +36,7 @@ TEST_F(DataManagerTest, GenerateProbLandscape)
 TEST_F(DataManagerTest, GetTranscriptionRegions)
 {
     std::vector<transcription_region_t> result =
-        data->get_transcription_regions("dummy_01");
+        *data->get_transcription_regions("dummy_01");
     ASSERT_EQ(result[0].start, 25);
     ASSERT_EQ(result[0].end, 80);
 }
