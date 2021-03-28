@@ -48,10 +48,10 @@ class TestingProvider : public DataProvider
         return transcription_regions;
     }
 
-    const std::vector<constitutive_origin_t> &
+    const std::shared_ptr<std::vector<constitutive_origin_t>>
     get_constitutive_origins(std::string code)
     {
-        return cons_origins;
+        return std::make_shared<std::vector<constitutive_origin_t>>(cons_origins);
     }
 };
 
@@ -78,7 +78,7 @@ class GenomeTest : public ::testing::Test
     {
         std::shared_ptr<TestingProvider> provider(new TestingProvider(size));
 
-        return std::make_shared<Chromosome>(id, *provider);
+        return std::make_shared<Chromosome>(id, provider);
     }
 
     void TearDown() {}

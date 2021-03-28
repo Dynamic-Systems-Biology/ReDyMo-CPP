@@ -237,13 +237,13 @@ DataManager::get_transcription_regions(std::string code)
     }
 }
 
-const std::vector<constitutive_origin_t> &
+const std::shared_ptr<std::vector<constitutive_origin_t>>
 DataManager::get_constitutive_origins(std::string code)
 {
     std::lock_guard<std::mutex> guard(constitutive_origins_mutex);
     try
     {
-        return constitutive_origins.at(code);
+        return std::make_shared<std::vector<constitutive_origin_t>>(constitutive_origins.at(code));
     }
     catch (std::out_of_range &e)
     {

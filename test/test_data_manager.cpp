@@ -44,7 +44,7 @@ TEST_F(DataManagerTest, GetTranscriptionRegions)
 TEST_F(DataManagerTest, GetConstitutiveOrigin)
 {
     std::vector<constitutive_origin_t> result =
-        data->get_constitutive_origins("dummy_01");
+        *data->get_constitutive_origins("dummy_01");
     ASSERT_EQ(result[0].base, 1234);
 }
 

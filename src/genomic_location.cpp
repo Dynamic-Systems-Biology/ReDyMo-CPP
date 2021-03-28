@@ -36,7 +36,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
     }
     std::vector<constitutive_origin_t> not_fired_origins;
 
-    for (auto origin : chromosome->constitutive_origins)
+    for (auto origin : *chromosome->constitutive_origins)
     {
         bool fired = false;
         for (auto fired_origin : chromosome->fired_constitutive_origins)
@@ -61,7 +61,7 @@ GenomicLocation::get_constitutive_origin(int origins_range)
     std::vector<constitutive_origin_t> not_fired_origins;
     origins_range /= 2;
 
-    for (auto origin : chromosome->constitutive_origins)
+    for (auto origin : *chromosome->constitutive_origins)
     {
         bool fired = false;
         for (auto fired_origin : chromosome->fired_constitutive_origins)
@@ -88,7 +88,7 @@ GenomicLocation::get_constitutive_origin(int origins_range)
 bool GenomicLocation::put_fired_constitutive_origin(
     constitutive_origin_t origin)
 {
-    for (auto curr_origin : chromosome->constitutive_origins)
+    for (auto curr_origin : *chromosome->constitutive_origins)
     {
         if (curr_origin == origin)
         {

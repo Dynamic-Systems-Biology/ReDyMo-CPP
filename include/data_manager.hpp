@@ -52,7 +52,7 @@ class DataManager : public DataProvider
     const std::vector<double> &get_probability_landscape(std::string code);
     const std::vector<transcription_region_t> &
     get_transcription_regions(std::string code);
-    const std::vector<constitutive_origin_t> &
+    const std::shared_ptr<std::vector<constitutive_origin_t>>
     get_constitutive_origins(std::string code);
 };
 

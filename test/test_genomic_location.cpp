@@ -48,10 +48,11 @@ class TestingProvider : public DataProvider
         return transcription_regions;
     }
 
-    const std::vector<constitutive_origin_t> &
+    const std::shared_ptr<std::vector<constitutive_origin_t>>
     get_constitutive_origins(std::string code)
     {
-        return cons_origins;
+        return std::make_shared<std::vector<constitutive_origin_t>>(
+            cons_origins);
     }
 };
 
@@ -72,8 +73,7 @@ class GenomicLocationTest : public ::testing::Test
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 300,
                                                   std::string id = "1")
     {
-        TestingProvider provider = TestingProvider(size);
-
+        std::shared_ptr<TestingProvider> provider(new TestingProvider(size));
         return std::make_shared<Chromosome>(id, provider);
     }
     void TearDown() {}
@@ -106,15 +106,15 @@ TEST_F(GenomicLocationTest, WillActivate)
 
 TEST_F(GenomicLocationTest, GetConstitutiveOrigin)
 {
-    ASSERT_TRUE(gen_loc->chromosome->constitutive_origins[0].base ==
-                gen_loc->get_constitutive_origin(600).base);
+    ASSERT_EQ((*gen_loc->chromosome->constitutive_origins)[0].base,
+              gen_loc->get_constitutive_origin(600).base);
 }
 
 TEST_F(GenomicLocationTest, PutFiredConstitutiveOrigin)
 {
     ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins.empty());
     gen_loc->put_fired_constitutive_origin(
-        gen_loc->chromosome->constitutive_origins[0]);
+        (*gen_loc->chromosome->constitutive_origins)[0]);
     ASSERT_FALSE(gen_loc->chromosome->fired_constitutive_origins.empty());
 }
 

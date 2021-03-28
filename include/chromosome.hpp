@@ -36,7 +36,7 @@ class Chromosome
 
   public:
     std::vector<constitutive_origin_t> fired_constitutive_origins;
-    const std::vector<constitutive_origin_t> &constitutive_origins;
+    const std::shared_ptr<std::vector<constitutive_origin_t>> constitutive_origins;
 
   public:
     /*! @var int number_of_replicated_bases
@@ -60,7 +60,7 @@ class Chromosome
      * Chromosome.
      */
 
-    Chromosome(std::string code, DataProvider &provider);
+    Chromosome(std::string code, std::shared_ptr<DataProvider> provider);
 
     /*! Query the length of the Chromosome.
      * @return The length of the Chromosome.

@@ -7,13 +7,15 @@
 #include <stdexcept>
 #include <string>
 
-Chromosome::Chromosome(std::string code, DataProvider &provider)
-    : probability_landscape(provider.get_probability_landscape(code)),
-      transcription_regions(provider.get_transcription_regions(code)),
-      constitutive_origins(provider.get_constitutive_origins(code)),
-      strand(provider.get_length(code), -1)
+Chromosome::Chromosome(std::string code, std::shared_ptr<DataProvider> provider)
+    : probability_landscape(provider->get_probability_landscape(code)),
+      transcription_regions(provider->get_transcription_regions(code)),
+      constitutive_origins(provider->get_constitutive_origins(code)),
+      strand(provider->get_length(code), -1)
 {
-    long long int length = provider.get_length(code);
+    long long int length = provider->get_length(code);
+
+    
 
     if (length <= 0)
         throw std::invalid_argument("Given length is not a positive number.");
@@ -120,7 +122,7 @@ std::string Chromosome::get_code() { return this->code; }
 
 uint Chromosome::n_constitutive_origins()
 {
-    return this->constitutive_origins.size();
+    return this->constitutive_origins->size();
 }
 
 uint Chromosome::get_n_replicated_bases() { return n_replicated_bases; }

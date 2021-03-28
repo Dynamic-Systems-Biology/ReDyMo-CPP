@@ -19,7 +19,7 @@ class DataProvider
     get_probability_landscape(std::string code) = 0;
     virtual const std::vector<transcription_region_t> &
     get_transcription_regions(std::string code) = 0;
-    virtual const std::vector<constitutive_origin_t> &
+    virtual const std::shared_ptr<std::vector<constitutive_origin_t>>
     get_constitutive_origins(std::string code) = 0;
 };
 

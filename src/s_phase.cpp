@@ -21,7 +21,7 @@ SPhase::SPhase(int origins_range, int n_resources, int replication_speed,
     auto codes = data->get_codes();
     for (auto code = codes.begin(); code != codes.end(); code++)
     {
-        chromosomes.push_back(std::make_shared<Chromosome>(*code, *data));
+        chromosomes.push_back(std::make_shared<Chromosome>(*code, data));
     }
 
     genome = std::make_shared<Genome>(chromosomes, seed);
@@ -55,7 +55,7 @@ SPhase::SPhase(Configuration &configuration, std::shared_ptr<DataProvider> data,
     auto codes = data->get_codes();
     for (auto code = codes.begin(); code != codes.end(); code++)
     {
-        chromosomes.push_back(std::make_shared<Chromosome>(*code, *data));
+        chromosomes.push_back(std::make_shared<Chromosome>(*code, data));
     }
 
     genome = std::make_shared<Genome>(chromosomes, seed);
