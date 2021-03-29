@@ -1,5 +1,8 @@
 # ReDyMo-CPP
 
+![Build and Test](https://github.com/msreis/ReDyMo-CPP/actions/workflows/build-test-coverage.yaml/badge.svg)
+[![codecov](https://codecov.io/gh/Dynamic-Systems-Biology-Group/ReDyMo-CPP/branch/master/graph/badge.svg?token=TtcbL2EvLU)](https://codecov.io/gh/Dynamic-Systems-Biology-Group/ReDyMo-CPP)
+
 This is the C++ implementation of the ReDyMo model.
 ReDyMo is a Python-coded, stochastic dynamic model simulator that reproduces the DNA replication process of cellular organisms belonging to the kinetoplastida group. Initially, we focused on Trypanosoma brucei strain TREU927.
 
@@ -62,14 +65,16 @@ cd build
 4. Initialize CMake in the **build**
 
 ```bash
-cmake ..
+cmake .. [-D<OPTIONS> ...]
 ```
 
 - if your **build** folder not inside the ReDyMo-CPP folder, the command is:
 
 ```bash
-cmake <path to ReDyMo-CPP>
+cmake <path to ReDyMo-CPP> [-D<OPTIONS> ...]
 ```
+
+For a list of options see [Build Options](#Build-Options).
 
 5. Compile ReDyMo-CPP
 
@@ -82,6 +87,31 @@ make
 ```bash
 make test
 ```
+
+### Build Options
+
+The custom options used by this project, aside form the CMake existing ones
+are listed below. To use with the `cmake` command write: `-DOPTION=value`,
+for example `-DCOVERAGE=OFF`.
+
+|              Option |  Type   | Description                                                                                                                                             |
+| ------------------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|     `BUILD_TESTING` | ON\|OFF | Whether to build the executables of unit tests.                                                                                                         |
+| `CUSTOM_BUILD_TYPE` | STRING  | Defines the compilation flags depending on the value. If no valid value is found, defaults to Release. See [Build Types](#Build-Types) for valid values. |
+|          `COVERAGE` | ON\|OFF | Whether to configure the test coverage reports. **WARNING** This option overwrites the compilation flags.                                               |
+|        `BUILD_GPGPU` | ON\|OFF | Whether to build the GPU code that depends on OpenCL.                                                                                                   |
+
+#### Build Types
+
+The available values for the `CUSTOM_BUILD_TYPE` option are listed below. For
+the exact flags set please refer to lines 18-27 of `CMakeLists.txt`.
+
+| Build type    | Description                                                                                                                                     |
+| -------------:| ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Release`     | Default build type. Has warnings disabled and optimization level 3 (`-O3`).                                                                       |
+| `Debug`       | Has all warnings enabled, debug flag enabled, profiling flag enabled and no optimizations.                                                      |
+| `Development` | Has all warnings enabled, debug flag enabled and no optimizations.                                                                              |
+| `Performance` | Disables coverage. Has all warnings enabled, optimization set to fast (`-Ofast`), native architecture optimization, and rename-registers enabled. |
 
 ### Run tests and coverage
 
