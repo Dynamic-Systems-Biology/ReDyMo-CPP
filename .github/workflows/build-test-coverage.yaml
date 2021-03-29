@@ -1,10 +1,11 @@
-name: Test and coverage for PRs to dev and master
+# THis is the workflow that updates the badges about the state of the main
+# brach.
+name: Tests
 
 on:
-  pull_request:
+  push:
     branches:
       - master
-      - dev
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
