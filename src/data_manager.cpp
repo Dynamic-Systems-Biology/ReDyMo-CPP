@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#undef __UNIFORM_LANDSCAPE__
+
 DataManager::DataManager(std::string organism, std::string database_path,
                          std::string mfa_seq_data_path, double p)
     : database_path(database_path), mfa_seq_data_path(mfa_seq_data_path),
@@ -153,8 +155,10 @@ void DataManager::generate_prob_landscape(std::string code, uint length)
 
     double b = 1 - (*std::max_element(scores.begin(), scores.end()) * a);
 
-    double sum  = 0;
-    double mean = 0;
+    #ifdef __UNIFORM_LANDSCAPE__
+        double sum  = 0;
+        double mean = 0;
+    #endif
 
     std::ofstream probs_file;
     probs_file.open(mfa_seq_data_path + code + "_probability.txt");
@@ -168,15 +172,19 @@ void DataManager::generate_prob_landscape(std::string code, uint length)
         for (int j = i * step; j < (i + 1) * step; j++)
         {
             landscape[j] = prob;
-            sum += prob;
+            #ifdef __UNIFORM_LANDSCAPE__
+                sum += prob;
+            #endif
             if (j == (int)length - 1)
             {
                 probs_file.close();
-                mean = sum / landscape.size();
-                for (int k = 0; k < landscape.size(); k++)
-                {
-                    landscape[k] = mean;
-                }
+                #ifdef __UNIFORM_LANDSCAPE__
+                    mean = sum / landscape.size();
+                    for (int k = 0; k < landscape.size(); k++)
+                    {
+                        landscape[k] = mean;
+                    }
+                #endif
                 return;
             }
         }
@@ -212,19 +220,20 @@ DataManager::get_probability_landscape(std::string code)
         for (auto code = codes.begin(); code != codes.end(); code++)
             std::cerr << *code << std::endl << std::flush;
 
-        std::cerr << code << "[P]: " << e.what() << " "
-                  << probability_landscape.size() << std::endl;
+        std::cerr << code << "[P]: " << e.what()
+                  << " - size: " << probability_landscape.size() << std::endl;
         exit(-1);
     }
 }
 
-const std::vector<transcription_region_t> &
+const std::shared_ptr<std::vector<transcription_region_t>>
 DataManager::get_transcription_regions(std::string code)
 {
     std::lock_guard<std::mutex> guard(transcription_regions_mutex);
     try
     {
-        return transcription_regions.at(code);
+        return std::make_shared<std::vector<transcription_region_t>>(
+            transcription_regions.at(code));
     }
     catch (std::out_of_range &e)
     {
@@ -237,13 +246,14 @@ DataManager::get_transcription_regions(std::string code)
     }
 }
 
-const std::vector<constitutive_origin_t> &
+const std::shared_ptr<std::vector<constitutive_origin_t>>
 DataManager::get_constitutive_origins(std::string code)
 {
     std::lock_guard<std::mutex> guard(constitutive_origins_mutex);
     try
     {
-        return constitutive_origins.at(code);
+        return std::make_shared<std::vector<constitutive_origin_t>>(
+            constitutive_origins.at(code));
     }
     catch (std::out_of_range &e)
     {
