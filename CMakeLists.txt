@@ -154,7 +154,7 @@ if(BUILD_TESTING)
 
         include(CodeCoverage)
         APPEND_COVERAGE_COMPILER_FLAGS()
-        set(COVERAGE_GCOVR_EXCLUDES "thirdparty/*")
+        set(COVERAGE_GCOVR_EXCLUDES "thirdparty/*" "include/*" "test/*")
 
         # The ctest_no_fail.sh is used because the coverage tests won't
         # continue if the ctest returns non zero. Ctest will returns 0 only if
