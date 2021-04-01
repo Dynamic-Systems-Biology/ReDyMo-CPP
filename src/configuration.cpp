@@ -96,7 +96,8 @@ void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
  */
 
 Configuration::Configuration(int argc, char *argv[])
-{
+{   
+    std::cout << argv[3] << " cells " << std::endl;
     args = configure_cmd_options(argc, argv);
 }
 
@@ -115,6 +116,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
 
     while (1)
     {
+        std::cout << " entrou no while " << std::endl;
         static struct option long_options[] = {
             {"help", no_argument, 0, 'h'},
             {"gpu", no_argument, 0, 'g'},
@@ -145,7 +147,12 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
                         &option_index);
 
         /* Detect the end of the options. */
+
+        std::cout << optarg << " optarg " << c << " c" << std::endl;
+
         if (c == -1) break;
+
+        //std::cout << optarg << " opt arg "  << std::endl;
 
         switch (c)
         {
@@ -188,31 +195,33 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
 
     if (!arguments.cells)
     {
-        std::cout << "Argument \"cells\" (c) is mandatory!" << std::endl
+        std::cout << arguments.cells << " cells 2" << std::endl;
+        std::cerr << "Argument \"cells\" (c) is mandatory!" << std::endl
                   << std::flush;
         exit(1);
     }
 
     if (!arguments.organism.length())
     {
-        std::cout << "Argument \"organism\" (o) is mandatory!" << std::endl
+        std::cerr << "Argument \"organism\" (o) is mandatory!" << std::endl
                   << std::flush;
         exit(1);
     }
 
     if (!arguments.resources)
     {
-        std::cout << "Argument \"resources\" (r) is mandatory!" << std::endl
+        std::cerr << "Argument \"resources\" (r) is mandatory!" << std::endl
                   << std::flush;
         exit(1);
     }
 
     if (!arguments.timeout)
     {
-        std::cout << "Argument \"timeout\" (T) is mandatory!" << std::endl
+        std::cerr << "Argument \"timeout\" (T) is mandatory!" << std::endl
                   << std::flush;
         exit(1);
     }
+    
 
     if (summary)
     {
@@ -299,21 +308,13 @@ bool operator==(const cl_evolution_data &a, const cl_evolution_data &b)
     return a.generations == b.generations;
 }
 
-bool operator==(const cl_configuration_data &a, const cl_configuration_data &b) {
-    return a.mode         == b.mode &&
-    a.cells        == b.cells &&
-    a.organism     == b.organism &&
-    a.resources    == b.resources &&
-    a.speed        == b.speed &&
-    a.timeout      == b.timeout &&
-    a.dormant      == b.dormant &&
-    a.seed         == b.seed &&
-    a.name         == b.name &&
-    a.period       == b.period &&
-    a.constitutive == b.constitutive &&
-    a.data_dir     == b.data_dir &&
-    a.probability  == b.probability &&
-    a.output       == b.output &&
-    a.threads      == b.threads &&
-    a.evolution    == b.evolution;
+bool operator==(const cl_configuration_data &a, const cl_configuration_data &b)
+{
+    return a.mode == b.mode && a.cells == b.cells && a.organism == b.organism &&
+           a.resources == b.resources && a.speed == b.speed &&
+           a.timeout == b.timeout && a.dormant == b.dormant &&
+           a.seed == b.seed && a.name == b.name && a.period == b.period &&
+           a.constitutive == b.constitutive && a.data_dir == b.data_dir &&
+           a.probability == b.probability && a.output == b.output &&
+           a.threads == b.threads && a.evolution == b.evolution;
 }

@@ -13,45 +13,64 @@ class ConfigurationTest : public ::testing::Test
 
     // Runs after each test
     void TearDown() {}
+
+  public:
+    std::vector<char *> argv_mock()
+    {
+        std::vector<char *> argv_mock = {
+            "program_name",
+            "--gpu",
+            "false",
+            "--cells",
+            "2",
+            "--organism",
+            "dummy",
+            "--resources",
+            "2",
+            "--speed",
+            "3",
+            "--dormant",
+            "--summary",
+            "--seed",
+            "4",
+            "--name",
+            "abc",
+            "--config",
+            "config_file.yaml",
+            "--timeout",
+            "5",
+            "--period",
+            "6",
+            "--constitutive",
+            "7",
+            "--data-dir",
+            "data_dir/",
+            "--probability",
+            "8",
+            "--output",
+            "out_folder/",
+            "--threads",
+            "9",
+        };
+        return argv_mock;
+    }
+    
+    std::vector<char *> generate_argv(int end_of_first_half,
+                                      int start_of_second_half)
+    {
+        std::vector<char *> local_argv_mock = argv_mock();
+        std::vector<char *> first_half(local_argv_mock.begin(),
+                                       local_argv_mock.begin() + end_of_first_half);
+        std::vector<char *> second_half(
+            local_argv_mock.begin() + start_of_second_half, local_argv_mock.end());
+        first_half.insert(first_half.end(), second_half.begin(),
+                          second_half.end());
+        return first_half;
+    };
 };
 
 TEST_F(ConfigurationTest, ValidCmdOptions)
 {
-    std::vector<char *> argv_mock = {
-        "program_name",
-        "--gpu",
-        "false",
-        "--cells",
-        "2",
-        "--organism",
-        "dummy",
-        "--resources",
-        "2",
-        "--speed",
-        "3",
-        "--dormant",
-        "--summary",
-        "--seed",
-        "4",
-        "--name",
-        "abc",
-        "--config",
-        "config_file.yaml",
-        "--timeout",
-        "5",
-        "--period",
-        "6",
-        "--constitutive",
-        "7",
-        "--data-dir",
-        "data_dir/",
-        "--probability",
-        "8",
-        "--output",
-        "out_folder/",
-        "--threads",
-        "9",
-    };
     cl_configuration_data expected;
     expected.mode                                          = "";
     expected.cells                                         = 2;
@@ -91,11 +110,16 @@ TEST_F(ConfigurationTest, ValidCmdOptions)
     expected.evolution.fitness.min_coll.gene                            = "";
 
     cl_configuration_data result;
-    result = Configuration(argv_mock.size(), argv_mock.data()).arguments();
+    result = Configuration(argv_mock().size(), argv_mock().data()).arguments();
     ASSERT_EQ(expected, result);
 }
 
-TEST_F(ConfigurationTest, InvalidCmdOptions) { ASSERT_TRUE(true); }
+TEST_F(ConfigurationTest, InvalidCmdOptions)
+{
+    cl_configuration_data result;
+    result = Configuration(argv_mock().size(), argv_mock().data()).arguments();
+    ASSERT_DEATH(Configuration(argv_mock().size(), argv_mock().data()), ".*");
+}
 
 TEST_F(ConfigurationTest, ValidConfigFile) { ASSERT_TRUE(true); }
 
