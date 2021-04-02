@@ -44,7 +44,7 @@ jobs:
         with:
           path: ${{github.workspace}}/build
           # Create a cache for each branch
-          key: build-cache-${{github.ref}}
+          key: build-cache
           # Use any other cache if not found for that branch
           restore-keys: |2
             build-cache
