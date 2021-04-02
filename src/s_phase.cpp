@@ -204,25 +204,6 @@ void SPhase::output(int sim_number, int time, int iod,
     checkpoint_times.end_save = std::chrono::steady_clock::now();
 }
 
-void SPhase::zstd_compression_output(int sim_number, int time, int iod,
-                                     std::shared_ptr<Genome> genome,
-                                     std::string path)
-{
-    // Write chromosome data
-    for (auto chromosome : this->genome->chromosomes)
-    {
-        std::string code       = chromosome->get_code() + ".txt.zst";
-        FILE *out_file         = fopen((path + code).c_str(), "w+b");
-        size_t compressed_size = 0;
-        void *compressed_data =
-            compress_cpp_string(chromosome->to_string(), compressed_size);
-        size_t written = fwrite(compressed_data, 1, compressed_size, out_file);
-        if (written == 0) std::__throw_ios_failure("Failed to write to file.");
-        fclose(out_file);
-        free(compressed_data);
-    }
-}
-
 void SPhase::semantic_compression_output(int sim_number, int time, int iod,
                                          std::shared_ptr<Genome> genome,
                                          std::string path)
