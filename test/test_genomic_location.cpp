@@ -94,7 +94,7 @@ TEST_F(GenomicLocationTest, IsReplicated)
     ASSERT_TRUE(gen_loc->is_replicated());
 }
 
-TEST_F(GenomicLocationTest, WillActivate)
+TEST_F(GenomicLocationTest, WillActivateNonConstitutive)
 {
     double sum                       = 0;
     std::shared_ptr<Chromosome> chrm = create_chromosome(1, "2");
@@ -102,7 +102,29 @@ TEST_F(GenomicLocationTest, WillActivate)
 
     for (int i = 0; i < 1000; i++)
         sum += loc.will_activate(false, 1) ? 1 : 0;
-    ASSERT_NEAR(sum, (double)1 / (1 + 1) * 1000, 100);
+    ASSERT_NEAR(sum, ((double)1 / (1 + 1)) * 1000, 100);
+}
+
+TEST_F(GenomicLocationTest, WillActivateConstitutive)
+{
+    std::shared_ptr<Chromosome> chrm = create_chromosome(100, "3");
+    GenomicLocation loc              = GenomicLocation(0, chrm);
+
+    ASSERT_FALSE(loc.will_activate(true, 138));
+    ASSERT_TRUE(loc.will_activate(true, 140));
+    ASSERT_FALSE(loc.will_activate(true, 139));
+}
+
+TEST_F(GenomicLocationTest, WillActivateConstitutiveAllFired)
+{
+    std::shared_ptr<Chromosome> chrm = create_chromosome(100, "3");
+    GenomicLocation loc              = GenomicLocation(0, chrm);
+    ASSERT_TRUE(
+        loc.put_fired_constitutive_origin((*chrm->constitutive_origins)[0]));
+    ASSERT_FALSE(chrm->fired_constitutive_origins->empty());
+    ASSERT_FALSE(loc.will_activate(true, 138));
+    ASSERT_FALSE(loc.will_activate(true, 140));
+    ASSERT_FALSE(loc.will_activate(true, 139));
 }
 
 TEST_F(GenomicLocationTest, GetConstitutiveOrigin)
@@ -111,12 +133,51 @@ TEST_F(GenomicLocationTest, GetConstitutiveOrigin)
               gen_loc->get_constitutive_origin(600).base);
 }
 
-TEST_F(GenomicLocationTest, PutFiredConstitutiveOrigin)
+TEST_F(GenomicLocationTest, GetConstitutiveOriginAllFired)
 {
-    ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins.empty());
     gen_loc->put_fired_constitutive_origin(
         (*gen_loc->chromosome->constitutive_origins)[0]);
-    ASSERT_FALSE(gen_loc->chromosome->fired_constitutive_origins.empty());
+    ASSERT_EQ(gen_loc->get_constitutive_origin(600).base, -1);
+}
+
+TEST_F(GenomicLocationTest, PutFiredConstitutiveOrigin)
+{
+    ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins->empty());
+    ASSERT_TRUE(gen_loc->put_fired_constitutive_origin(
+        (*gen_loc->chromosome->constitutive_origins)[0]));
+    ASSERT_FALSE(gen_loc->chromosome->fired_constitutive_origins->empty());
+}
+
+TEST_F(GenomicLocationTest, PutFiredConstitutiveOriginAlreadyFired)
+{
+    ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins->empty());
+    ASSERT_TRUE(gen_loc->put_fired_constitutive_origin(
+        (*gen_loc->chromosome->constitutive_origins)[0]));
+    ASSERT_FALSE(gen_loc->chromosome->fired_constitutive_origins->empty());
+    ASSERT_FALSE(gen_loc->put_fired_constitutive_origin(
+        (*gen_loc->chromosome->constitutive_origins)[0]));
+}
+
+TEST_F(GenomicLocationTest, PutFiredInvalidConstitutiveOrigin)
+{
+    constitutive_origin_t invalid_origin;
+    invalid_origin.base = 71;
+    ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins->empty());
+    ASSERT_FALSE(gen_loc->put_fired_constitutive_origin(invalid_origin));
+    ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins->empty());
+}
+
+TEST_F(GenomicLocationTest, SumOperator)
+{
+    std::shared_ptr<Chromosome> chrm = create_chromosome(100, "3");
+    GenomicLocation loc(0, chrm);
+
+    EXPECT_EQ((loc + (-1)).base, 0);
+    EXPECT_EQ((loc + 100).base, 99);
+    loc += -1;
+    EXPECT_EQ(loc.base, 0);
+    loc += 100;
+    ASSERT_EQ(loc.base, 99);
 }
 
 int main(int argc, char **argv)

@@ -36,7 +36,7 @@ class Chromosome
         transcription_regions;
 
   public:
-    std::vector<constitutive_origin_t> fired_constitutive_origins;
+    std::shared_ptr<std::vector<constitutive_origin_t>> fired_constitutive_origins;
     const std::shared_ptr<std::vector<constitutive_origin_t>>
         constitutive_origins;
 
