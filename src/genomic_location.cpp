@@ -39,7 +39,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
     for (auto origin : *chromosome->constitutive_origins)
     {
         bool fired = false;
-        for (auto fired_origin : chromosome->fired_constitutive_origins)
+        for (auto fired_origin : *chromosome->fired_constitutive_origins)
         {
             if (fired_origin.base == origin.base) fired = true;
         }
@@ -64,7 +64,7 @@ GenomicLocation::get_constitutive_origin(int origins_range)
     for (auto origin : *chromosome->constitutive_origins)
     {
         bool fired = false;
-        for (auto fired_origin : chromosome->fired_constitutive_origins)
+        for (auto fired_origin : *chromosome->fired_constitutive_origins)
         {
             if (fired_origin.base == origin.base) fired = true;
         }
@@ -92,9 +92,9 @@ bool GenomicLocation::put_fired_constitutive_origin(
     {
         if (curr_origin == origin)
         {
-            for (auto fired_origin : chromosome->fired_constitutive_origins)
+            for (auto fired_origin : *chromosome->fired_constitutive_origins)
                 if (fired_origin == origin) return false;
-            chromosome->fired_constitutive_origins.push_back(origin);
+            chromosome->fired_constitutive_origins->push_back(origin);
             return true;
         }
     }
@@ -103,7 +103,7 @@ bool GenomicLocation::put_fired_constitutive_origin(
 
 GenomicLocation &GenomicLocation::operator+=(int bases)
 {
-    long tmp = base + bases;
+    long tmp = (long)base + bases;
     if (tmp < 0)
         tmp = 0;
     else if (tmp >= chromosome->length)
@@ -116,7 +116,7 @@ GenomicLocation &GenomicLocation::operator+=(int bases)
 
 GenomicLocation GenomicLocation::operator+(int bases)
 {
-    long tmp = base + bases;
+    long tmp = (long)base + bases;
     if (tmp < 0)
         tmp = 0;
     else if (tmp >= chromosome->length)

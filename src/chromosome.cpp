@@ -21,6 +21,9 @@ Chromosome::Chromosome(std::string code, std::shared_ptr<DataProvider> provider)
     this->length             = length;
     this->n_replicated_bases = 0;
     this->n_fired_origins    = 0;
+    this->fired_constitutive_origins =
+        std::make_shared<std::vector<constitutive_origin_t>>(
+            std::vector<constitutive_origin_t>(0));
 }
 
 uint Chromosome::size() { return this->length; }
