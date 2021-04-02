@@ -157,7 +157,6 @@ if(BUILD_TESTING)
 
         include(CodeCoverage)
         APPEND_COVERAGE_COMPILER_FLAGS()
-        set(COVERAGE_GCOVR_EXCLUDES "thirdparty/*" "include/*" "test/*")
 
         # The ctest_no_fail.sh is used because the coverage tests won't
         # continue if the ctest returns non zero. Ctest will returns 0 only if
@@ -166,12 +165,6 @@ if(BUILD_TESTING)
             NAME coverage
             EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/script/ctest_no_fail.sh
             EXCLUDE "thirdparty/*" "include/*" "test/*"
-            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_util
-        )
-        setup_target_for_coverage_gcovr_xml(
-            NAME coverage_xml
-            EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/script/ctest_no_fail.sh
-            EXCLUDE "thirdparty/*"
             DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_util
         )
     endif()
