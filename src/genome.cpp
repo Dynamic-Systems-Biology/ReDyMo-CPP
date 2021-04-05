@@ -57,7 +57,7 @@ std::shared_ptr<GenomicLocation> Genome::random_genomic_location()
 std::shared_ptr<GenomicLocation> Genome::random_unreplicated_genomic_location()
 {
     if (this->is_replicated())
-        throw "There are no unreplicated bases available.";
+        throw std::runtime_error("There are no unreplicated bases available.");
 
     uint rand_chromosome, rand_base;
 
