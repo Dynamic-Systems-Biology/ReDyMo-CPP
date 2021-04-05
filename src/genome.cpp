@@ -5,8 +5,6 @@
 #include <iostream>
 #include <vector>
 
-Genome::Genome() {}
-
 Genome::Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes, int seed)
 {
     rand_generator.seed(seed);

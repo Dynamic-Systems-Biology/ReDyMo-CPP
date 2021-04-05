@@ -25,9 +25,6 @@ class Genome
     std::vector<std::shared_ptr<Chromosome>> chromosomes;
 
   public:
-    /*! Empty constructor */
-    Genome();
-
     /*! Constructor */
     Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes, int seed = 0);
 
