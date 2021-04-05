@@ -102,6 +102,27 @@ TEST_F(GenomeTest, RandomGenomicLocation)
     }
 }
 
+TEST_F(GenomeTest, RandomUnreplicatedGenomicLocation)
+{
+    std::vector<std::shared_ptr<Chromosome>> chrms;
+    chrms.push_back(create_chromosome(300, "1"));
+    gen = std::make_shared<Genome>(chrms);
+
+    gen->chromosomes[0]->replicate(1, 299, 1);
+
+    GenomicLocation loc = *gen->random_unreplicated_genomic_location();
+    bool found          = false;
+    for (auto chrm : gen->chromosomes)
+    {
+        if (chrm == loc.chromosome) found = true;
+    }
+    ASSERT_EQ(loc.base, 0);
+    ASSERT_TRUE(found);
+
+    gen->chromosomes[0]->replicate(0, 0, 2);
+    ASSERT_THROW(gen->random_unreplicated_genomic_location(), std::runtime_error);
+}
+
 TEST_F(GenomeTest, RandomUnreplicatedGenLoc)
 {
 
