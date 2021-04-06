@@ -153,6 +153,18 @@ TEST_F(ReplicationForkTest, JustDetached)
     ASSERT_TRUE(fork->get_just_detached());
 }
 
+TEST_F(ReplicationForkTest, JustDetachedReattach)
+{
+    ASSERT_FALSE(fork->get_just_detached());
+    GenomicLocation loc(298, chrms[1]);
+    fork->attach(loc, 1, 4);
+    fork->advance(5);
+
+    ASSERT_TRUE(fork->get_just_detached());
+    GenomicLocation loc2(3, chrms[1]);
+    ASSERT_THROW(fork->attach(loc2, 1, 6), std::runtime_error);
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

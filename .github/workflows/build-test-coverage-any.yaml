@@ -32,8 +32,8 @@ jobs:
           # Create a cache for each branch
           key: libraries-cache-${{github.ref}}
           # Use any other cache if not found for that branch
-          restore-keys: |
-            libraries-cache-
+          restore-keys: |2
+            libraries-cache
 
       # Since this build runs for all commits, use cache to speed up the
       # process.
@@ -44,10 +44,10 @@ jobs:
         with:
           path: ${{github.workspace}}/build
           # Create a cache for each branch
-          key: build-cache-${{github.ref}}
+          key: build-cache
           # Use any other cache if not found for that branch
-          restore-keys: |
-            build-cache-
+          restore-keys: |2
+            build-cache
 
       - name: Create Build Environment
         # Some projects don't allow in-source building, so create a separate build directory
@@ -56,7 +56,8 @@ jobs:
 
         # Install a dependency for test coverage report
       - name: Install gcovr
-        run: sudo apt install gcovr
+        run: sudo apt update && sudo apt install gcovr
+
 
       - name: Configure CMake
         # Use a bash shell so we can use the same syntax for environment variable
@@ -88,7 +89,7 @@ jobs:
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{github.workspace}}/build/coverage.xml
+          files: ${{github.workspace}}/build/coverage.info
           flags: unittests # optional
           fail_ci_if_error: false
           verbose: true

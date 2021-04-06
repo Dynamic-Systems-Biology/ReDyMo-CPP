@@ -52,7 +52,8 @@ class TestingProvider : public DataProvider
     const std::shared_ptr<std::vector<constitutive_origin_t>>
     get_constitutive_origins(std::string code)
     {
-        return std::make_shared<std::vector<constitutive_origin_t>>(cons_origins);
+        return std::make_shared<std::vector<constitutive_origin_t>>(
+            cons_origins);
     }
 };
 
@@ -158,6 +159,13 @@ TEST_F(ChromosomeTest, SetDormantActivationProbability)
     }
 }
 
+TEST_F(ChromosomeTest, SetDormantActivationProbabilityOutsideChromosome)
+{
+    ASSERT_THROW(chrm->set_dormant_activation_probability(400),
+                 std::out_of_range);
+    ASSERT_THROW(chrm->set_dormant_activation_probability(-1),
+                 std::out_of_range);
+}
 /*! Tests if the method throws exception when the start base is invalid.
  */
 TEST_F(ChromosomeTest, OutOfRangeReplicate)
@@ -187,6 +195,23 @@ TEST_F(ChromosomeTest, IsReplicated)
     ASSERT_FALSE(chrm->is_replicated());
     chrm->replicate(0, 300, 1);
     ASSERT_TRUE(chrm->is_replicated());
+}
+
+TEST_F(ChromosomeTest, GetCode) { ASSERT_EQ(chrm->get_code(), "1"); }
+
+TEST_F(ChromosomeTest, OperatorVector)
+{
+    ASSERT_EQ((*chrm)[0], -1);
+    ASSERT_EQ((*chrm)[299], -1);
+    chrm->replicate(0, 1, 1);
+    ASSERT_EQ((*chrm)[0], 1);
+}
+
+TEST_F(ChromosomeTest, ToString)
+{
+    Chromosome chrm = *create_chromosome(3);
+    chrm.replicate(0, 1, 1);
+    ASSERT_EQ(chrm.to_string(), "1\n1\n-1\n");
 }
 
 int main(int argc, char **argv)

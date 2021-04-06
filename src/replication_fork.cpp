@@ -13,9 +13,11 @@ ReplicationFork::ReplicationFork(std::shared_ptr<Genome> genome, uint speed)
 
 void ReplicationFork::attach(GenomicLocation &gen_loc, int direction, uint time)
 {
-    if (this->is_attached()) throw "This fork is already attached.";
+    if (this->is_attached())
+        throw std::runtime_error("This fork is already attached.");
     if (this->get_just_detached())
-        throw "This fork has just detached and cannot be used right now.";
+        throw std::runtime_error(
+            "This fork has just detached and cannot be used right now.");
 
     this->base       = gen_loc.base;
     this->chromosome = gen_loc.chromosome;

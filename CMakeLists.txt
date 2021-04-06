@@ -129,6 +129,7 @@ if(BUILD_TESTING)
     add_executable(test_replication_fork test/test_replication_fork.cpp)
     add_executable(test_fork_manager test/test_fork_manager.cpp)
     add_executable(test_data_manager test/test_data_manager.cpp)
+    add_executable(test_util test/test_util.cpp)
 
     target_link_libraries(simulator deps gtest)
 
@@ -138,6 +139,7 @@ if(BUILD_TESTING)
     target_link_libraries(test_replication_fork deps libzstd_static gtest gcov)
     target_link_libraries(test_fork_manager deps libzstd_static gtest gcov)
     target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl gcov)
+    target_link_libraries(test_util deps gtest gmock gcov)
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
@@ -145,6 +147,7 @@ if(BUILD_TESTING)
     gtest_discover_tests(test_replication_fork)
     gtest_discover_tests(test_fork_manager)
     gtest_discover_tests(test_data_manager)
+    gtest_discover_tests(test_util)
 
     #######
     # Coverage report
@@ -154,16 +157,15 @@ if(BUILD_TESTING)
 
         include(CodeCoverage)
         APPEND_COVERAGE_COMPILER_FLAGS()
-        set(COVERAGE_GCOVR_EXCLUDES "thirdparty/*")
 
         # The ctest_no_fail.sh is used because the coverage tests won't
         # continue if the ctest returns non zero. Ctest will returns 0 only if
         # all tests pass.
-        setup_target_for_coverage_gcovr_xml(
+        setup_target_for_coverage_lcov(
             NAME coverage
             EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/script/ctest_no_fail.sh
-            EXCLUDE "thirdparty/*"
-            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager
+            EXCLUDE "thirdparty/*" "include/*" "test/*"
+            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_util
         )
     endif()
 endif()

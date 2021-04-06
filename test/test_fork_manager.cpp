@@ -22,7 +22,12 @@ class TestingProvider : public DataProvider
         reg.start = 1000;
         reg.end   = 2600;
 
+        transcription_region_t reg2;
+        reg2.start = 260;
+        reg2.end   = 100;
+
         transcription_regions.push_back(reg);
+        transcription_regions.push_back(reg2);
 
         constitutive_origin_t origin;
         origin.base = 0;
@@ -94,6 +99,17 @@ TEST_F(ForkManagerTest, CheckConflicts)
         1);
     ASSERT_TRUE(manager->replication_forks[0]->is_attached());
     ASSERT_FALSE(manager->replication_forks[1]->is_attached());
+}
+
+TEST_F(ForkManagerTest, CheckConflictsReversed)
+{
+    GenomicLocation loc(220, gen->chromosomes[0]);
+    manager->attach_forks(loc, 10);
+    ASSERT_EQ(
+        manager->check_replication_transcription_conflicts(140, 100, true),
+        1);
+    ASSERT_FALSE(manager->replication_forks[0]->is_attached());
+    ASSERT_TRUE(manager->replication_forks[1]->is_attached());
 }
 
 TEST_F(ForkManagerTest, AdvanceAttachedForks)
