@@ -96,8 +96,7 @@ void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
  */
 
 Configuration::Configuration(int argc, char *argv[])
-{   
-    std::cout << argv[3] << " cells " << std::endl;
+{
     args = configure_cmd_options(argc, argv);
 }
 
@@ -109,14 +108,13 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     int c;
     cl_configuration_data arguments;
 
-    int dormant = 0;
+    int dormant = -1;
     int summary = 0;
 
     std::string config;
 
     while (1)
     {
-        std::cout << " entrou no while " << std::endl;
         static struct option long_options[] = {
             {"help", no_argument, 0, 'h'},
             {"gpu", no_argument, 0, 'g'},
@@ -147,12 +145,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
                         &option_index);
 
         /* Detect the end of the options. */
-
-        std::cout << optarg << " optarg " << c << " c" << std::endl;
-
         if (c == -1) break;
-
-        //std::cout << optarg << " opt arg "  << std::endl;
 
         switch (c)
         {
@@ -191,7 +184,8 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
 
     if (config.length() > 0) read_configuration_file(config, arguments);
 
-    arguments.dormant = !!dormant;
+    if (dormant>=0)
+        arguments.dormant = !!dormant;
 
     if (!arguments.cells)
     {
@@ -221,7 +215,6 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
                   << std::flush;
         exit(1);
     }
-    
 
     if (summary)
     {

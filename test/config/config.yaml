@@ -1,0 +1,15 @@
+simulation: basic
+parameters:
+  # Basic simulation data
+  cells: 100
+  name: abc
+  organism: TcruziCLBrenerEsmeraldo-like
+  resources: 50
+  speed: 65
+  period: 100
+  timeout: 1000000
+  dormant: true
+  data_dir: data_dir/
+  probability: 8
+  output: out_folder/
+  threads: 9

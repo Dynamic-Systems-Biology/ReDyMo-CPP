@@ -76,9 +76,9 @@ typedef struct
 
 typedef struct
 {
-    unsigned long long population = 0;
+    unsigned long long population  = 0;
     unsigned long long generations = 0;
-    unsigned long long survivors = 0;
+    unsigned long long survivors   = 0;
 
     struct
     {
@@ -141,12 +141,12 @@ typedef struct
 {
     std::string mode = "basic";
 
-    unsigned long long cells = 0;
-    std::string organism = "";
+    unsigned long long cells     = 0;
+    std::string organism         = "";
     unsigned long long resources = 0;
-    unsigned long long speed = 1;
-    unsigned long long timeout = 0;
-    bool dormant = false;
+    unsigned long long speed     = 1;
+    unsigned long long timeout   = 0;
+    bool dormant                 = false;
 
     unsigned long long seed         = time(0);
     std::string name                = "no_name";
