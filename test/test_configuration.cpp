@@ -113,14 +113,36 @@ TEST_F(ConfigurationTest, ValidCmdOptions)
     ASSERT_EQ(expected, result);
 }
 
-TEST_F(ConfigurationTest, InvalidCmdOptions)
-{
+// TEST_F(ConfigurationTest, InvalidCmdOptions)
+// {
 
-    // cl_configuration_data result;
-    // result = Configuration(argv_mock().size(),
-    // argv_mock().data()).arguments();
-    // ASSERT_DEATH(Configuration(argv_mock().size(), argv_mock().data()),
-    // ".*");
+//     cl_configuration_data result;
+//     result = Configuration(argv_mock().size(),
+//     argv_mock().data()).arguments();
+//     ASSERT_DEATH(Configuration(argv_mock().size(), argv_mock().data()),
+//     ".*");
+// }
+
+
+TEST_F(ConfigurationTest, HelpCmdOption)
+{
+    std::vector<char *> argv_mock = {
+        "program_name",
+        "--h",
+    };
+    ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
+    std::invalid_argument);
+}
+
+
+TEST_F(ConfigurationTest, InvalidCmdOption)
+{
+    std::vector<char *> argv_mock = {
+        "program_name",
+        "--z",
+    };
+    ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
+    std::invalid_argument);
 }
 
 TEST_F(ConfigurationTest, ValidBasicConfigFile)
@@ -147,6 +169,13 @@ TEST_F(ConfigurationTest, ValidBasicConfigFile)
     expected.seed = result.seed;
 
     ASSERT_EQ(expected, result);
+}
+
+TEST_F(ConfigurationTest, InvalidBasicConfigFileOption)
+{
+    std::vector<char*>argv_config= {"program_name", "-C", "../test/config/invalid_option_config.yaml"};
+    ASSERT_THROW(Configuration(argv_config.size(), argv_config.data()),
+    std::invalid_argument);
 }
 
 TEST_F(ConfigurationTest, InvalidConfigFile) { ASSERT_TRUE(true); }

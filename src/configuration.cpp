@@ -152,7 +152,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
         case 0: break;
         case 'h':
             // TODO: add help
-            std::cout << "Usage:" << std::endl;
+            throw std::invalid_argument("Usage: ");
             break;
         case 'g':
             std::cout << "GPU Processing is broken for now. Ignoring option..."
@@ -176,12 +176,12 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
 
         case '?':
             /* getopt_long already printed an error message. */
+            throw std::invalid_argument("Check arguments");
             break;
 
         default: abort();
         }
     }
-
     if (config.length() > 0) read_configuration_file(config, arguments);
 
     if (dormant>=0)
@@ -189,7 +189,6 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
 
     if (!arguments.cells)
     {
-        std::cout << arguments.cells << " cells 2" << std::endl;
         std::cerr << "Argument \"cells\" (c) is mandatory!" << std::endl
                   << std::flush;
         exit(1);
