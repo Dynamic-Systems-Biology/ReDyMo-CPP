@@ -57,10 +57,6 @@ jobs:
         # Install a dependency for test coverage report
       - name: Install gcovr
         run: sudo apt update && sudo apt install gcovr
-<<<<<<< HEAD
-
-=======
->>>>>>> 0672015 (Finalize test for valid cmd options)
 
       - name: Configure CMake
         # Use a bash shell so we can use the same syntax for environment variable
