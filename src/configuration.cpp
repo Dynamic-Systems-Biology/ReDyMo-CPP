@@ -108,7 +108,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     int c;
     cl_configuration_data arguments;
 
-    int dormant = 0;
+    int dormant = -1;
     int summary = 0;
 
     std::string config;
@@ -152,7 +152,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
         case 0: break;
         case 'h':
             // TODO: add help
-            std::cout << "Usage:" << std::endl;
+            throw std::invalid_argument("Usage: ");
             break;
         case 'g':
             std::cout << "GPU Processing is broken for now. Ignoring option..."
@@ -176,42 +176,35 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
 
         case '?':
             /* getopt_long already printed an error message. */
+            throw std::invalid_argument("Check arguments");
             break;
 
         default: abort();
         }
     }
-
     if (config.length() > 0) read_configuration_file(config, arguments);
 
-    arguments.dormant = !!dormant;
+    if (dormant>=0)
+        arguments.dormant = !!dormant;
 
     if (!arguments.cells)
     {
-        std::cout << "Argument \"cells\" (c) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+       throw std::invalid_argument("Argument \"cells\" (c) is mandatory!");
     }
 
     if (!arguments.organism.length())
     {
-        std::cout << "Argument \"organism\" (o) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+        throw std::invalid_argument("Argument \"organism\" (o) is mandatory!");
     }
 
     if (!arguments.resources)
     {
-        std::cout << "Argument \"resources\" (r) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+        throw std::invalid_argument("Argument \"resources\" (r) is mandatory!");
     }
 
     if (!arguments.timeout)
     {
-        std::cout << "Argument \"timeout\" (T) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+        throw std::invalid_argument("Argument \"timeout\" (T) is mandatory!");
     }
 
     if (summary)
@@ -292,4 +285,20 @@ Configuration::read_configuration_file(std::string filename,
     read_conf_yml(parameters, arguments, cl_configuration_functions);
 
     return arguments;
+}
+
+bool operator==(const cl_evolution_data &a, const cl_evolution_data &b)
+{
+    return a.generations == b.generations;
+}
+
+bool operator==(const cl_configuration_data &a, const cl_configuration_data &b)
+{
+    return a.mode == b.mode && a.cells == b.cells && a.organism == b.organism &&
+           a.resources == b.resources && a.speed == b.speed &&
+           a.timeout == b.timeout && a.dormant == b.dormant &&
+           a.seed == b.seed && a.name == b.name && a.period == b.period &&
+           a.constitutive == b.constitutive && a.data_dir == b.data_dir &&
+           a.probability == b.probability && a.output == b.output &&
+           a.threads == b.threads && a.evolution == b.evolution;
 }

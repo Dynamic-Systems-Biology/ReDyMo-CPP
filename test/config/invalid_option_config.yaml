@@ -1,0 +1,4 @@
+simulation: basic
+parameters:
+  # This option doesn't exist
+  zzzz: abc
