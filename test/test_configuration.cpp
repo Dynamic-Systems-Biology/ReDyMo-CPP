@@ -18,8 +18,9 @@ class ConfigurationTest : public ::testing::Test
 TEST_F(ConfigurationTest, ValidCmdOptions)
 {
     std::vector<char *> argv_mock = {
+        "program_name",
         "--gpu",
-        "false"
+        "false",
         "--cells",
         "2",
         "--organism",
@@ -91,11 +92,7 @@ TEST_F(ConfigurationTest, ValidCmdOptions)
 
     cl_configuration_data result;
     result = Configuration(argv_mock.size(), argv_mock.data()).arguments();
-    printf("%d\n", expected == result);
-    ASSERT_TRUE(expected == result);
-    ASSERT_TRUE(expected.evolution == result.evolution);
-    for(char *str : argv_mock)
-        free(str);
+    ASSERT_EQ(expected, result);
 }
 
 TEST_F(ConfigurationTest, InvalidCmdOptions) { ASSERT_TRUE(true); }

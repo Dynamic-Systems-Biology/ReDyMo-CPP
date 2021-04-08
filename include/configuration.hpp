@@ -141,11 +141,11 @@ typedef struct
 {
     std::string mode = "basic";
 
-    unsigned long long cells;
-    std::string organism;
-    unsigned long long resources;
-    unsigned long long speed;
-    unsigned long long timeout;
+    unsigned long long cells = 0;
+    std::string organism = "";
+    unsigned long long resources = 0;
+    unsigned long long speed = 1;
+    unsigned long long timeout = 0;
     bool dormant = false;
 
     unsigned long long seed         = time(0);
