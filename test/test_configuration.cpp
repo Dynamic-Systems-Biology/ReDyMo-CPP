@@ -15,9 +15,6 @@ class ConfigurationTest : public ::testing::Test
         // test.
         optind = 1;
     }
-
-    // Runs after each test
-    void TearDown() {}
 };
 
 std::vector<char *> argv_mock()
@@ -113,17 +110,6 @@ TEST_F(ConfigurationTest, ValidCmdOptions)
     ASSERT_EQ(expected, result);
 }
 
-// TEST_F(ConfigurationTest, InvalidCmdOptions)
-// {
-
-//     cl_configuration_data result;
-//     result = Configuration(argv_mock().size(),
-//     argv_mock().data()).arguments();
-//     ASSERT_DEATH(Configuration(argv_mock().size(), argv_mock().data()),
-//     ".*");
-// }
-
-
 TEST_F(ConfigurationTest, HelpCmdOption)
 {
     std::vector<char *> argv_mock = {
@@ -131,9 +117,8 @@ TEST_F(ConfigurationTest, HelpCmdOption)
         "--h",
     };
     ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
-    std::invalid_argument);
+                 std::invalid_argument);
 }
-
 
 TEST_F(ConfigurationTest, InvalidCmdOption)
 {
@@ -142,28 +127,62 @@ TEST_F(ConfigurationTest, InvalidCmdOption)
         "--z",
     };
     ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
-    std::invalid_argument);
+                 std::invalid_argument);
+}
+
+TEST_F(ConfigurationTest, MandatoryCmdOption)
+{
+    std::vector<char *> argv_mock = {
+        "program_name",
+    };
+    ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
+                 std::invalid_argument);
+
+    optind = 1;
+    argv_mock.push_back("--cells");
+    argv_mock.push_back("2");
+    ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
+                 std::invalid_argument);
+
+    optind = 1;
+    argv_mock.push_back("--organism");
+    argv_mock.push_back("my-organism");
+    ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
+                 std::invalid_argument);
+
+    optind = 1;
+    argv_mock.push_back("--resources");
+    argv_mock.push_back("5");
+    ASSERT_THROW(Configuration(argv_mock.size(), argv_mock.data()),
+                 std::invalid_argument);
+
+    optind = 1;
+    argv_mock.push_back("--timeout");
+    argv_mock.push_back("10");
+    ASSERT_NO_THROW(Configuration(argv_mock.size(), argv_mock.data()));
 }
 
 TEST_F(ConfigurationTest, ValidBasicConfigFile)
 {
     cl_configuration_data expected;
-    expected.mode         = "basic";
-    expected.cells        = 100;
-    expected.organism     = "TcruziCLBrenerEsmeraldo-like";
-    expected.resources    = 50;
-    expected.speed        = 65;
-    expected.timeout      = 1000000;
-    expected.dormant      = true;
-    expected.name         = "abc";
-    expected.period       = 100;
-    expected.constitutive = 0;
-    expected.data_dir     = "data_dir/";
-    expected.probability  = 8;
-    expected.output       = "out_folder/";
-    expected.threads      = 9;
-    char *argv_config[] = {"program_name", "-C", "../test/config/config.yaml"};
-    cl_configuration_data result = Configuration(3, argv_config).arguments();
+    expected.mode                   = "basic";
+    expected.cells                  = 100;
+    expected.organism               = "TcruziCLBrenerEsmeraldo-like";
+    expected.resources              = 50;
+    expected.speed                  = 65;
+    expected.timeout                = 1000000;
+    expected.dormant                = true;
+    expected.name                   = "abc";
+    expected.period                 = 100;
+    expected.constitutive           = 0;
+    expected.data_dir               = "data_dir/";
+    expected.probability            = 8;
+    expected.output                 = "out_folder/";
+    expected.threads                = 9;
+    std::vector<char *> argv_config = {"program_name", "-C",
+                                       "../test/config/config.yaml"};
+    cl_configuration_data result =
+        Configuration(argv_config.size(), argv_config.data()).arguments();
 
     // Seed is not set by config file
     expected.seed = result.seed;
@@ -173,12 +192,11 @@ TEST_F(ConfigurationTest, ValidBasicConfigFile)
 
 TEST_F(ConfigurationTest, InvalidBasicConfigFileOption)
 {
-    std::vector<char*>argv_config= {"program_name", "-C", "../test/config/invalid_option_config.yaml"};
+    std::vector<char *> argv_config = {
+        "program_name", "-C", "../test/config/invalid_option_config.yaml"};
     ASSERT_THROW(Configuration(argv_config.size(), argv_config.data()),
-    std::invalid_argument);
+                 std::invalid_argument);
 }
-
-TEST_F(ConfigurationTest, InvalidConfigFile) { ASSERT_TRUE(true); }
 
 int main(int argc, char **argv)
 {

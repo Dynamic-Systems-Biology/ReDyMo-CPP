@@ -189,30 +189,22 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
 
     if (!arguments.cells)
     {
-        std::cerr << "Argument \"cells\" (c) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+       throw std::invalid_argument("Argument \"cells\" (c) is mandatory!");
     }
 
     if (!arguments.organism.length())
     {
-        std::cerr << "Argument \"organism\" (o) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+        throw std::invalid_argument("Argument \"organism\" (o) is mandatory!");
     }
 
     if (!arguments.resources)
     {
-        std::cerr << "Argument \"resources\" (r) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+        throw std::invalid_argument("Argument \"resources\" (r) is mandatory!");
     }
 
     if (!arguments.timeout)
     {
-        std::cerr << "Argument \"timeout\" (T) is mandatory!" << std::endl
-                  << std::flush;
-        exit(1);
+        throw std::invalid_argument("Argument \"timeout\" (T) is mandatory!");
     }
 
     if (summary)
