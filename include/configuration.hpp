@@ -76,9 +76,9 @@ typedef struct
 
 typedef struct
 {
-    unsigned long long population;
-    unsigned long long generations;
-    unsigned long long survivors;
+    unsigned long long population = 0;
+    unsigned long long generations = 0;
+    unsigned long long survivors = 0;
 
     struct
     {
@@ -160,6 +160,10 @@ typedef struct
     // Other modes data
     cl_evolution_data evolution;
 } cl_configuration_data;
+
+bool operator==(const cl_evolution_data &a, const cl_evolution_data &b);
+
+bool operator==(const cl_configuration_data &a, const cl_configuration_data &b);
 
 typedef std::unordered_map<
     std::string,

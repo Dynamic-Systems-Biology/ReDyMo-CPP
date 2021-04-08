@@ -97,7 +97,9 @@ void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
 
 Configuration::Configuration(int argc, char *argv[])
 {
-    args = configure_cmd_options(argc, argv);
+    cl_configuration_data abc = configure_cmd_options(argc, argv);
+    // print here
+    args = abc;
 }
 
 cl_configuration_data Configuration::arguments() { return args; }
@@ -292,4 +294,28 @@ Configuration::read_configuration_file(std::string filename,
     read_conf_yml(parameters, arguments, cl_configuration_functions);
 
     return arguments;
+}
+
+bool operator==(const cl_evolution_data &a, const cl_evolution_data &b)
+{
+    printf("aaaaaaaaaa\n");
+    return a.generations == b.generations;
+}
+
+bool operator==(const cl_configuration_data &a, const cl_configuration_data &b) {
+    return a.mode         == b.mode &&
+    a.cells        == b.cells &&
+    a.organism     == b.organism &&
+    a.resources    == b.resources &&
+    a.speed        == b.speed &&
+    a.timeout      == b.timeout &&
+    a.dormant      == b.dormant &&
+    a.seed         == b.seed &&
+    a.name         == b.name &&
+    a.period       == b.period &&
+    a.constitutive == b.constitutive &&
+    a.data_dir     == b.data_dir &&
+    a.probability  == b.probability &&
+    a.output       == b.output &&
+    a.threads      == b.threads;
 }
