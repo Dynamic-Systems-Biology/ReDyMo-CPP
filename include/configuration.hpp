@@ -76,9 +76,9 @@ typedef struct
 
 typedef struct
 {
-    unsigned long long population;
-    unsigned long long generations;
-    unsigned long long survivors;
+    unsigned long long population  = 0;
+    unsigned long long generations = 0;
+    unsigned long long survivors   = 0;
 
     struct
     {
@@ -141,12 +141,12 @@ typedef struct
 {
     std::string mode = "basic";
 
-    unsigned long long cells;
-    std::string organism;
-    unsigned long long resources;
-    unsigned long long speed;
-    unsigned long long timeout;
-    bool dormant = false;
+    unsigned long long cells     = 0;
+    std::string organism         = "";
+    unsigned long long resources = 0;
+    unsigned long long speed     = 1;
+    unsigned long long timeout   = 0;
+    bool dormant                 = false;
 
     unsigned long long seed         = time(0);
     std::string name                = "no_name";
@@ -161,6 +161,10 @@ typedef struct
     cl_evolution_data evolution;
 } cl_configuration_data;
 
+bool operator==(const cl_evolution_data &a, const cl_evolution_data &b);
+
+bool operator==(const cl_configuration_data &a, const cl_configuration_data &b);
+
 typedef std::unordered_map<
     std::string,
     std::function<void(cl_configuration_data &, std::string, ryml::NodeRef)>>
@@ -169,11 +173,12 @@ typedef std::unordered_map<
 void read_conf_yml(
     ryml::NodeRef base, cl_configuration_data &arguments,
     conf_function_map &function_map,
-    std::function<void(std::string)> on_unknown = [](std::string argument) {
-        std::cerr << "Unknown parameter in configuration file: " << argument
-                  << std::endl
-                  << std::flush;
-    });
+    std::function<void(std::string)> on_unknown =
+        [](std::string argument) {
+            throw std::invalid_argument(
+                "Unknown parameter in configuration file: " + argument);
+        }
+);
 
 /*! This class represents a running configuration for the simulations.
  *
