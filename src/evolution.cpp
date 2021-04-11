@@ -8,12 +8,6 @@
 
 #include "evolution.hpp"
 
-typedef struct
-{
-    double collisions = 0;
-    double time       = 0;
-} instance_metrics;
-
 double calculate_fitness(instance_metrics metrics,
                          cl_evolution_data config_data)
 {

@@ -173,12 +173,10 @@ typedef std::unordered_map<
 void read_conf_yml(
     ryml::NodeRef base, cl_configuration_data &arguments,
     conf_function_map &function_map,
-    std::function<void(std::string)> on_unknown =
-        [](std::string argument) {
-            throw std::invalid_argument(
-                "Unknown parameter in configuration file: " + argument);
-        }
-);
+    std::function<void(std::string)> on_unknown = [](std::string argument) {
+        throw std::invalid_argument(
+            "Unknown parameter in configuration file: " + argument);
+    });
 
 /*! This class represents a running configuration for the simulations.
  *
@@ -188,6 +186,9 @@ void read_conf_yml(
 class Configuration
 {
   private:
+    // Allow the test class to set args directly
+    friend class EvolutionTest;
+
     cl_configuration_data args;
 
     cl_configuration_data configure_cmd_options(int argc, char *argv[]);

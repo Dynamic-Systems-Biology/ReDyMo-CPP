@@ -131,6 +131,7 @@ if(BUILD_TESTING)
     add_executable(test_data_manager test/test_data_manager.cpp)
     add_executable(test_util test/test_util.cpp)
     add_executable(test_configuration test/test_configuration.cpp)
+    add_executable(test_evolution test/test_evolution.cpp)
 
     target_link_libraries(simulator deps gtest)
 
@@ -142,6 +143,7 @@ if(BUILD_TESTING)
     target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl gcov)
     target_link_libraries(test_util deps gtest gmock gcov)
     target_link_libraries(test_configuration deps ryml gtest gcov)
+    target_link_libraries(test_evolution deps SQLiteCpp sqlite3 dl ryml gtest gmock gcov)
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
@@ -151,6 +153,7 @@ if(BUILD_TESTING)
     gtest_discover_tests(test_data_manager)
     gtest_discover_tests(test_util)
     gtest_discover_tests(test_configuration)
+    gtest_discover_tests(test_evolution)
 
     #######
     # Coverage report
@@ -168,7 +171,7 @@ if(BUILD_TESTING)
             NAME coverage
             EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/script/ctest_no_fail.sh
             EXCLUDE "thirdparty/*" "include/*" "test/*"
-            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_util test_configuration
+            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_util test_configuration test_evolution
         )
     endif()
 endif()
