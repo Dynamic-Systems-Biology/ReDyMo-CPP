@@ -1,0 +1,43 @@
+simulation: evolution
+parameters:
+  # Basic simulation data
+  cells: 1
+  organism: TcruziCLBrenerEsmeraldo-like
+  resources: 50
+  speed: 65
+  period: 1000
+  timeout: 100000
+  dormant: true
+
+  evolution: # Evolution simulator data
+    population: 5
+    generations: 50
+    survivors: 13
+    mutations: # Allowed mutation types and their parameters
+      probability_landscape:
+        add: 0.15           # 15% chance of adding a new source
+        del: 0.1            # 10% chance of adding a new source
+        change_mean:
+          prob: 0.05   # 5% chance of changing mean for each source
+          std: 2000
+        change_std:
+          prob: 0.05    # 5% chance of changing standard variation for each source
+          std: 50
+          max: 1000
+      genes:
+        move:
+          std: 50
+          prob: 0.5
+        swap:
+          prob: 0.3
+    fitness: # Fitness calculation
+      min_sphase: 1
+      match_mfaseq: 0
+      max_coll_all: 0
+      min_coll_all: 0
+      max_coll:
+        gene: "a"
+        weight: 0
+      min_coll:
+        gene: "a"
+        weight: 0

@@ -198,6 +198,54 @@ TEST_F(ConfigurationTest, InvalidBasicConfigFileOption)
                  std::invalid_argument);
 }
 
+TEST_F(ConfigurationTest, ValidEvolutionConfigFile)
+{
+    cl_configuration_data expected;
+    expected.mode                                          = "evolution";
+    expected.cells                                         = 1;
+    expected.organism                                      = "dummy";
+    expected.resources                                     = 2;
+    expected.speed                                         = 3;
+    expected.timeout                                       = 5;
+    expected.dormant                                       = true;
+    expected.seed                                          = 4;
+    expected.name                                          = "abc";
+    expected.period                                        = 6;
+    expected.constitutive                                  = 7;
+    expected.data_dir                                      = "data_dir/";
+    expected.probability                                   = 8;
+    expected.output                                        = "out_folder/";
+    expected.threads                                       = 9;
+    expected.evolution.population                          = 5;
+    expected.evolution.generations                         = 50;
+    expected.evolution.survivors                           = 13;
+    expected.evolution.mutations.probability_landscape.add = 0.15;
+    expected.evolution.mutations.probability_landscape.del = 0.1;
+    expected.evolution.mutations.probability_landscape.change_mean.prob = 0.05;
+    expected.evolution.mutations.probability_landscape.change_mean.std  = 2000;
+    expected.evolution.mutations.probability_landscape.change_std.prob  = 0.05;
+    expected.evolution.mutations.probability_landscape.change_std.std   = 50;
+    expected.evolution.mutations.probability_landscape.change_std.max   = 1000;
+    expected.evolution.mutations.genes.move.prob                        = 0.5;
+    expected.evolution.mutations.genes.move.std                         = 50;
+    expected.evolution.mutations.genes.swap.prob                        = 0.3;
+    expected.evolution.fitness.min_sphase                               = 1;
+    expected.evolution.fitness.match_mfaseq                             = 0;
+    expected.evolution.fitness.max_coll_all                             = 0;
+    expected.evolution.fitness.min_coll_all                             = 0;
+    expected.evolution.fitness.max_coll.weight                          = 0;
+    expected.evolution.fitness.max_coll.gene                            = "";
+    expected.evolution.fitness.min_coll.weight                          = 0;
+    expected.evolution.fitness.min_coll.gene                            = "";
+
+    std::vector<char *> argv_config = {
+        "program_name", "-C", "../test/config/config_evolution.yaml"};
+    optind = 1;
+    cl_configuration_data result;
+    result = Configuration(argv_config.size(), argv_config.data()).arguments();
+    ASSERT_EQ(expected, result);
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

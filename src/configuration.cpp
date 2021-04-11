@@ -81,7 +81,8 @@ void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
         auto val = std::string();
 
         c4::from_chars(ref.key(), &key);
-        c4::from_chars(ref.val(), &val);
+       // c4::from_chars(ref.val(), &val);
+        std::cout << key << " " << val << std::endl;
 
         // Call callback on unknown
         if (function_map.find(key) == function_map.end())
@@ -276,6 +277,7 @@ Configuration::read_configuration_file(std::string filename,
 
     ryml::NodeRef simulation = tree["simulation"];
     ryml::NodeRef parameters = tree["parameters"];
+
 
     std::string mode = std::string();
     c4::from_chars(simulation.val(), &mode);
