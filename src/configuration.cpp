@@ -71,7 +71,7 @@ conf_function_map cl_configuration_functions = {
     PUSH_D(probability),    PUSH_STR(output),
     PUSH_ULL(threads),      PUSH_FUNCS(evolution, cl_evolution_functions)};
 
-void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
+void read_conf_yml(ryml::NodeRef &base, cl_configuration_data &arguments,
                    conf_function_map &function_map,
                    std::function<void(std::string)> on_unknown)
 {
@@ -81,8 +81,7 @@ void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
         auto val = std::string();
 
         c4::from_chars(ref.key(), &key);
-       // c4::from_chars(ref.val(), &val);
-        std::cout << key << " " << val << std::endl;
+        if (ref.has_val()) c4::from_chars(ref.val(), &val);
 
         // Call callback on unknown
         if (function_map.find(key) == function_map.end())
@@ -185,12 +184,11 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     }
     if (config.length() > 0) read_configuration_file(config, arguments);
 
-    if (dormant>=0)
-        arguments.dormant = !!dormant;
+    if (dormant >= 0) arguments.dormant = !!dormant;
 
     if (!arguments.cells)
     {
-       throw std::invalid_argument("Argument \"cells\" (c) is mandatory!");
+        throw std::invalid_argument("Argument \"cells\" (c) is mandatory!");
     }
 
     if (!arguments.organism.length())
@@ -277,7 +275,6 @@ Configuration::read_configuration_file(std::string filename,
 
     ryml::NodeRef simulation = tree["simulation"];
     ryml::NodeRef parameters = tree["parameters"];
-
 
     std::string mode = std::string();
     c4::from_chars(simulation.val(), &mode);
