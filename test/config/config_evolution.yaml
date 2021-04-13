@@ -1,6 +1,7 @@
 simulation: evolution
 parameters:
   # Basic simulation data
+  name: abc
   cells: 1
   organism: TcruziCLBrenerEsmeraldo-like
   resources: 50
@@ -26,8 +27,8 @@ parameters:
           max: 1000
       genes:
         move:
-          std: 50
           prob: 0.5
+          std: 50
         swap:
           prob: 0.3
     fitness: # Fitness calculation

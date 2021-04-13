@@ -19,7 +19,7 @@ class ConfigurationTest : public ::testing::Test
 
 std::vector<char *> argv_mock()
 {
-    std::vector<char *> argv_mock = {
+    std::vector<const char *> argv_mock = {
         "program_name",
         "--gpu",
         "false",
@@ -54,7 +54,7 @@ std::vector<char *> argv_mock()
     };
 
     std::vector<char *> argv_non_const;
-    for (char *a : argv_mock)
+    for (const char *a : argv_mock)
     {
         char *b = (char *)malloc(strlen(a) * sizeof(char));
         for (int i = 0; i < strlen(a); i++)
@@ -203,19 +203,13 @@ TEST_F(ConfigurationTest, ValidEvolutionConfigFile)
     cl_configuration_data expected;
     expected.mode                                          = "evolution";
     expected.cells                                         = 1;
-    expected.organism                                      = "dummy";
-    expected.resources                                     = 2;
-    expected.speed                                         = 3;
-    expected.timeout                                       = 5;
+    expected.organism                                      = "TcruziCLBrenerEsmeraldo-like";
+    expected.resources                                     = 50;
+    expected.speed                                         = 65;
+    expected.timeout                                       = 100000;
     expected.dormant                                       = true;
-    expected.seed                                          = 4;
     expected.name                                          = "abc";
-    expected.period                                        = 6;
-    expected.constitutive                                  = 7;
-    expected.data_dir                                      = "data_dir/";
-    expected.probability                                   = 8;
-    expected.output                                        = "out_folder/";
-    expected.threads                                       = 9;
+    expected.period                                        = 1000;
     expected.evolution.population                          = 5;
     expected.evolution.generations                         = 50;
     expected.evolution.survivors                           = 13;
@@ -233,10 +227,10 @@ TEST_F(ConfigurationTest, ValidEvolutionConfigFile)
     expected.evolution.fitness.match_mfaseq                             = 0;
     expected.evolution.fitness.max_coll_all                             = 0;
     expected.evolution.fitness.min_coll_all                             = 0;
+    expected.evolution.fitness.max_coll.gene                            = "a";
     expected.evolution.fitness.max_coll.weight                          = 0;
-    expected.evolution.fitness.max_coll.gene                            = "";
+    expected.evolution.fitness.min_coll.gene                            = "a";
     expected.evolution.fitness.min_coll.weight                          = 0;
-    expected.evolution.fitness.min_coll.gene                            = "";
 
     std::vector<char *> argv_config = {
         "program_name", "-C", "../test/config/config_evolution.yaml"};
