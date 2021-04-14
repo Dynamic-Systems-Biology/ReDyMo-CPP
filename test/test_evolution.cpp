@@ -16,6 +16,14 @@ class MockEvolutionManager : public EvolutionManager
 
     cl_configuration_data get_arguments() { return this->arguments; }
     int get_current_generation() { return this->current_generation; }
+    std::vector<std::shared_ptr<EvolutionDataProvider>> get_data_providers()
+    {
+        return this->data_providers;
+    }
+    std::vector<std::vector<simulation_stats>> get_population()
+    {
+        return this->population;
+    }
 };
 
 class EvolutionTest : public ::testing::Test
@@ -49,15 +57,25 @@ TEST_F(EvolutionTest, CalculateFitness)
 
 TEST_F(EvolutionTest, TestConstructor)
 {
-    std::vector<char *> argv_mock = {
-        "program_name", "--cells", "2",         "--organism", "dummy",
-        "--resources",  "2",       "--timeout", "5"};
+    std::vector<char *> argv_mock = {"program_name",
+                                     "--cells",
+                                     "2",
+                                     "--organism",
+                                     "dummy",
+                                     "--resources",
+                                     "2",
+                                     "--timeout",
+                                     "5",
+                                     "-C",
+                                     "../test/config/config_evolution.yaml"};
 
     // Reset getopt global variable
     optind               = 1;
     Configuration config = Configuration(argv_mock.size(), argv_mock.data());
     MockEvolutionManager evo(config, 0);
     ASSERT_EQ(evo.get_arguments(), config.arguments());
+    ASSERT_FALSE(evo.get_data_providers().empty());
+    ASSERT_FALSE(evo.get_population().empty());
 }
 
 TEST_F(EvolutionTest, TestGeneration)
