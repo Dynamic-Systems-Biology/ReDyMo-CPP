@@ -11,9 +11,9 @@ parameters:
   dormant: true
 
   evolution: # Evolution simulator data
-    population: 5
-    generations: 50
-    survivors: 13
+    population: 2
+    generations: 2
+    survivors: 1
     mutations: # Allowed mutation types and their parameters
       probability_landscape:
         add: 0.15           # 15% chance of adding a new source

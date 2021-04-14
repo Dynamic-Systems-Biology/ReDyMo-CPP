@@ -210,9 +210,9 @@ TEST_F(ConfigurationTest, ValidEvolutionConfigFile)
     expected.dormant                                       = true;
     expected.name                                          = "abc";
     expected.period                                        = 1000;
-    expected.evolution.population                          = 5;
-    expected.evolution.generations                         = 50;
-    expected.evolution.survivors                           = 13;
+    expected.evolution.population                          = 2;
+    expected.evolution.generations                         = 2;
+    expected.evolution.survivors                           = 1;
     expected.evolution.mutations.probability_landscape.add = 0.15;
     expected.evolution.mutations.probability_landscape.del = 0.1;
     expected.evolution.mutations.probability_landscape.change_mean.prob = 0.05;
