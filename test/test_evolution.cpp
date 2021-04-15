@@ -13,9 +13,18 @@ class MockEvolutionManager : public EvolutionManager
         : EvolutionManager(config, seed)
     {
     }
+    int get_current_generation() { return this->current_generation; }
+};
+
+class PublicEvolutionManager : public EvolutionManager
+{
+  public:
+    PublicEvolutionManager(Configuration config, int seed)
+        : EvolutionManager(config, seed)
+    {
+    }
 
     cl_configuration_data get_arguments() { return this->arguments; }
-    int get_current_generation() { return this->current_generation; }
     std::vector<std::shared_ptr<EvolutionDataProvider>> get_data_providers()
     {
         return this->data_providers;
@@ -23,6 +32,9 @@ class MockEvolutionManager : public EvolutionManager
     std::vector<std::vector<simulation_stats>> get_population()
     {
         return this->population;
+    }
+    void reproduce() {
+        EvolutionManager::reproduce();
     }
 };
 
@@ -72,7 +84,7 @@ TEST_F(EvolutionTest, TestConstructor)
     // Reset getopt global variable
     optind               = 1;
     Configuration config = Configuration(argv_mock.size(), argv_mock.data());
-    MockEvolutionManager evo(config, 0);
+    PublicEvolutionManager evo(config, 0);
     ASSERT_EQ(evo.get_arguments(), config.arguments());
     ASSERT_FALSE(evo.get_data_providers().empty());
     ASSERT_FALSE(evo.get_population().empty());
@@ -88,9 +100,33 @@ TEST_F(EvolutionTest, TestGeneration)
     optind               = 1;
     Configuration config = Configuration(argv_mock.size(), argv_mock.data());
     MockEvolutionManager evo(config, 0);
+    int last_gen = evo.get_current_generation();
     EXPECT_CALL(evo, simulate());
     EXPECT_CALL(evo, reproduce());
     evo.generation();
+    ASSERT_EQ(evo.get_current_generation(), last_gen + 1);
+}
+
+TEST_F(EvolutionTest, TestReproduce)
+{
+
+    std::vector<char *> argv_mock = {"program_name",
+                                     "--cells",
+                                     "2",
+                                     "--organism",
+                                     "dummy",
+                                     "--resources",
+                                     "2",
+                                     "--timeout",
+                                     "5",
+                                     "-C",
+                                     "../test/config/config_evolution.yaml"};
+
+    // Reset getopt global variable
+    optind               = 1;
+    Configuration config = Configuration(argv_mock.size(), argv_mock.data());
+    PublicEvolutionManager evo(config, 8);
+    evo.reproduce();
 }
 
 int main(int argc, char **argv)
