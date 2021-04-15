@@ -114,15 +114,15 @@ void EvolutionManager::reproduce()
     int to_kill =
         arguments.evolution.population - arguments.evolution.survivors;
 
-    int reproduced = 0;
+    int killed = 0;
 
-    while (reproduced < to_kill)
+    while (killed < to_kill)
     {
-        auto to_kill = killing_roulette(rand_generator);
-        if (!data_providers[to_kill]->isdead()) // Check if organism is not dead
+        auto kill_index = killing_roulette(rand_generator);
+        if (!data_providers[kill_index]->isdead()) // Check if organism is not dead
         {
-            data_providers[to_kill]->die();
-            reproduced++;
+            data_providers[kill_index]->die();
+            killed++;
         }
     }
 
