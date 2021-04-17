@@ -97,20 +97,20 @@ for example `-DCOVERAGE=OFF`.
 |              Option |  Type   | Description                                                                                                                                             |
 | ------------------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |     `BUILD_TESTING` | ON\|OFF | Whether to build the executables of unit tests.                                                                                                         |
-| `CUSTOM_BUILD_TYPE` | STRING  | Defines the compilation flags depending on the value. If no valid value is found, defaults to Release. See [Build Types](#Build-Types) for valid values. |
+| `CMAKE_BUILD_TYPE` | STRING  | Defines the compilation flags depending on the value. If no valid value is found, defaults to Release. See [Build Types](#Build-Types) for valid values. |
 |          `COVERAGE` | ON\|OFF | Whether to configure the test coverage reports. **WARNING** This option overwrites the compilation flags.                                               |
 |        `BUILD_GPGPU` | ON\|OFF | Whether to build the GPU code that depends on OpenCL.                                                                                                   |
 
 #### Build Types
 
-The available values for the `CUSTOM_BUILD_TYPE` option are listed below. For
-the exact flags set please refer to lines 18-27 of `CMakeLists.txt`.
+The available values for the `CMAKE_BUILD_TYPE` option are listed below. For
+the exact flags set please refer to `CMakeLists.txt`.
 
 | Build type    | Description                                                                                                                                     |
 | -------------:| ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Release`     | Default build type. Has warnings disabled and optimization level 3 (`-O3`).                                                                       |
 | `Debug`       | Has all warnings enabled, debug flag enabled, profiling flag enabled and no optimizations.                                                      |
-| `Development` | Has all warnings enabled, debug flag enabled and no optimizations.                                                                              |
+| `Coverage` | Has all warnings enabled, debug flag enabled and no optimizations. Enables coverage, if not already enabled.                                                                            |
 | `Performance` | Disables coverage. Has all warnings enabled, optimization set to fast (`-Ofast`), native architecture optimization, and rename-registers enabled. |
 
 ### Run tests and coverage

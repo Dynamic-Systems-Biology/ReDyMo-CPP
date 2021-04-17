@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.9)
 project(ReDyMo)
 
 #######
@@ -13,7 +13,6 @@ execute_process(COMMAND git submodule foreach --recursive git submodule update -
 #######
 # Declare our custom options
 #######
-SET(CUSTOM_BUILD_TYPE "Release" CACHE STRING "Sets custom comp flags")
 OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
 OPTION(BUILD_TESTING "Wether to build the tests." ON)
 OPTION(COVERAGE "Wether to configure test coverage report." OFF)
@@ -21,16 +20,38 @@ OPTION(COVERAGE "Wether to configure test coverage report." OFF)
 #######
 # Set flags for our custom build types
 #######
-if(CUSTOM_BUILD_TYPE STREQUAL Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g -pg")
-elseif(CUSTOM_BUILD_TYPE STREQUAL Performance)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native -frename-registers")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -O0 -g -pg" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_COVERAGE "-Wall -O0 -g -pg" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_PERFORMANCE "-Wall -Ofast -march=native" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-w -O3" CACHE STRING "" FORCE)
+
+mark_as_advanced(
+    CMAKE_CXX_FLAGS_DEBUG
+    CMAKE_CXX_FLAGS_COVERAGE
+    CMAKE_CXX_FLAGS_PERFORMANCE
+    CMAKE_CXX_FLAGS_RELEASE
+)
+
+if(NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE Debug
+       CACHE STRING "Choose the type of build : None Debug Coverage Release Performace."
+       FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+message("* Current build type is : ${CMAKE_BUILD_TYPE}")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Performance")
     set(COVERAGE OFF)
-elseif(CUSTOM_BUILD_TYPE STREQUAL Development)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fopenmp -O3")
+    message("* Performance BUILD TYPE -> COVERAGE SET TO OFF")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    set(COVERAGE ON)
+    message("* Coverage BUILD TYPE -> COVERAGE SET TO ON")
 endif()
+
+
+#######
+# OpenMP
+#######
+find_package(OpenMP)
 
 #######
 # OpenCL
@@ -94,14 +115,8 @@ if (BUILD_GPGPU)
     )
 endif()
 
-message("")
-message("================")
-message("Current CXX flags: ${CMAKE_CXX_FLAGS}")
-message("================")
-message("")
-
 add_executable(simulator src/main.cpp)
-target_link_libraries(simulator deps SQLiteCpp libzstd_static sqlite3 pthread dl ryml)
+target_link_libraries(simulator deps SQLiteCpp libzstd_static sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
 
 if (BUILD_GPGPU)
     target_link_libraries(simulator gpudeps ${OpenCL_LIBRARY})
