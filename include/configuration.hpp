@@ -19,7 +19,7 @@
             return path.substr(path.rfind(".") + 1, path.size());              \
         })(),                                                                  \
             [](cl_configuration_data &data, std::string val,                   \
-               ryml::NodeRef base) -> void { data.field = std::stoull(val); }  \
+               ryml::NodeRef &base) -> void { data.field = std::stoull(val); } \
     }
 #define PUSH_D(field)                                                          \
     {                                                                          \
@@ -28,7 +28,7 @@
             return path.substr(path.rfind(".") + 1, path.size());              \
         })(),                                                                  \
             [](cl_configuration_data &data, std::string val,                   \
-               ryml::NodeRef base) -> void { data.field = std::stod(val); }    \
+               ryml::NodeRef &base) -> void { data.field = std::stod(val); }   \
     }
 #define PUSH_STR(field)                                                        \
     {                                                                          \
@@ -37,7 +37,7 @@
             return path.substr(path.rfind(".") + 1, path.size());              \
         })(),                                                                  \
             [](cl_configuration_data &data, std::string val,                   \
-               ryml::NodeRef base) -> void { data.field = std::string(val); }  \
+               ryml::NodeRef &base) -> void { data.field = std::string(val); } \
     }
 #define PUSH_BOOL(field)                                                       \
     {                                                                          \
@@ -46,7 +46,7 @@
             return path.substr(path.rfind(".") + 1, path.size());              \
         })(),                                                                  \
             [](cl_configuration_data &data, std::string val,                   \
-               ryml::NodeRef base) {                                           \
+               ryml::NodeRef &base) {                                          \
                 data.field = !std::string(val).compare("true");                \
             }                                                                  \
     }
@@ -58,12 +58,19 @@
             return path.substr(path.rfind(".") + 1, path.size());              \
         })(),                                                                  \
             [](cl_configuration_data &data, std::string val,                   \
-               ryml::NodeRef base) {                                           \
+               ryml::NodeRef &base) {                                          \
                 std::string path = #field;                                     \
                 c4::csubstr k    = c4::to_csubstr(                             \
-                    path.substr(path.rfind(".") + 1, path.size()));         \
+                    path.substr(path.rfind(".") + 1, path.size()).c_str());    \
                 conf_function_map map = functions;                             \
-                read_conf_yml(base[k], data, map);                             \
+                for (ryml::NodeRef c : base.children())                        \
+                {                                                              \
+                    if (!c.key().compare(k))                                   \
+                    {                                                          \
+                        read_conf_yml(c, data, map);                           \
+                        break;                                                 \
+                    }                                                          \
+                }                                                              \
             }                                                                  \
     }
 
@@ -167,18 +174,16 @@ bool operator==(const cl_configuration_data &a, const cl_configuration_data &b);
 
 typedef std::unordered_map<
     std::string,
-    std::function<void(cl_configuration_data &, std::string, ryml::NodeRef)>>
+    std::function<void(cl_configuration_data &, std::string, ryml::NodeRef &)>>
     conf_function_map;
 
 void read_conf_yml(
-    ryml::NodeRef base, cl_configuration_data &arguments,
+    ryml::NodeRef &base, cl_configuration_data &arguments,
     conf_function_map &function_map,
-    std::function<void(std::string)> on_unknown =
-        [](std::string argument) {
-            throw std::invalid_argument(
-                "Unknown parameter in configuration file: " + argument);
-        }
-);
+    std::function<void(std::string)> on_unknown = [](std::string argument) {
+        throw std::invalid_argument(
+            "Unknown parameter in configuration file: " + argument);
+    });
 
 /*! This class represents a running configuration for the simulations.
  *
@@ -188,6 +193,9 @@ void read_conf_yml(
 class Configuration
 {
   private:
+    // Allow the test class to set args directly
+    friend class EvolutionTest;
+
     cl_configuration_data args;
 
     cl_configuration_data configure_cmd_options(int argc, char *argv[]);

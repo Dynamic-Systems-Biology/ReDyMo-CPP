@@ -14,7 +14,10 @@
 
 class EvolutionManager
 {
-  private:
+  protected:
+    // This allows us to test private methods and attributes.
+    friend class EvolutionTest;
+
     int seed;
     std::mt19937 rand_generator;
     Configuration &configuration;
@@ -26,17 +29,26 @@ class EvolutionManager
 
     int current_generation = 0;
 
-    void simulate();
-    void reproduce();
+    virtual void simulate();
+    virtual void reproduce();
 
   public:
     EvolutionManager(Configuration &configuration, int seed);
     ~EvolutionManager();
 
     void run_all();
-    void generation();
+    virtual void generation();
 
-    void snapshot(std::string folder);
+    virtual void snapshot(std::string folder);
 };
+
+typedef struct
+{
+    double collisions = 0;
+    double time       = 0;
+} instance_metrics;
+
+double calculate_fitness(instance_metrics metrics,
+                         cl_evolution_data config_data);
 
 #endif

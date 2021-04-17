@@ -19,7 +19,7 @@ class ConfigurationTest : public ::testing::Test
 
 std::vector<char *> argv_mock()
 {
-    std::vector<char *> argv_mock = {
+    std::vector<const char *> argv_mock = {
         "program_name",
         "--gpu",
         "false",
@@ -54,7 +54,7 @@ std::vector<char *> argv_mock()
     };
 
     std::vector<char *> argv_non_const;
-    for (char *a : argv_mock)
+    for (const char *a : argv_mock)
     {
         char *b = (char *)malloc(strlen(a) * sizeof(char));
         for (int i = 0; i < strlen(a); i++)
@@ -196,6 +196,48 @@ TEST_F(ConfigurationTest, InvalidBasicConfigFileOption)
         "program_name", "-C", "../test/config/invalid_option_config.yaml"};
     ASSERT_THROW(Configuration(argv_config.size(), argv_config.data()),
                  std::invalid_argument);
+}
+
+TEST_F(ConfigurationTest, ValidEvolutionConfigFile)
+{
+    cl_configuration_data expected;
+    expected.mode                                          = "evolution";
+    expected.cells                                         = 1;
+    expected.organism                                      = "TcruziCLBrenerEsmeraldo-like";
+    expected.resources                                     = 50;
+    expected.speed                                         = 65;
+    expected.timeout                                       = 100000;
+    expected.dormant                                       = true;
+    expected.name                                          = "abc";
+    expected.period                                        = 1000;
+    expected.evolution.population                          = 2;
+    expected.evolution.generations                         = 2;
+    expected.evolution.survivors                           = 1;
+    expected.evolution.mutations.probability_landscape.add = 0.15;
+    expected.evolution.mutations.probability_landscape.del = 0.1;
+    expected.evolution.mutations.probability_landscape.change_mean.prob = 0.05;
+    expected.evolution.mutations.probability_landscape.change_mean.std  = 2000;
+    expected.evolution.mutations.probability_landscape.change_std.prob  = 0.05;
+    expected.evolution.mutations.probability_landscape.change_std.std   = 50;
+    expected.evolution.mutations.probability_landscape.change_std.max   = 1000;
+    expected.evolution.mutations.genes.move.prob                        = 0.5;
+    expected.evolution.mutations.genes.move.std                         = 50;
+    expected.evolution.mutations.genes.swap.prob                        = 0.3;
+    expected.evolution.fitness.min_sphase                               = 1;
+    expected.evolution.fitness.match_mfaseq                             = 0;
+    expected.evolution.fitness.max_coll_all                             = 0;
+    expected.evolution.fitness.min_coll_all                             = 0;
+    expected.evolution.fitness.max_coll.gene                            = "a";
+    expected.evolution.fitness.max_coll.weight                          = 0;
+    expected.evolution.fitness.min_coll.gene                            = "a";
+    expected.evolution.fitness.min_coll.weight                          = 0;
+
+    std::vector<char *> argv_config = {
+        "program_name", "-C", "../test/config/config_evolution.yaml"};
+    optind = 1;
+    cl_configuration_data result;
+    result = Configuration(argv_config.size(), argv_config.data()).arguments();
+    ASSERT_EQ(expected, result);
 }
 
 int main(int argc, char **argv)
