@@ -158,7 +158,7 @@ if(BUILD_TESTING)
     target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl gcov)
     target_link_libraries(test_util deps gtest gmock gcov)
     target_link_libraries(test_configuration deps ryml gtest gcov)
-    target_link_libraries(test_evolution deps SQLiteCpp sqlite3 dl ryml gtest gmock gcov)
+    target_link_libraries(test_evolution deps SQLiteCpp sqlite3 dl ryml gtest gmock gcov OpenMP::OpenMP_CXX)
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
