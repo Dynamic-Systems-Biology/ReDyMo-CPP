@@ -64,6 +64,7 @@ class ReplicationForkTest : public ::testing::Test
   protected:
     std::shared_ptr<ReplicationFork> fork;
     std::vector<std::shared_ptr<Chromosome>> chrms;
+    unsigned long long seed = 0;
 
   protected:
     ReplicationForkTest() {}
@@ -89,14 +90,14 @@ class ReplicationForkTest : public ::testing::Test
 
 TEST_F(ReplicationForkTest, AlreadyAttached)
 {
-    GenomicLocation loc(2, chrms[1]);
+    GenomicLocation loc(2, chrms[1], seed);
     fork->attach(loc, 1, 2);
     ASSERT_ANY_THROW(fork->attach(loc, 1, 2));
 }
 
 TEST_F(ReplicationForkTest, AttachAndGetters)
 {
-    GenomicLocation loc(2, chrms[1]);
+    GenomicLocation loc(2, chrms[1], seed);
     fork->attach(loc, 1, 2);
     ASSERT_EQ(fork->get_base(), 2);
     ASSERT_EQ(fork->get_direction(), 1);
@@ -106,7 +107,7 @@ TEST_F(ReplicationForkTest, AttachAndGetters)
 
 TEST_F(ReplicationForkTest, Detach)
 {
-    GenomicLocation loc(2, chrms[1]);
+    GenomicLocation loc(2, chrms[1], seed);
     fork->attach(loc, 1, 2);
     fork->detach();
     ASSERT_EQ(-1, fork->get_base());
@@ -116,7 +117,7 @@ TEST_F(ReplicationForkTest, Detach)
 
 TEST_F(ReplicationForkTest, Advance)
 {
-    GenomicLocation loc(2, chrms[1]);
+    GenomicLocation loc(2, chrms[1], seed);
     fork->attach(loc, 1, 2);
     ASSERT_TRUE(fork->advance(3));
 
@@ -127,7 +128,7 @@ TEST_F(ReplicationForkTest, Advance)
 TEST_F(ReplicationForkTest, IsAttached)
 {
     ASSERT_FALSE(fork->is_attached());
-    GenomicLocation loc(2, chrms[1]);
+    GenomicLocation loc(2, chrms[1], seed);
     fork->attach(loc, 1, 2);
     ASSERT_TRUE(fork->is_attached());
     fork->detach();
@@ -138,7 +139,7 @@ TEST_F(ReplicationForkTest, JustDetached)
 {
     ASSERT_FALSE(fork->get_just_detached());
 
-    GenomicLocation loc(2, chrms[1]);
+    GenomicLocation loc(2, chrms[1], seed);
     fork->attach(loc, 1, 2);
 
     ASSERT_FALSE(fork->get_just_detached());
@@ -146,7 +147,7 @@ TEST_F(ReplicationForkTest, JustDetached)
     fork->detach();
 
     ASSERT_FALSE(fork->get_just_detached());
-    GenomicLocation loc2(298, chrms[1]);
+    GenomicLocation loc2(298, chrms[1], seed);
     fork->attach(loc2, 1, 4);
     fork->advance(5);
 
@@ -156,12 +157,12 @@ TEST_F(ReplicationForkTest, JustDetached)
 TEST_F(ReplicationForkTest, JustDetachedReattach)
 {
     ASSERT_FALSE(fork->get_just_detached());
-    GenomicLocation loc(298, chrms[1]);
+    GenomicLocation loc(298, chrms[1], seed);
     fork->attach(loc, 1, 4);
     fork->advance(5);
 
     ASSERT_TRUE(fork->get_just_detached());
-    GenomicLocation loc2(3, chrms[1]);
+    GenomicLocation loc2(3, chrms[1], seed);
     ASSERT_THROW(fork->attach(loc2, 1, 6), std::runtime_error);
 }
 

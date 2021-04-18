@@ -155,7 +155,7 @@ typedef struct
     unsigned long long timeout   = 0;
     bool dormant                 = false;
 
-    unsigned long long seed         = time(0);
+    unsigned long long seed         = 0;
     std::string name                = "no_name";
     unsigned long long period       = 0;
     unsigned long long constitutive = 0;

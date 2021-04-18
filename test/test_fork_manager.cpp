@@ -67,6 +67,7 @@ class ForkManagerTest : public ::testing::Test
   protected:
     std::shared_ptr<ForkManager> manager;
     std::shared_ptr<Genome> gen;
+    unsigned long long seed = 0;
 
   protected:
     ForkManagerTest() {}
@@ -92,7 +93,7 @@ class ForkManagerTest : public ::testing::Test
 
 TEST_F(ForkManagerTest, CheckConflicts)
 {
-    GenomicLocation loc(1400, gen->chromosomes[0]);
+    GenomicLocation loc(1400, gen->chromosomes[0], seed);
     manager->attach_forks(loc, 10);
     ASSERT_EQ(
         manager->check_replication_transcription_conflicts(1400, 1000, true),
@@ -103,7 +104,7 @@ TEST_F(ForkManagerTest, CheckConflicts)
 
 TEST_F(ForkManagerTest, CheckConflictsReversed)
 {
-    GenomicLocation loc(220, gen->chromosomes[0]);
+    GenomicLocation loc(220, gen->chromosomes[0], seed);
     manager->attach_forks(loc, 10);
     ASSERT_EQ(
         manager->check_replication_transcription_conflicts(140, 100, true),
@@ -114,7 +115,7 @@ TEST_F(ForkManagerTest, CheckConflictsReversed)
 
 TEST_F(ForkManagerTest, AdvanceAttachedForks)
 {
-    GenomicLocation loc(1800, gen->chromosomes[0]);
+    GenomicLocation loc(1800, gen->chromosomes[0], seed);
     manager->attach_forks(loc, 10);
     manager->replication_forks[2]->set_just_detached(true);
     manager->advance_attached_forks(12);
@@ -127,7 +128,7 @@ TEST_F(ForkManagerTest, AdvanceAttachedForks)
 
 TEST_F(ForkManagerTest, AttachForks)
 {
-    GenomicLocation loc(1800, gen->chromosomes[0]);
+    GenomicLocation loc(1800, gen->chromosomes[0], seed);
     manager->attach_forks(loc, 10);
     ASSERT_TRUE(manager->replication_forks[0]->is_attached());
     ASSERT_TRUE(manager->replication_forks[1]->is_attached());

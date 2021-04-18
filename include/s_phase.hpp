@@ -49,9 +49,9 @@ class SPhase
            int timeout, int transcription_period, bool has_dormant,
            std::shared_ptr<DataProvider> data, std::string organism,
            std::string name, std::string output_folder = "output",
-           int seed = 0);
+           unsigned long long seed = 0);
     SPhase(Configuration &configuration, std::shared_ptr<DataProvider> data,
-           int seed = 0);
+           unsigned long long seed = 0);
     ~SPhase();
 
     simulation_stats get_stats();

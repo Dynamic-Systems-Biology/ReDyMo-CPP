@@ -41,7 +41,8 @@ class EvolutionDataProvider : public DataManager
 
   public:
     EvolutionDataProvider(std::string organism, std::string database_path,
-                          std::string mfa_seq_data_path, double p = 0);
+                          std::string mfa_seq_data_path,
+                          unsigned long long seed, double p = 0);
 
     void clone(EvolutionDataProvider &provider);
     void mutate(cl_configuration_data config);

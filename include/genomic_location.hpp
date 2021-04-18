@@ -18,6 +18,7 @@ class GenomicLocation
   public:
     uint base;
     std::shared_ptr<Chromosome> chromosome;
+    unsigned long long seed;
 
   public:
     /*! The constructor.
@@ -27,7 +28,8 @@ class GenomicLocation
      * @throw invalid_argument If base doesn't belong to chromosome.
      * @see Chromosome
      */
-    GenomicLocation(uint base, std::shared_ptr<Chromosome> chromosome);
+    GenomicLocation(uint base, std::shared_ptr<Chromosome> chromosome,
+                    unsigned long long seed);
 
     /*! Queries if the genomic location base has been replicated.
      * @return True if the base is replicated.
@@ -57,6 +59,7 @@ class GenomicLocation
 
     GenomicLocation &operator+=(int bases);
     GenomicLocation operator+(int bases);
+    static void set_seed(unsigned long long seed) { rand_generator.seed(seed); }
 };
 
 #endif

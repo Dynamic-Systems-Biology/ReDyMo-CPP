@@ -2,6 +2,7 @@
 
 #include <c4/yml/std/string.hpp>
 #include <fstream>
+#include <random>
 
 conf_function_map cl_evolution_mutations_genes_functions = {
     PUSH_FUNCS(evolution.mutations.genes.move,
@@ -182,6 +183,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
         default: abort();
         }
     }
+
     if (config.length() > 0) read_configuration_file(config, arguments);
 
     if (dormant >= 0) arguments.dormant = !!dormant;
@@ -204,6 +206,13 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     if (!arguments.timeout)
     {
         throw std::invalid_argument("Argument \"timeout\" (T) is mandatory!");
+    }
+
+    // Set a GLOBAL seed based on a random device (possibly true random number)
+    if (!arguments.seed)
+    {
+        std::random_device rd;
+        arguments.seed = rd();
     }
 
     if (summary)
@@ -250,7 +259,8 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
         std::cout << "Thread count            : " << arguments.threads
                   << std::endl
                   << std::flush;
-        std::cout << "Random seed             : " << arguments.seed << std::endl
+        std::cout << "Seed for the RNG        : "
+                  << arguments.seed << std::endl
                   << std::flush;
     }
 

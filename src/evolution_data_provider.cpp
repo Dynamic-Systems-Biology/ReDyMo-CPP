@@ -15,10 +15,10 @@
 EvolutionDataProvider::EvolutionDataProvider(std::string organism,
                                              std::string database_path,
                                              std::string mfa_seq_data_path,
-                                             double p)
+                                             unsigned long long seed, double p)
     : DataManager(organism, database_path, mfa_seq_data_path, p)
 {
-    rand_generator.seed((long long)this);
+    rand_generator.seed(seed);
     // std::cout << "[DEBUG] Evolution Data Provider created!" << std::endl <<
     // std::flush;
 

@@ -18,7 +18,7 @@ class EvolutionManager
     // This allows us to test private methods and attributes.
     friend class EvolutionTest;
 
-    int seed;
+    unsigned long long seed;
     std::mt19937 rand_generator;
     Configuration &configuration;
 
@@ -33,7 +33,7 @@ class EvolutionManager
     virtual void reproduce();
 
   public:
-    EvolutionManager(Configuration &configuration, int seed);
+    EvolutionManager(Configuration &configuration, unsigned long long seed);
     ~EvolutionManager();
 
     void run_all();
