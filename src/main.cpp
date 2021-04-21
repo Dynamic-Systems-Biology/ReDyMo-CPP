@@ -111,6 +111,9 @@ int main(int argc, char *argv[])
                 #pragma omp parallel for
                 for (long long unsigned int i = 0; i < arg_values.cells; i++)
                 {
+                    // Run all simulations with the same parameters, except for
+                    // seed, otherwise it would be exactly the same simulation
+                    // every time.
                     SPhase *s_phase = new SPhase(
                         arg_values.constitutive, arg_values.resources,
                         arg_values.speed, arg_values.timeout, arg_values.period,
