@@ -32,8 +32,8 @@ EvolutionManager::EvolutionManager(Configuration &configuration,
     for (int i = 0; i < arguments.evolution.population; i++)
         data_providers.push_back(std::make_shared<EvolutionDataProvider>(
             arguments.organism, arguments.data_dir + "/database.sqlite",
-            arguments.data_dir + "/MFA-Seq_" + arguments.organism + "/", seed,
-            arguments.probability));
+            arguments.data_dir + "/MFA-Seq_" + arguments.organism + "/",
+            i ^ seed, arguments.probability));
 
     // Create first generation
     for (int i = 0; i < arguments.evolution.population; i++)

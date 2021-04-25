@@ -2,8 +2,9 @@
 #include <memory>
 #include <stdexcept>
 
-ReplicationFork::ReplicationFork(std::shared_ptr<Genome> genome, uint speed)
-    : genome(genome), chromosome(nullptr)
+ReplicationFork::ReplicationFork(std::shared_ptr<Genome> genome,
+                                 ForkManager *fork_manager, uint speed)
+    : genome(genome), chromosome(nullptr), fork_manager(fork_manager)
 {
     this->speed         = speed;
     this->base          = -1;
@@ -31,6 +32,12 @@ void ReplicationFork::detach(bool problem)
     this->direction  = 0;
     this->chromosome = nullptr;
     if (problem) this->just_detached = true;
+    // increment metrics of detachment
+    // TODO: compare with the actual number of collisions
+    if (problem)
+        fork_manager->metric_times_detached_normal++;
+    else
+        fork_manager->metric_times_detached_collision++;
 }
 
 bool ReplicationFork::advance(uint time)

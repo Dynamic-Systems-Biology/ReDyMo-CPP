@@ -147,6 +147,7 @@ if(BUILD_TESTING)
     add_executable(test_util test/test_util.cpp)
     add_executable(test_configuration test/test_configuration.cpp)
     add_executable(test_evolution test/test_evolution.cpp)
+    add_executable(test_s_phase test/test_s_phase.cpp)
 
     target_link_libraries(simulator deps gtest)
 
@@ -159,6 +160,8 @@ if(BUILD_TESTING)
     target_link_libraries(test_util deps gtest gmock gcov)
     target_link_libraries(test_configuration deps ryml gtest gcov)
     target_link_libraries(test_evolution deps SQLiteCpp sqlite3 dl ryml gtest gmock gcov OpenMP::OpenMP_CXX)
+    target_link_libraries(test_s_phase deps SQLiteCpp sqlite3 gtest gmock gcov dl ryml)
+
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
@@ -169,6 +172,7 @@ if(BUILD_TESTING)
     gtest_discover_tests(test_util)
     gtest_discover_tests(test_configuration)
     gtest_discover_tests(test_evolution)
+
 
     #######
     # Coverage report

@@ -23,7 +23,7 @@ typedef struct
  */
 class SPhase
 {
-  private:
+  protected:
     int origins_range, n_resources, replication_speed, timeout,
         transcription_period;
     bool has_dormant;
@@ -32,7 +32,6 @@ class SPhase
     s_phase_checkpoints_t checkpoint_times;
 
     std::shared_ptr<DataProvider> data;
-    std::vector<std::shared_ptr<Chromosome>> *chromosomes;
     std::shared_ptr<Genome> genome;
     std::shared_ptr<ForkManager> fork_manager;
     std::string organism;
@@ -58,15 +57,12 @@ class SPhase
 
     void output(int sim_number, int time, int iod,
                 std::shared_ptr<Genome> genome);
+
     void semantic_compression_output(int sim_number, int time, int iod,
                                      std::shared_ptr<Genome> genome,
                                      std::string path);
-    void zstd_compression_output(int sim_number, int time, int iod,
-                                 std::shared_ptr<Genome> genome,
-                                 std::string path);
-    void simulate(int sim_number);
 
-    void reset();
+    void simulate(int sim_number);
 
     const s_phase_checkpoints_t getTimes() const;
 };

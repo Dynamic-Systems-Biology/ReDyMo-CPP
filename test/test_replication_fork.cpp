@@ -74,7 +74,8 @@ class ReplicationForkTest : public ::testing::Test
         for (int i = 0; i < 100; i++)
             chrms.push_back(create_chromosome(300, std::to_string(i)));
         std::shared_ptr<Genome> gen = std::make_shared<Genome>(chrms);
-        fork = std::make_shared<ReplicationFork>(gen, 40);
+        ForkManager *fork_manager   = new ForkManager(2, gen, 1);
+        fork = std::make_shared<ReplicationFork>(gen, fork_manager, 40);
     }
 
     void TearDown() {}

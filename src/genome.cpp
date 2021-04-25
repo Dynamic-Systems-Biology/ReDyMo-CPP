@@ -84,6 +84,8 @@ double Genome::average_interorigin_distance()
     uint n_interorigin_spaces = 0;
     for (auto chromosome : chromosomes)
     {
+        // TODO: this +1 should always be added, or only whe there are fired
+        // origins
         n_interorigin_spaces += chromosome->get_n_fired_origins() + 1;
     }
     if (n_interorigin_spaces == 0) return 0;
