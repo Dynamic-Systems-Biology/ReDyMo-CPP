@@ -6,26 +6,16 @@
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
 
-std::mt19937 GenomicLocation::rand_generator = std::mt19937();
 std::uniform_real_distribution<double> GenomicLocation::rand_distribution =
     std::uniform_real_distribution<double>(0, 1);
-bool GenomicLocation::rand_initialized = false;
 
 GenomicLocation::GenomicLocation(uint base,
                                  std::shared_ptr<Chromosome> chromosome,
-                                 unsigned long long seed)
-    : chromosome(chromosome), seed(seed)
+                                 std::mt19937 *rand_generator)
+    : chromosome(chromosome), rand_generator(rand_generator)
 {
     if (base >= chromosome->size())
         throw std::invalid_argument("Base is not inside given chromosome.");
-
-    // Initialize the class' static rand generator a single time, since the seed
-    // comes from main function
-    if (!GenomicLocation::rand_initialized)
-    {
-        GenomicLocation::set_seed(seed);
-        GenomicLocation::rand_initialized = true;
-    }
 
     this->base = base;
 }
@@ -40,7 +30,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 {
     if (!use_constitutive_origin)
     {
-        double chance = rand_distribution(rand_generator);
+        double chance = rand_distribution(*rand_generator);
         return chance < this->chromosome->activation_probability(this->base);
     }
     std::vector<constitutive_origin_t> not_fired_origins;
@@ -131,5 +121,5 @@ GenomicLocation GenomicLocation::operator+(int bases)
     else if (tmp >= chromosome->length)
         tmp = chromosome->length - 1;
 
-    return GenomicLocation(tmp, chromosome, seed);
+    return GenomicLocation(tmp, chromosome, rand_generator);
 }

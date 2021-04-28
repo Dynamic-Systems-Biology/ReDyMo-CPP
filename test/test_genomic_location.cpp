@@ -61,7 +61,7 @@ class GenomicLocationTest : public ::testing::Test
 {
   protected:
     std::shared_ptr<GenomicLocation> gen_loc;
-    unsigned long long seed = 0;
+    std::mt19937 *rand_generator;
 
   protected:
     GenomicLocationTest() {}
@@ -69,7 +69,8 @@ class GenomicLocationTest : public ::testing::Test
     {
         std::shared_ptr<Chromosome> chrm = create_chromosome();
         uint base                        = rand() % chrm->size();
-        gen_loc = std::make_shared<GenomicLocation>(base, chrm, seed);
+        rand_generator                   = new std::mt19937(1);
+        gen_loc = std::make_shared<GenomicLocation>(base, chrm, rand_generator);
     }
 
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 300,
@@ -78,14 +79,14 @@ class GenomicLocationTest : public ::testing::Test
         std::shared_ptr<TestingProvider> provider(new TestingProvider(size));
         return std::make_shared<Chromosome>(id, provider);
     }
-    void TearDown() {}
+    void TearDown() { delete rand_generator; }
 };
 
 TEST_F(GenomicLocationTest, OutOfRangeBase)
 {
-    ASSERT_THROW(GenomicLocation(302, gen_loc->chromosome, seed),
+    ASSERT_THROW(GenomicLocation(302, gen_loc->chromosome, rand_generator),
                  std::invalid_argument);
-    ASSERT_NO_THROW(GenomicLocation(10, gen_loc->chromosome, seed));
+    ASSERT_NO_THROW(GenomicLocation(10, gen_loc->chromosome, rand_generator));
 }
 
 TEST_F(GenomicLocationTest, IsReplicated)
@@ -99,7 +100,7 @@ TEST_F(GenomicLocationTest, WillActivateNonConstitutive)
 {
     double sum                       = 0;
     std::shared_ptr<Chromosome> chrm = create_chromosome(1, "2");
-    GenomicLocation loc              = GenomicLocation(0, chrm, seed);
+    GenomicLocation loc              = GenomicLocation(0, chrm, rand_generator);
 
     for (int i = 0; i < 1000; i++)
         sum += loc.will_activate(false, 1) ? 1 : 0;
@@ -109,7 +110,7 @@ TEST_F(GenomicLocationTest, WillActivateNonConstitutive)
 TEST_F(GenomicLocationTest, WillActivateConstitutive)
 {
     std::shared_ptr<Chromosome> chrm = create_chromosome(100, "3");
-    GenomicLocation loc              = GenomicLocation(0, chrm, seed);
+    GenomicLocation loc              = GenomicLocation(0, chrm, rand_generator);
 
     ASSERT_FALSE(loc.will_activate(true, 138));
     ASSERT_TRUE(loc.will_activate(true, 140));
@@ -119,7 +120,7 @@ TEST_F(GenomicLocationTest, WillActivateConstitutive)
 TEST_F(GenomicLocationTest, WillActivateConstitutiveAllFired)
 {
     std::shared_ptr<Chromosome> chrm = create_chromosome(100, "3");
-    GenomicLocation loc              = GenomicLocation(0, chrm, seed);
+    GenomicLocation loc              = GenomicLocation(0, chrm, rand_generator);
     ASSERT_TRUE(
         loc.put_fired_constitutive_origin((*chrm->constitutive_origins)[0]));
     ASSERT_FALSE(chrm->fired_constitutive_origins->empty());
@@ -171,7 +172,7 @@ TEST_F(GenomicLocationTest, PutFiredInvalidConstitutiveOrigin)
 TEST_F(GenomicLocationTest, SumOperator)
 {
     std::shared_ptr<Chromosome> chrm = create_chromosome(100, "3");
-    GenomicLocation loc(0, chrm, seed);
+    GenomicLocation loc(0, chrm, rand_generator);
 
     EXPECT_EQ((loc + (-1)).base, 0);
     EXPECT_EQ((loc + 100).base, 99);

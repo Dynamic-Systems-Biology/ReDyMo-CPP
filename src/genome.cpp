@@ -47,7 +47,7 @@ std::shared_ptr<GenomicLocation> Genome::random_genomic_location()
 
     uint rand_base = base_distribution(rand_generator);
     return std::make_shared<GenomicLocation>(
-        rand_base, chromosomes[rand_chromosome], this->seed);
+        rand_base, chromosomes[rand_chromosome], &this->rand_generator);
 }
 
 // Actually never used, still here for eventual future use
@@ -67,7 +67,7 @@ std::shared_ptr<GenomicLocation> Genome::random_unreplicated_genomic_location()
     while (chromosomes[rand_chromosome]->base_is_replicated(rand_base));
 
     return std::make_shared<GenomicLocation>(
-        rand_base, chromosomes[rand_chromosome], this->seed);
+        rand_base, chromosomes[rand_chromosome], &this->rand_generator);
 }
 
 bool Genome::is_replicated()

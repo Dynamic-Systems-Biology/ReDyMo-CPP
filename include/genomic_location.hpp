@@ -12,14 +12,12 @@
 class GenomicLocation
 {
   private:
-    static std::mt19937 rand_generator;
+    std::mt19937 *rand_generator;
     static std::uniform_real_distribution<double> rand_distribution;
-    static bool rand_initialized;
 
   public:
     uint base;
     std::shared_ptr<Chromosome> chromosome;
-    unsigned long long seed;
 
   public:
     /*! The constructor.
@@ -30,7 +28,7 @@ class GenomicLocation
      * @see Chromosome
      */
     GenomicLocation(uint base, std::shared_ptr<Chromosome> chromosome,
-                    unsigned long long seed);
+                    std::mt19937 *rand_generator);
 
     /*! Queries if the genomic location base has been replicated.
      * @return True if the base is replicated.
@@ -60,7 +58,6 @@ class GenomicLocation
 
     GenomicLocation &operator+=(int bases);
     GenomicLocation operator+(int bases);
-    static void set_seed(unsigned long long seed) { rand_generator.seed(seed); }
 };
 
 #endif
