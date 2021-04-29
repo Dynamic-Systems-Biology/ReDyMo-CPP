@@ -146,7 +146,7 @@ In this version of ReDyMo, most parameters are mandatory and are listed below:
 
 The three optional parameters are:
 
-- **--constitutive** <range>: When this parameter is provided, a DNA replication must use the set of constitutive origins within the database instead of the probability landscape. `range` is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
+- **--constitutive** <range>: When this parameter is provided, a DNA replication must use **only** the set of constitutive origins within the database instead of the probability landscape. `range` is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
 
 - **--period** <period_value>: Period (in number of simulation iterations) between two consecutive activations (i.e. RNAP binding) of a transcription region. period_value is a positive integer. If this parameter is not set, then the simulation is carried out without transcription.
 

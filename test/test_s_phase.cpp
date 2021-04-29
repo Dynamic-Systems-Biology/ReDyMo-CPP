@@ -132,7 +132,7 @@ TEST_F(SPhaseTest, WithoutTranscription)
             (std::istreambuf_iterator<char>(chrm_0_times)),
             std::istreambuf_iterator<char>());
 
-        ASSERT_EQ(replication_times, chrms[0]->to_string());
+        EXPECT_EQ(replication_times, chrms[0]->to_string());
 
         uint n_fired_origins = 0;
 
@@ -143,15 +143,14 @@ TEST_F(SPhaseTest, WithoutTranscription)
 
         std::shared_ptr<ForkManager> fork_manager = s_phase->get_fork_manager();
 
-        ASSERT_EQ(fork_manager->metric_times_attached, 2);
-        ASSERT_EQ(fork_manager->metric_times_detached_normal, 1);
-        ASSERT_EQ(fork_manager->metric_times_detached_collision, 0);
-        ASSERT_NEAR(s_phase->get_genome()->average_interorigin_distance(),
+        EXPECT_EQ(fork_manager->metric_times_attached, 2);
+        EXPECT_EQ(fork_manager->metric_times_detached_normal, 1);
+        EXPECT_EQ(fork_manager->metric_times_detached_collision, 0);
+        EXPECT_NEAR(s_phase->get_genome()->average_interorigin_distance(),
                     75.000, 0.001);
-        ASSERT_EQ(s_phase->get_stats().collisions, 0);
-        ASSERT_EQ(s_phase->get_stats().time, 88);
-
-        ASSERT_EQ(n_fired_origins, 1);
+        EXPECT_EQ(s_phase->get_stats().collisions, 0);
+        EXPECT_EQ(s_phase->get_stats().time, 88);
+        EXPECT_EQ(n_fired_origins, 1);
 
         checkpoint_times.push_back(
             std::pair<int, s_phase_checkpoints_t>(i, s_phase->getTimes()));
@@ -236,7 +235,7 @@ TEST_F(SPhaseTest, WithTranscription)
             (std::istreambuf_iterator<char>(chrm_0_times)),
             std::istreambuf_iterator<char>());
 
-        ASSERT_EQ(replication_times, chrms[0]->to_string());
+        EXPECT_EQ(replication_times, chrms[0]->to_string());
 
         uint n_fired_origins = 0;
 
@@ -247,14 +246,14 @@ TEST_F(SPhaseTest, WithTranscription)
 
         std::shared_ptr<ForkManager> fork_manager = s_phase->get_fork_manager();
 
-        ASSERT_EQ(fork_manager->metric_times_attached, 8);
-        ASSERT_EQ(fork_manager->metric_times_detached_normal, 4);
-        ASSERT_EQ(fork_manager->metric_times_detached_collision, 3);
-        ASSERT_NEAR(s_phase->get_genome()->average_interorigin_distance(), 30.0,
+        EXPECT_EQ(fork_manager->metric_times_attached, 6);
+        EXPECT_EQ(fork_manager->metric_times_detached_normal, 3);
+        EXPECT_EQ(fork_manager->metric_times_detached_collision, 2);
+        EXPECT_NEAR(s_phase->get_genome()->average_interorigin_distance(), 37.5,
                     0.001);
-        ASSERT_EQ(s_phase->get_stats().collisions, 3);
-        ASSERT_EQ(s_phase->get_stats().time, 405);
-        ASSERT_EQ(n_fired_origins, 4);
+        EXPECT_EQ(s_phase->get_stats().collisions, 2);
+        EXPECT_EQ(s_phase->get_stats().time, 182);
+        EXPECT_EQ(n_fired_origins, 3);
 
         checkpoint_times.push_back(
             std::pair<int, s_phase_checkpoints_t>(i, s_phase->getTimes()));
@@ -267,7 +266,7 @@ TEST_F(SPhaseTest, WithTranscription)
 
 // This test was made comparing the results obtained with the simulator code at
 // the commit with hash: 77574af4fb61cdc5211e6bd1274298a38a0f17c7
-TEST_F(SPhaseTest, ConstitutiveNoTranscription)
+TEST_F(SPhaseTest, ConstitutiveWithoutTranscription)
 {
     std::vector<const char *> const_argv_mock = {"program_name",
                                                  "--gpu",
@@ -292,7 +291,7 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription)
                                                  "1",
                                                  "--seed",
                                                  "1",
-                                                 "--period",
+                                                 "--constitutive",
                                                  "15"};
 
     std::vector<char *> argv_mock = unconst_string_vector(const_argv_mock);
@@ -351,23 +350,14 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription)
 
         std::shared_ptr<ForkManager> fork_manager = s_phase->get_fork_manager();
 
-        printf("attch:%u\n", fork_manager->metric_times_attached);
-        printf("dtch norml:%u\n", fork_manager->metric_times_detached_normal);
-        printf("dtch coll:%u\n", fork_manager->metric_times_detached_collision);
-        printf("IOD:%f\n",
-               s_phase->get_genome()->average_interorigin_distance());
-        printf("coll:%u\n", s_phase->get_stats().collisions);
-        printf("ite:%u\n", s_phase->get_stats().time);
-        printf("NFO:%u\n", n_fired_origins);
-
-        ASSERT_EQ(fork_manager->metric_times_attached, 6);
-        ASSERT_EQ(fork_manager->metric_times_detached_normal, 3);
-        ASSERT_EQ(fork_manager->metric_times_detached_collision, 2);
-        ASSERT_NEAR(s_phase->get_genome()->average_interorigin_distance(), 37.5,
+        EXPECT_EQ(fork_manager->metric_times_attached, 2);
+        EXPECT_EQ(fork_manager->metric_times_detached_normal, 1);
+        EXPECT_EQ(fork_manager->metric_times_detached_collision, 0);
+        EXPECT_NEAR(s_phase->get_genome()->average_interorigin_distance(), 75.0,
                     0.001);
-        ASSERT_EQ(s_phase->get_stats().collisions, 2);
-        ASSERT_EQ(s_phase->get_stats().time, 136);
-        ASSERT_EQ(n_fired_origins, 3);
+        EXPECT_EQ(s_phase->get_stats().collisions, 0);
+        EXPECT_EQ(s_phase->get_stats().time, 90);
+        EXPECT_EQ(n_fired_origins, 1);
 
         checkpoint_times.push_back(
             std::pair<int, s_phase_checkpoints_t>(i, s_phase->getTimes()));
@@ -380,7 +370,7 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription)
 
 // This test was made comparing the results obtained with the simulator code at
 // the commit with hash: 77574af4fb61cdc5211e6bd1274298a38a0f17c7
-TEST_F(SPhaseTest, ConstitutiveNoTranscription2)
+TEST_F(SPhaseTest, ConstitutiveWithTranscription)
 {
     std::vector<const char *> const_argv_mock = {"program_name",
                                                  "--gpu",
@@ -396,7 +386,7 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription2)
                                                  "--name",
                                                  "test",
                                                  "--timeout",
-                                                 "1000000",
+                                                 "100",
                                                  "--data-dir",
                                                  "../data/",
                                                  "--output",
@@ -405,6 +395,8 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription2)
                                                  "1",
                                                  "--seed",
                                                  "1",
+                                                 "--constitutive",
+                                                 "15",
                                                  "--period",
                                                  "15"};
 
@@ -436,6 +428,8 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription2)
             arg_values.timeout, arg_values.period, arg_values.dormant, data,
             arg_values.organism, arg_values.name, arg_values.output, i ^ seed);
 
+        // OBS: this simulation will timeout because of its configuration, hence
+        // the small limit
         s_phase->simulate(i);
 
         // Compare with values that were gotten from a simulation ran with the
@@ -447,13 +441,13 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription2)
         std::ifstream chrm_0_times;
         chrm_0_times.open(
             "../test/expected_outputs/"
-            "dummy01_times_constitutive_without_transcription.out");
+            "dummy01_times_constitutive_with_transcription.out");
 
         std::string replication_times(
             (std::istreambuf_iterator<char>(chrm_0_times)),
             std::istreambuf_iterator<char>());
 
-        // ASSERT_EQ(replication_times, chrms[0]->to_string());
+        ASSERT_EQ(replication_times, chrms[0]->to_string());
 
         uint n_fired_origins = 0;
 
@@ -464,23 +458,14 @@ TEST_F(SPhaseTest, ConstitutiveNoTranscription2)
 
         std::shared_ptr<ForkManager> fork_manager = s_phase->get_fork_manager();
 
-        printf("attch:%u\n", fork_manager->metric_times_attached);
-        printf("dtch norml:%u\n", fork_manager->metric_times_detached_normal);
-        printf("dtch coll:%u\n", fork_manager->metric_times_detached_collision);
-        printf("IOD:%f\n",
-               s_phase->get_genome()->average_interorigin_distance());
-        printf("coll:%u\n", s_phase->get_stats().collisions);
-        printf("ite:%u\n", s_phase->get_stats().time);
-        printf("NFO:%u\n", n_fired_origins);
-
-        ASSERT_EQ(fork_manager->metric_times_attached, 6);
-        ASSERT_EQ(fork_manager->metric_times_detached_normal, 3);
-        ASSERT_EQ(fork_manager->metric_times_detached_collision, 2);
-        ASSERT_NEAR(s_phase->get_genome()->average_interorigin_distance(), 37.5,
+        EXPECT_EQ(fork_manager->metric_times_attached, 2);
+        EXPECT_EQ(fork_manager->metric_times_detached_normal, 1);
+        EXPECT_EQ(fork_manager->metric_times_detached_collision, 1);
+        EXPECT_NEAR(s_phase->get_genome()->average_interorigin_distance(), 75.0,
                     0.001);
-        ASSERT_EQ(s_phase->get_stats().collisions, 2);
-        ASSERT_EQ(s_phase->get_stats().time, 136);
-        ASSERT_EQ(n_fired_origins, 3);
+        EXPECT_EQ(s_phase->get_stats().collisions, 1);
+        EXPECT_EQ(s_phase->get_stats().time, 100);
+        EXPECT_EQ(n_fired_origins, 1);
 
         checkpoint_times.push_back(
             std::pair<int, s_phase_checkpoints_t>(i, s_phase->getTimes()));
