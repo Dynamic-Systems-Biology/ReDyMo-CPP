@@ -189,5 +189,11 @@ if(BUILD_TESTING)
             EXCLUDE "thirdparty/*" "include/*" "test/*"
             DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_configuration test_evolution test_s_phase
         )
+        setup_target_for_coverage_lcov(
+            NAME coverage_integrated_tests
+            EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/build/test_s_phase
+            EXCLUDE "thirdparty/*" "include/*" "test/*"
+            DEPENDENCIES test_s_phase
+        )
     endif()
 endif()

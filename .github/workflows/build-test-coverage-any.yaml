@@ -79,7 +79,7 @@ jobs:
 
         # Run coverage before tests so if tests fail, coverage report is still
         # generated.
-      - name: Coverage
+      - name: Coverage for Unit Tests
         working-directory: ${{github.workspace}}/build
         shell: bash
         run: make coverage
@@ -89,13 +89,36 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ${{github.workspace}}/build/coverage.info
-          flags: unittests # optional
+          flags: unit # optional
           fail_ci_if_error: false
           verbose: true
 
-      - name: Test
+        # Run coverage before tests so if tests fail, coverage report is still
+        # generated.
+      - name: Coverage for Integrated Tests
+        working-directory: ${{github.workspace}}/build
+        shell: bash
+        run: make coverage_integrated_tests
+
+        # Upload coverage results to Codecov
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{github.workspace}}/build/coverage_integrated_tests.info
+          flags: integrated # optional
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Unit Tests
         working-directory: ${{github.workspace}}/build
         shell: bash
         # Execute tests defined by the CMake configuration.
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: make test
+
+      - name: Integrated Tests
+        working-directory: ${{github.workspace}}/build
+        shell: bash
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ./test_s_phase
