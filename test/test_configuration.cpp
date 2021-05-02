@@ -210,6 +210,7 @@ TEST_F(ConfigurationTest, ValidEvolutionConfigFile)
     expected.dormant                                       = true;
     expected.name                                          = "abc";
     expected.period                                        = 1000;
+    expected.seed                                          = 3;
     expected.evolution.population                          = 2;
     expected.evolution.generations                         = 2;
     expected.evolution.survivors                           = 1;
@@ -237,6 +238,8 @@ TEST_F(ConfigurationTest, ValidEvolutionConfigFile)
     optind = 1;
     cl_configuration_data result;
     result = Configuration(argv_config.size(), argv_config.data()).arguments();
+    EXPECT_TRUE(expected == result);
+    EXPECT_TRUE(expected.evolution == result.evolution);
     ASSERT_EQ(expected, result);
 }
 

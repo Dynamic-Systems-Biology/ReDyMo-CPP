@@ -9,6 +9,7 @@ parameters:
   period: 1000
   timeout: 100000
   dormant: true
+  seed: 3
 
   evolution: # Evolution simulator data
     population: 2
