@@ -3,14 +3,21 @@
 
 #include "replication_fork.hpp"
 #include "util.hpp"
+#include "genome.hpp"
 #include <map>
 #include <vector>
+#include <memory>
+
+// Forward declaration
+class ReplicationFork;
 
 class ForkManager
 {
   public:
     uint n_forks, n_free_forks;
     std::vector<std::shared_ptr<ReplicationFork>> replication_forks;
+    uint metric_times_attached, metric_times_detached_normal,
+        metric_times_detached_collision;
 
   public:
     ForkManager(uint n_forks, std::shared_ptr<Genome> genome, uint speed);

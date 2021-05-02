@@ -2,17 +2,35 @@
 
 #include <c4/yml/std/string.hpp>
 #include <fstream>
+#include <random>
+
+conf_function_map cl_evolution_mutations_genes_move_functions = {
+    PUSH_D(evolution.mutations.genes.move.prob),
+    PUSH_D(evolution.mutations.genes.move.std),
+};
+
+conf_function_map cl_evolution_mutitons_genes_swap_functions = {
+    PUSH_D(evolution.mutations.genes.swap.prob),
+};
 
 conf_function_map cl_evolution_mutations_genes_functions = {
     PUSH_FUNCS(evolution.mutations.genes.move,
-               (conf_function_map{
-                   PUSH_D(evolution.mutations.genes.move.prob),
-                   PUSH_D(evolution.mutations.genes.move.std),
-               })),
+               cl_evolution_mutations_genes_move_functions),
     PUSH_FUNCS(evolution.mutations.genes.swap,
-               (conf_function_map{
-                   PUSH_D(evolution.mutations.genes.swap.prob),
-               })),
+               cl_evolution_mutitons_genes_swap_functions),
+};
+
+conf_function_map
+    cl_evolution_mutations_probability_landscape_change_mean_functions = {
+        PUSH_D(evolution.mutations.probability_landscape.change_mean.prob),
+        PUSH_D(evolution.mutations.probability_landscape.change_mean.std),
+};
+
+conf_function_map
+    cl_evolution_mutations_probability_landscape_change_std_functions = {
+        PUSH_D(evolution.mutations.probability_landscape.change_std.prob),
+        PUSH_D(evolution.mutations.probability_landscape.change_std.std),
+        PUSH_D(evolution.mutations.probability_landscape.change_std.max),
 };
 
 conf_function_map cl_evolution_mutations_probability_landscape_functions = {
@@ -20,58 +38,66 @@ conf_function_map cl_evolution_mutations_probability_landscape_functions = {
     PUSH_D(evolution.mutations.probability_landscape.del),
     PUSH_FUNCS(
         evolution.mutations.probability_landscape.change_mean,
-        (conf_function_map{
-            PUSH_D(evolution.mutations.probability_landscape.change_mean.prob),
-            PUSH_D(evolution.mutations.probability_landscape.change_mean.std),
-        })),
+        cl_evolution_mutations_probability_landscape_change_mean_functions),
     PUSH_FUNCS(
         evolution.mutations.probability_landscape.change_std,
-        (conf_function_map{
-            PUSH_D(evolution.mutations.probability_landscape.change_std.prob),
-            PUSH_D(evolution.mutations.probability_landscape.change_std.std),
-            PUSH_D(evolution.mutations.probability_landscape.change_std.max),
-        })),
+        cl_evolution_mutations_probability_landscape_change_std_functions),
+};
+
+conf_function_map cl_evolution_mutations_functions = {
+    PUSH_FUNCS(evolution.mutations.probability_landscape,
+               cl_evolution_mutations_probability_landscape_functions),
+    PUSH_FUNCS(evolution.mutations.genes,
+               cl_evolution_mutations_genes_functions),
+};
+
+conf_function_map cl_evolution_fitness_min_coll_functions = {
+    PUSH_D(evolution.fitness.min_coll.weight),
+    PUSH_STR(evolution.fitness.min_coll.gene),
+};
+
+conf_function_map cl_evolution_fitness_max_coll_functions = {
+    PUSH_D(evolution.fitness.max_coll.weight),
+    PUSH_STR(evolution.fitness.max_coll.gene),
+};
+
+conf_function_map cl_evolution_fitness_functions = {
+    PUSH_D(evolution.fitness.min_sphase),
+    PUSH_D(evolution.fitness.match_mfaseq),
+    PUSH_D(evolution.fitness.max_coll_all),
+    PUSH_D(evolution.fitness.min_coll_all),
+    PUSH_FUNCS(evolution.fitness.max_coll,
+               cl_evolution_fitness_max_coll_functions),
+    PUSH_FUNCS(evolution.fitness.min_coll,
+               cl_evolution_fitness_min_coll_functions),
 };
 
 conf_function_map cl_evolution_functions = {
-    PUSH_ULL(evolution.population), PUSH_ULL(evolution.generations),
+    PUSH_ULL(evolution.population),
+    PUSH_ULL(evolution.generations),
     PUSH_ULL(evolution.survivors),
-    PUSH_FUNCS(
-        evolution.mutations,
-        (conf_function_map{
-            PUSH_FUNCS(evolution.mutations.probability_landscape,
-                       cl_evolution_mutations_probability_landscape_functions),
-            PUSH_FUNCS(evolution.mutations.genes,
-                       cl_evolution_mutations_genes_functions),
-        })),
-    PUSH_FUNCS(evolution.fitness,
-               (conf_function_map{
-                   PUSH_D(evolution.fitness.min_sphase),
-                   PUSH_D(evolution.fitness.match_mfaseq),
-                   PUSH_D(evolution.fitness.max_coll_all),
-                   PUSH_D(evolution.fitness.min_coll_all),
-                   PUSH_FUNCS(evolution.fitness.max_coll,
-                              (conf_function_map{
-                                  PUSH_D(evolution.fitness.max_coll.weight),
-                                  PUSH_STR(evolution.fitness.max_coll.gene),
-                              })),
-
-                   PUSH_FUNCS(evolution.fitness.min_coll,
-                              (conf_function_map{
-                                  PUSH_D(evolution.fitness.max_coll.weight),
-                                  PUSH_STR(evolution.fitness.max_coll.gene),
-                              }))}))};
+    PUSH_FUNCS(evolution.mutations, cl_evolution_mutations_functions),
+    PUSH_FUNCS(evolution.fitness, cl_evolution_fitness_functions),
+};
 
 conf_function_map cl_configuration_functions = {
-    PUSH_ULL(cells),        PUSH_STR(organism),
-    PUSH_ULL(resources),    PUSH_ULL(speed),
-    PUSH_ULL(timeout),      PUSH_BOOL(dormant),
-    PUSH_STR(name),         PUSH_ULL(period),
-    PUSH_ULL(constitutive), PUSH_STR(data_dir),
-    PUSH_D(probability),    PUSH_STR(output),
-    PUSH_ULL(threads),      PUSH_FUNCS(evolution, cl_evolution_functions)};
+    PUSH_ULL(cells),
+    PUSH_STR(organism),
+    PUSH_ULL(resources),
+    PUSH_ULL(speed),
+    PUSH_ULL(timeout),
+    PUSH_BOOL(dormant),
+    PUSH_STR(name),
+    PUSH_ULL(period),
+    PUSH_ULL(constitutive),
+    PUSH_STR(data_dir),
+    PUSH_D(probability),
+    PUSH_STR(output),
+    PUSH_ULL(threads),
+    PUSH_ULL(seed),
+    PUSH_FUNCS(evolution, cl_evolution_functions)};
 
-void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
+void read_conf_yml(ryml::NodeRef &base, cl_configuration_data &arguments,
                    conf_function_map &function_map,
                    std::function<void(std::string)> on_unknown)
 {
@@ -81,7 +107,7 @@ void read_conf_yml(ryml::NodeRef base, cl_configuration_data &arguments,
         auto val = std::string();
 
         c4::from_chars(ref.key(), &key);
-        c4::from_chars(ref.val(), &val);
+        if (ref.has_val()) c4::from_chars(ref.val(), &val);
 
         // Call callback on unknown
         if (function_map.find(key) == function_map.end())
@@ -182,14 +208,14 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
         default: abort();
         }
     }
+
     if (config.length() > 0) read_configuration_file(config, arguments);
 
-    if (dormant>=0)
-        arguments.dormant = !!dormant;
+    if (dormant >= 0) arguments.dormant = !!dormant;
 
     if (!arguments.cells)
     {
-       throw std::invalid_argument("Argument \"cells\" (c) is mandatory!");
+        throw std::invalid_argument("Argument \"cells\" (c) is mandatory!");
     }
 
     if (!arguments.organism.length())
@@ -205,6 +231,13 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     if (!arguments.timeout)
     {
         throw std::invalid_argument("Argument \"timeout\" (T) is mandatory!");
+    }
+
+    // Set a GLOBAL seed based on a random device (possibly true random number)
+    if (!arguments.seed)
+    {
+        std::random_device rd;
+        arguments.seed = rd();
     }
 
     if (summary)
@@ -251,7 +284,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
         std::cout << "Thread count            : " << arguments.threads
                   << std::endl
                   << std::flush;
-        std::cout << "Random seed             : " << arguments.seed << std::endl
+        std::cout << "Seed for the RNG        : " << arguments.seed << std::endl
                   << std::flush;
     }
 
@@ -289,7 +322,33 @@ Configuration::read_configuration_file(std::string filename,
 
 bool operator==(const cl_evolution_data &a, const cl_evolution_data &b)
 {
-    return a.generations == b.generations;
+    return a.population == b.population && a.generations == b.generations &&
+           a.survivors == b.survivors &&
+           a.mutations.probability_landscape.add ==
+               b.mutations.probability_landscape.add &&
+           a.mutations.probability_landscape.del ==
+               b.mutations.probability_landscape.del &&
+           a.mutations.probability_landscape.change_mean.prob ==
+               b.mutations.probability_landscape.change_mean.prob &&
+           a.mutations.probability_landscape.change_mean.std ==
+               b.mutations.probability_landscape.change_mean.std &&
+           a.mutations.probability_landscape.change_std.prob ==
+               b.mutations.probability_landscape.change_std.prob &&
+           a.mutations.probability_landscape.change_std.std ==
+               b.mutations.probability_landscape.change_std.std &&
+           a.mutations.probability_landscape.change_std.max ==
+               b.mutations.probability_landscape.change_std.max &&
+           a.mutations.genes.move.prob == b.mutations.genes.move.prob &&
+           a.mutations.genes.move.std == b.mutations.genes.move.std &&
+           a.mutations.genes.swap.prob == b.mutations.genes.swap.prob &&
+           a.fitness.min_sphase == b.fitness.min_sphase &&
+           a.fitness.match_mfaseq == b.fitness.match_mfaseq &&
+           a.fitness.max_coll_all == b.fitness.max_coll_all &&
+           a.fitness.min_coll_all == b.fitness.min_coll_all &&
+           a.fitness.max_coll.gene == b.fitness.max_coll.gene &&
+           a.fitness.max_coll.weight == b.fitness.max_coll.weight &&
+           a.fitness.min_coll.gene == b.fitness.min_coll.gene &&
+           a.fitness.min_coll.weight == b.fitness.min_coll.weight;
 }
 
 bool operator==(const cl_configuration_data &a, const cl_configuration_data &b)

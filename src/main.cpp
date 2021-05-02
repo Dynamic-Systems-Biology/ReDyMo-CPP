@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 
         cl_configuration_data arg_values = config.arguments();
 
-        srand(time(NULL));
+        srand(arg_values.seed);
 
         omp_set_num_threads(arg_values.threads);
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
             if (gpu)
             {
-#ifdef GPU_ENABLED
+            #ifdef GPU_ENABLED
                 std::cout << std::endl;
 
                 // Select Platform
@@ -99,18 +99,21 @@ int main(int argc, char *argv[])
 
                     s_phase.simulate(i);
                 }
-#endif
+            #endif
             }
             else
             {
                 std::vector<std::pair<int, s_phase_checkpoints_t>>
                     checkpoint_times;
 
-                int seed = arg_values.seed;
+                unsigned long long seed = arg_values.seed;
 
-#pragma omp parallel for
+                #pragma omp parallel for
                 for (long long unsigned int i = 0; i < arg_values.cells; i++)
                 {
+                    // Run all simulations with the same parameters, except for
+                    // seed, otherwise it would be exactly the same simulation
+                    // every time.
                     SPhase *s_phase = new SPhase(
                         arg_values.constitutive, arg_values.resources,
                         arg_values.speed, arg_values.timeout, arg_values.period,

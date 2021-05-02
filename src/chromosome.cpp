@@ -104,6 +104,7 @@ bool Chromosome::replicate(int start, int end, int time)
             strand[base] = time;
             n_replicated_bases++;
         }
+        // if the base was already replicated
         else if (base != start)
         {
             normal_replication = false;

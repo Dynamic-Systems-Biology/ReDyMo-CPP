@@ -67,6 +67,7 @@ class ForkManagerTest : public ::testing::Test
   protected:
     std::shared_ptr<ForkManager> manager;
     std::shared_ptr<Genome> gen;
+    std::mt19937 *rand_generator;
 
   protected:
     ForkManagerTest() {}
@@ -77,9 +78,12 @@ class ForkManagerTest : public ::testing::Test
         chrms[0] = create_chromosome(3000, "2");
         gen      = std::make_shared<Genome>(chrms);
         manager  = std::make_shared<ForkManager>(3, gen, 15);
+        rand_generator = new std::mt19937(1);
     }
 
-    void TearDown() {}
+    void TearDown() {
+        delete rand_generator;
+    }
 
     std::shared_ptr<Chromosome> create_chromosome(uint size      = 3000,
                                                   std::string id = "1")
@@ -92,7 +96,7 @@ class ForkManagerTest : public ::testing::Test
 
 TEST_F(ForkManagerTest, CheckConflicts)
 {
-    GenomicLocation loc(1400, gen->chromosomes[0]);
+    GenomicLocation loc(1400, gen->chromosomes[0], rand_generator);
     manager->attach_forks(loc, 10);
     ASSERT_EQ(
         manager->check_replication_transcription_conflicts(1400, 1000, true),
@@ -103,7 +107,7 @@ TEST_F(ForkManagerTest, CheckConflicts)
 
 TEST_F(ForkManagerTest, CheckConflictsReversed)
 {
-    GenomicLocation loc(220, gen->chromosomes[0]);
+    GenomicLocation loc(220, gen->chromosomes[0], rand_generator);
     manager->attach_forks(loc, 10);
     ASSERT_EQ(
         manager->check_replication_transcription_conflicts(140, 100, true),
@@ -114,7 +118,7 @@ TEST_F(ForkManagerTest, CheckConflictsReversed)
 
 TEST_F(ForkManagerTest, AdvanceAttachedForks)
 {
-    GenomicLocation loc(1800, gen->chromosomes[0]);
+    GenomicLocation loc(1800, gen->chromosomes[0], rand_generator);
     manager->attach_forks(loc, 10);
     manager->replication_forks[2]->set_just_detached(true);
     manager->advance_attached_forks(12);
@@ -127,7 +131,7 @@ TEST_F(ForkManagerTest, AdvanceAttachedForks)
 
 TEST_F(ForkManagerTest, AttachForks)
 {
-    GenomicLocation loc(1800, gen->chromosomes[0]);
+    GenomicLocation loc(1800, gen->chromosomes[0], rand_generator);
     manager->attach_forks(loc, 10);
     ASSERT_TRUE(manager->replication_forks[0]->is_attached());
     ASSERT_TRUE(manager->replication_forks[1]->is_attached());

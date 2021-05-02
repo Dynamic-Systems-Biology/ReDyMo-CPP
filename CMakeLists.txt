@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.9)
 project(ReDyMo)
 
 #######
@@ -13,7 +13,6 @@ execute_process(COMMAND git submodule foreach --recursive git submodule update -
 #######
 # Declare our custom options
 #######
-SET(CUSTOM_BUILD_TYPE "Release" CACHE STRING "Sets custom comp flags")
 OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
 OPTION(BUILD_TESTING "Wether to build the tests." ON)
 OPTION(COVERAGE "Wether to configure test coverage report." OFF)
@@ -21,16 +20,38 @@ OPTION(COVERAGE "Wether to configure test coverage report." OFF)
 #######
 # Set flags for our custom build types
 #######
-if(CUSTOM_BUILD_TYPE STREQUAL Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g -pg")
-elseif(CUSTOM_BUILD_TYPE STREQUAL Performance)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -Ofast -march=native -frename-registers")
+set(CMAKE_CXX_FLAGS_DEBUG "-Wall -O0 -g -pg" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_COVERAGE "-Wall -O0 -g -pg" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_PERFORMANCE "-Wall -Ofast -march=native" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-w -O3" CACHE STRING "" FORCE)
+
+mark_as_advanced(
+    CMAKE_CXX_FLAGS_DEBUG
+    CMAKE_CXX_FLAGS_COVERAGE
+    CMAKE_CXX_FLAGS_PERFORMANCE
+    CMAKE_CXX_FLAGS_RELEASE
+)
+
+if(NOT CMAKE_BUILD_TYPE)
+   set(CMAKE_BUILD_TYPE Debug
+       CACHE STRING "Choose the type of build : None Debug Coverage Release Performace."
+       FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+message("* Current build type is : ${CMAKE_BUILD_TYPE}")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Performance")
     set(COVERAGE OFF)
-elseif(CUSTOM_BUILD_TYPE STREQUAL Development)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fopenmp -g")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -fopenmp -O3")
+    message("* Performance BUILD TYPE -> COVERAGE SET TO OFF")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    set(COVERAGE ON)
+    message("* Coverage BUILD TYPE -> COVERAGE SET TO ON")
 endif()
+
+
+#######
+# OpenMP
+#######
+find_package(OpenMP)
 
 #######
 # OpenCL
@@ -94,14 +115,8 @@ if (BUILD_GPGPU)
     )
 endif()
 
-message("")
-message("================")
-message("Current CXX flags: ${CMAKE_CXX_FLAGS}")
-message("================")
-message("")
-
 add_executable(simulator src/main.cpp)
-target_link_libraries(simulator deps SQLiteCpp libzstd_static sqlite3 pthread dl ryml)
+target_link_libraries(simulator deps SQLiteCpp libzstd_static sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
 
 if (BUILD_GPGPU)
     target_link_libraries(simulator gpudeps ${OpenCL_LIBRARY})
@@ -129,8 +144,9 @@ if(BUILD_TESTING)
     add_executable(test_replication_fork test/test_replication_fork.cpp)
     add_executable(test_fork_manager test/test_fork_manager.cpp)
     add_executable(test_data_manager test/test_data_manager.cpp)
-    add_executable(test_util test/test_util.cpp)
     add_executable(test_configuration test/test_configuration.cpp)
+    add_executable(test_evolution test/test_evolution.cpp)
+    add_executable(test_s_phase test/test_s_phase.cpp)
 
     target_link_libraries(simulator deps gtest)
 
@@ -140,8 +156,10 @@ if(BUILD_TESTING)
     target_link_libraries(test_replication_fork deps libzstd_static gtest gcov)
     target_link_libraries(test_fork_manager deps libzstd_static gtest gcov)
     target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl gcov)
-    target_link_libraries(test_util deps gtest gmock gcov)
     target_link_libraries(test_configuration deps ryml gtest gcov)
+    target_link_libraries(test_evolution deps SQLiteCpp sqlite3 dl ryml gtest gmock gcov OpenMP::OpenMP_CXX)
+    target_link_libraries(test_s_phase deps SQLiteCpp sqlite3 gtest gmock gcov dl ryml)
+
 
     gtest_discover_tests(test_chromosome)
     gtest_discover_tests(test_genome)
@@ -149,8 +167,9 @@ if(BUILD_TESTING)
     gtest_discover_tests(test_replication_fork)
     gtest_discover_tests(test_fork_manager)
     gtest_discover_tests(test_data_manager)
-    gtest_discover_tests(test_util)
     gtest_discover_tests(test_configuration)
+    gtest_discover_tests(test_evolution)
+
 
     #######
     # Coverage report
@@ -168,7 +187,13 @@ if(BUILD_TESTING)
             NAME coverage
             EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/script/ctest_no_fail.sh
             EXCLUDE "thirdparty/*" "include/*" "test/*"
-            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_util test_configuration
+            DEPENDENCIES test_chromosome test_genome test_genomic_location test_replication_fork test_fork_manager test_data_manager test_configuration test_evolution test_s_phase
+        )
+        setup_target_for_coverage_lcov(
+            NAME coverage_integrated_tests
+            EXECUTABLE ${CMAKE_CURRENT_LIST_DIR}/build/test_s_phase
+            EXCLUDE "thirdparty/*" "include/*" "test/*"
+            DEPENDENCIES test_s_phase
         )
     endif()
 endif()

@@ -8,12 +8,6 @@
 
 #include "evolution.hpp"
 
-typedef struct
-{
-    double collisions = 0;
-    double time       = 0;
-} instance_metrics;
-
 double calculate_fitness(instance_metrics metrics,
                          cl_evolution_data config_data)
 {
@@ -26,7 +20,8 @@ double calculate_fitness(instance_metrics metrics,
     return result;
 }
 
-EvolutionManager::EvolutionManager(Configuration &configuration, int seed)
+EvolutionManager::EvolutionManager(Configuration &configuration,
+                                   unsigned long long seed)
     : configuration(configuration), seed(seed)
 {
     rand_generator.seed(seed);
@@ -38,7 +33,7 @@ EvolutionManager::EvolutionManager(Configuration &configuration, int seed)
         data_providers.push_back(std::make_shared<EvolutionDataProvider>(
             arguments.organism, arguments.data_dir + "/database.sqlite",
             arguments.data_dir + "/MFA-Seq_" + arguments.organism + "/",
-            arguments.probability));
+            i ^ seed, arguments.probability));
 
     // Create first generation
     for (int i = 0; i < arguments.evolution.population; i++)
@@ -120,15 +115,16 @@ void EvolutionManager::reproduce()
     int to_kill =
         arguments.evolution.population - arguments.evolution.survivors;
 
-    int reproduced = 0;
+    int killed = 0;
 
-    while (reproduced < to_kill)
+    while (killed < to_kill)
     {
-        auto to_kill = killing_roulette(rand_generator);
-        if (!data_providers[to_kill]->isdead()) // Check if organism is not dead
+        auto kill_index = killing_roulette(rand_generator);
+        if (!data_providers[kill_index]
+                 ->isdead()) // Check if organism is not dead
         {
-            data_providers[to_kill]->die();
-            reproduced++;
+            data_providers[kill_index]->die();
+            killed++;
         }
     }
 
