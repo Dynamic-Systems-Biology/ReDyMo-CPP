@@ -6,14 +6,13 @@
 #include "chromosome.hpp"
 #include "genomic_location.hpp"
 
-std::random_device rand_device;
-std::mt19937 GenomicLocation::rand_generator = std::mt19937(rand_device());
 std::uniform_real_distribution<double> GenomicLocation::rand_distribution =
     std::uniform_real_distribution<double>(0, 1);
 
 GenomicLocation::GenomicLocation(uint base,
-                                 std::shared_ptr<Chromosome> chromosome)
-    : chromosome(chromosome)
+                                 std::shared_ptr<Chromosome> chromosome,
+                                 std::mt19937 *rand_generator)
+    : chromosome(chromosome), rand_generator(rand_generator)
 {
     if (base >= chromosome->size())
         throw std::invalid_argument("Base is not inside given chromosome.");
@@ -31,7 +30,7 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
 {
     if (!use_constitutive_origin)
     {
-        double chance = rand_distribution(rand_generator);
+        double chance = rand_distribution(*rand_generator);
         return chance < this->chromosome->activation_probability(this->base);
     }
     std::vector<constitutive_origin_t> not_fired_origins;
@@ -122,5 +121,5 @@ GenomicLocation GenomicLocation::operator+(int bases)
     else if (tmp >= chromosome->length)
         tmp = chromosome->length - 1;
 
-    return GenomicLocation(tmp, chromosome);
+    return GenomicLocation(tmp, chromosome, rand_generator);
 }

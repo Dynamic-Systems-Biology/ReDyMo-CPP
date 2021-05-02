@@ -60,12 +60,12 @@
             [](cl_configuration_data &data, std::string val,                   \
                ryml::NodeRef &base) {                                          \
                 std::string path = #field;                                     \
-                c4::csubstr k    = c4::to_csubstr(                             \
-                    path.substr(path.rfind(".") + 1, path.size()).c_str());    \
+                std::string k =                                                \
+                    path.substr(path.rfind(".") + 1, path.size()).c_str();     \
                 conf_function_map map = functions;                             \
                 for (ryml::NodeRef c : base.children())                        \
                 {                                                              \
-                    if (!c.key().compare(k))                                   \
+                    if (!c.key().compare(k.c_str(), k.size()))                 \
                     {                                                          \
                         read_conf_yml(c, data, map);                           \
                         break;                                                 \
@@ -155,7 +155,7 @@ typedef struct
     unsigned long long timeout   = 0;
     bool dormant                 = false;
 
-    unsigned long long seed         = time(0);
+    unsigned long long seed         = 0;
     std::string name                = "no_name";
     unsigned long long period       = 0;
     unsigned long long constitutive = 0;

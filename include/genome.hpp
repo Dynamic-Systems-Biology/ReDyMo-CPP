@@ -23,10 +23,12 @@ class Genome
 
   public:
     std::vector<std::shared_ptr<Chromosome>> chromosomes;
+    unsigned long long seed;
 
   public:
     /*! Constructor */
-    Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes, int seed = 0);
+    Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes,
+           unsigned long long seed = 0);
 
     /*! Initializer to fill a previously empty object*/
     void initialize(std::vector<std::shared_ptr<Chromosome>> &chromosomes);

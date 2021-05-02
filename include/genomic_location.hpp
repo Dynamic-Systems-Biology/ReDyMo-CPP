@@ -12,7 +12,7 @@
 class GenomicLocation
 {
   private:
-    static std::mt19937 rand_generator;
+    std::mt19937 *rand_generator;
     static std::uniform_real_distribution<double> rand_distribution;
 
   public:
@@ -27,7 +27,8 @@ class GenomicLocation
      * @throw invalid_argument If base doesn't belong to chromosome.
      * @see Chromosome
      */
-    GenomicLocation(uint base, std::shared_ptr<Chromosome> chromosome);
+    GenomicLocation(uint base, std::shared_ptr<Chromosome> chromosome,
+                    std::mt19937 *rand_generator);
 
     /*! Queries if the genomic location base has been replicated.
      * @return True if the base is replicated.

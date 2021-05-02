@@ -134,7 +134,7 @@ In this version of ReDyMo, most parameters are mandatory and are listed below:
 
 - **--cells** <number_of_cells>: Number of independent simulations to be made. number_of_cells is a positive integer.
 
-- **--dormant** <dormant_flag>: Flag that either activates ('true') or disables ('false') the firing of dormant origins. dormant_value is a Boolean flag. It is noteworthy that the dormant origing firing does not work when constitutive origins are used (parameter --constitutive).
+- **--dormant** <dormant_flag>: Flag that, when present activates ('true') the firing of dormant origins and when its absent, disables ('false') it. It is noteworthy that the dormant origin firing does not work when constitutive origins are used (parameter --constitutive).
 
 - **--organism** <'organism_name'>: Name of the parasite species, as saved in the database. 'organism_name' is a string (in space-separated names, use single quotation marks).
 
@@ -146,7 +146,7 @@ In this version of ReDyMo, most parameters are mandatory and are listed below:
 
 The three optional parameters are:
 
-- **--constitutive** <range>: When this parameter is provided, a DNA replication must use the set of constitutive origins within the database instead of the probability landscape. `range` is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
+- **--constitutive** <range>: When this parameter is provided, a DNA replication must use **only** the set of constitutive origins within the database instead of the probability landscape. `range` is a positive integer, and specifies the range of nucleotides around each constitutive origin that can initiate replication.
 
 - **--period** <period_value>: Period (in number of simulation iterations) between two consecutive activations (i.e. RNAP binding) of a transcription region. period_value is a positive integer. If this parameter is not set, then the simulation is carried out without transcription.
 

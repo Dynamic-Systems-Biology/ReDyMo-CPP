@@ -5,17 +5,16 @@
 #include <iostream>
 #include <vector>
 
-Genome::Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes, int seed)
+Genome::Genome(std::vector<std::shared_ptr<Chromosome>> &chromosomes,
+               unsigned long long seed)
+    : seed(seed)
 {
-    rand_generator.seed(seed);
+    this->rand_generator = std::mt19937(seed);
     initialize(chromosomes);
 }
 
 void Genome::initialize(std::vector<std::shared_ptr<Chromosome>> &chromosomes)
 {
-    std::random_device rand_device;
-    this->rand_generator = std::mt19937(rand_device());
-
     std::vector<int> chromosome_sizes;
 
     for (auto chromosome = 0; chromosome < chromosomes.size(); chromosome++)
@@ -47,8 +46,8 @@ std::shared_ptr<GenomicLocation> Genome::random_genomic_location()
     base_distribution.param(bases_dist);
 
     uint rand_base = base_distribution(rand_generator);
-    return std::make_shared<GenomicLocation>(rand_base,
-                                             chromosomes[rand_chromosome]);
+    return std::make_shared<GenomicLocation>(
+        rand_base, chromosomes[rand_chromosome], &this->rand_generator);
 }
 
 // Actually never used, still here for eventual future use
@@ -67,8 +66,8 @@ std::shared_ptr<GenomicLocation> Genome::random_unreplicated_genomic_location()
         rand_base = rand() % chromosomes[rand_chromosome]->size();
     while (chromosomes[rand_chromosome]->base_is_replicated(rand_base));
 
-    return std::make_shared<GenomicLocation>(rand_base,
-                                             chromosomes[rand_chromosome]);
+    return std::make_shared<GenomicLocation>(
+        rand_base, chromosomes[rand_chromosome], &this->rand_generator);
 }
 
 bool Genome::is_replicated()
@@ -85,6 +84,8 @@ double Genome::average_interorigin_distance()
     uint n_interorigin_spaces = 0;
     for (auto chromosome : chromosomes)
     {
+        // TODO: this +1 should always be added, or only whe there are fired
+        // origins
         n_interorigin_spaces += chromosome->get_n_fired_origins() + 1;
     }
     if (n_interorigin_spaces == 0) return 0;

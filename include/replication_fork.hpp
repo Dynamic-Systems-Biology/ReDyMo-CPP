@@ -1,7 +1,11 @@
 #ifndef __REPLICATION_FORK_HPP__
 #define __REPLICATION_FORK_HPP__
 
+#include "fork_manager.hpp"
 #include "genome.hpp"
+
+// Forward declaration
+class ForkManager;
 
 /*! This class represents a replication fork.
  */
@@ -10,6 +14,7 @@ class ReplicationFork
   private:
     std::shared_ptr<Genome> genome;
     std::shared_ptr<Chromosome> chromosome;
+    ForkManager *fork_manager;
     uint speed;
     int base, direction;
     bool just_detached;
@@ -20,7 +25,8 @@ class ReplicationFork
      * @param int speed The speed, in bases per step, at which the
      * fork replicates.
      */
-    ReplicationFork(std::shared_ptr<Genome> genome, uint speed);
+    ReplicationFork(std::shared_ptr<Genome> genome, ForkManager *fork_manager,
+                    uint speed);
 
     /*! This function assigns the fork to a given base and chromosome
      * (genomic location) and replicates this base right away.
@@ -63,7 +69,7 @@ class ReplicationFork
 
     /*! This function queries if the fork was recently detached and was not
      * treated yet.
-     * @return bool True if the fork has not received post detachement
+     * @return bool True if the fork has not received post detachment
      * treatment.
      */
     bool get_just_detached();

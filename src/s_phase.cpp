@@ -8,7 +8,8 @@
 SPhase::SPhase(int origins_range, int n_resources, int replication_speed,
                int timeout, int transcription_period, bool has_dormant,
                std::shared_ptr<DataProvider> data, std::string organism,
-               std::string name, std::string output_folder, int seed)
+               std::string name, std::string output_folder,
+               unsigned long long seed)
     : origins_range(origins_range), n_resources(n_resources),
       replication_speed(replication_speed), timeout(timeout),
       transcription_period(transcription_period), has_dormant(has_dormant),
@@ -33,7 +34,7 @@ SPhase::SPhase(int origins_range, int n_resources, int replication_speed,
 }
 
 SPhase::SPhase(Configuration &configuration, std::shared_ptr<DataProvider> data,
-               int seed)
+               unsigned long long seed)
     : data(data)
 {
     auto args = configuration.arguments();
@@ -157,13 +158,14 @@ void SPhase::output(int sim_number, int time, int iod,
     checkpoint_times.start_save = std::chrono::steady_clock::now();
 
     // Create simulation folder
-    std::stringstream ss;
+    std::stringstream folder_name_stream;
 
-    ss << output_folder << "/" << name << "_"
-       << (has_dormant ? "true" : "false") << "_" << std::to_string(n_resources)
-       << "_" << std::to_string(transcription_period) << "/";
+    folder_name_stream << output_folder << "/" << name << "_"
+                       << (has_dormant ? "true" : "false") << "_"
+                       << std::to_string(n_resources) << "_"
+                       << std::to_string(transcription_period) << "/";
 
-    std::string dir        = ss.str();
+    std::string dir        = folder_name_stream.str();
     std::string simulation = "simulation_" + std::to_string(sim_number) + "/";
 
     system(("mkdir -p " + output_folder).c_str());
@@ -179,7 +181,6 @@ void SPhase::output(int sim_number, int time, int iod,
     output_file.close();
 
     // Save Chromosome data
-    // zstd_compression_output(sim_number, time, iod, genome, dir + simulation);
     semantic_compression_output(sim_number, time, iod, genome,
                                 dir + simulation);
 

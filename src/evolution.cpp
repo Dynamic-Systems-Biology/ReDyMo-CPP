@@ -20,7 +20,8 @@ double calculate_fitness(instance_metrics metrics,
     return result;
 }
 
-EvolutionManager::EvolutionManager(Configuration &configuration, int seed)
+EvolutionManager::EvolutionManager(Configuration &configuration,
+                                   unsigned long long seed)
     : configuration(configuration), seed(seed)
 {
     rand_generator.seed(seed);
@@ -32,7 +33,7 @@ EvolutionManager::EvolutionManager(Configuration &configuration, int seed)
         data_providers.push_back(std::make_shared<EvolutionDataProvider>(
             arguments.organism, arguments.data_dir + "/database.sqlite",
             arguments.data_dir + "/MFA-Seq_" + arguments.organism + "/",
-            arguments.probability));
+            i ^ seed, arguments.probability));
 
     // Create first generation
     for (int i = 0; i < arguments.evolution.population; i++)
@@ -119,7 +120,8 @@ void EvolutionManager::reproduce()
     while (killed < to_kill)
     {
         auto kill_index = killing_roulette(rand_generator);
-        if (!data_providers[kill_index]->isdead()) // Check if organism is not dead
+        if (!data_providers[kill_index]
+                 ->isdead()) // Check if organism is not dead
         {
             data_providers[kill_index]->die();
             killed++;
