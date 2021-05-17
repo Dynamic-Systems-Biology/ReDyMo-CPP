@@ -1,0 +1,254 @@
+typedef struct _transcription_region_t
+{
+    int start;
+    int end;
+} transcription_region_t;
+
+unsigned int int_rand(unsigned int *state)
+{
+    unsigned int x = *state;
+    // XOR Shift RNG
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+
+    *state = x;
+
+    return x;
+}
+
+double uniform_rand(unsigned int *state)
+{
+    return ((double)int_rand(state)) / UINT_MAX;
+}
+
+bool collided(int transcription_period, int transcription_regions_size,
+              transcription_region_t *transcription_regions, int at,
+              int direction, int time)
+{
+    for (int i = 0; i < transcription_regions_size; i++)
+    {
+        transcription_region_t region = transcription_regions[i];
+
+        int t_dir   = 1;
+        int t_start = region.start;
+        int t_end   = region.end;
+
+        if (region.end > region.start)
+        {
+            t_dir   = -1;
+            t_start = region.end;
+            t_end   = region.start;
+        }
+
+        // If inside transcription region
+        if (t_start <= at && at <= t_end)
+        {
+            // Check current and next transcription locations so we don't miss
+            // collisions
+            if (abs(at - region.start) % (time % transcription_period) == 0 ||
+                abs(at - region.start) % ((time + 1) % transcription_period) ==
+                    0)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ *
+ */
+__kernel void fork(
+    // End Time
+    __global int *end_time,
+    // Number of already replicated bases
+    __global int *replicated,
+    // Number of free forks
+    __global int *free_forks,
+    // Start Location and Direction Arrays
+    __global int *start_locations, __global int *start_directions,
+    // Replication-transcription collision counts
+    __global int *rt_collisions,
+    // Replication timestamps for base pairs
+    __global unsigned int *replication_times,
+    // Repliction initiation probability landscape
+    __global const double *probability_landscape,
+    // Genome chromosome boundaries
+    __global const int *chromosome_boundaries,
+    // Transcription period
+    const int transcription_period,
+    // Transcription region count
+    const int transcription_regions_size,
+    // Transcription regions
+    __global const transcription_region_t *transcription_regions,
+    // Timeout
+    const unsigned int timeout,
+    // Total genome base pairs
+    const int genome_size,
+    // Chromosome count
+    const int chromosome_count,
+    // Number of max forks
+    const int max_forks,
+    // Initial seed for random
+    const unsigned int seed,
+    // Colldown after detach before next attempt
+    const int fork_cooldown)
+{
+    // Replication fork ID
+    int fork_id = get_global_id(0);
+
+    // Local time
+    int time = 0;
+
+    // Fork cooldown
+    int cooldown = 0;
+
+    // Fork location
+    int at = -1;
+
+    // Fork direction
+    int direction = 0;
+
+    // Next chromosome boundary
+    int boundary = -1;
+
+    // Replicated
+    int local_replicated = 0;
+
+    // If fork is free
+    bool free = true;
+
+    // Initial RNG state
+    unsigned int state = ((unsigned int)fork_id + 1) * seed;
+
+    // Do until entire genome is replicated
+    while (time < timeout && (*replicated) < genome_size)
+    {
+        barrier(CLK_LOCAL_MEM_FENCE);
+
+        time++;
+
+        // Try to attach forks to genome (fork 0)
+        if (fork_id == 0 && (*free_forks) > 1)
+        {
+            const int prev_free = *free_forks;
+            int free_cnt        = prev_free;
+
+            for (int attempt = 0; attempt < prev_free && free_cnt > 1;
+                 attempt++)
+            {
+                unsigned int location = int_rand(&state) % (genome_size - 1);
+
+                // Check if replicated and check probability
+                if (!replication_times[location] &&
+                    uniform_rand(&state) < probability_landscape[location])
+                {
+                    int i = 0;
+
+                    // Spawn forks
+
+                    // Fork to -1
+                    for (bool ok = false; i < max_forks && !ok; i++)
+                    {
+                        if (start_locations[i] == -1)
+                        {
+                            start_locations[i]  = location + 1;
+                            start_directions[i] = -1;
+
+                            ok = true;
+
+                            break;
+                        }
+                    }
+
+                    // Fork to +1
+                    for (bool ok = false; i < max_forks && !ok; i++)
+                    {
+                        if (start_locations[i] == -1)
+                        {
+                            start_locations[i]  = location;
+                            start_directions[i] = 1;
+
+                            ok = true;
+
+                            break;
+                        }
+                    }
+
+                    atomic_sub(free_forks, 2);
+                    free_cnt -= 2;
+                }
+            }
+        }
+
+        // If not attached, check for start_location
+        if (!cooldown && start_locations[fork_id] > -1 && at < 0)
+        {
+            at        = start_locations[fork_id];
+            free      = false;
+            direction = start_directions[fork_id];
+
+            // Find relevant chromosome boundary
+            for (int c = 0; c < chromosome_count + 1; c++)
+            {
+                if (chromosome_boundaries[c] > at)
+                {
+                    if (direction < 0)
+                        boundary = chromosome_boundaries[c - 1];
+                    else
+                        boundary = chromosome_boundaries[c] + 1;
+                }
+            }
+        }
+
+        // If attached, loop copy until machinery release
+        if (!cooldown && at >= 0)
+        {
+            int next = at + direction;
+
+            bool on_boundary = at < 0 ? next == boundary : at == boundary;
+
+            // If has not reached a boundary, collided with transcription
+            // machinery or hit an already replicated base, continue
+            if (next != boundary &&
+                !atomic_cmpxchg(&replication_times[next], 0, time) &&
+                !collided(transcription_period, transcription_regions_size,
+                          transcription_regions, at, direction, time))
+            {
+                local_replicated++;
+
+                at = next;
+            }
+            // Set cooldown and detach fork
+            else
+            {
+                atomic_add(replicated, local_replicated);
+                local_replicated = 0;
+                cooldown         = fork_cooldown;
+                at               = -1;
+            }
+        }
+
+        // Fork Grace period before attaching again
+        if (at < 0)
+        {
+            if (cooldown)
+                cooldown--;
+            else if (!free)
+            {
+                atomic_inc(free_forks);
+                start_locations[fork_id] = -1;
+                free                     = true;
+            }
+        }
+
+        // Wait for workgroup
+        barrier(CLK_LOCAL_MEM_FENCE);
+    }
+
+    if (!free) atomic_inc(free_forks);
+
+    (*end_time) = time;
+}
