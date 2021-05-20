@@ -59,7 +59,7 @@ transcription_period.each do |period|
   replisome_count.each do |replisomes|
     print "Running for replisomes=#{replisomes} and period=#{period}\n"
     Dir.chdir("./build") do
-      system("mkdir output_structured_regions/round_#{options[:round]}_false_#{replisomes}_#{period}")
+      system("mkdir -p output_structured_regions/round_#{options[:round]}_false_#{replisomes}_#{period}")
       system("nice -n 20 ./simulator --cells #{options[:simulations]} \
         --organism '#{options[:organism]}' \
         --resources #{replisomes} \
