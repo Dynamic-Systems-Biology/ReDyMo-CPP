@@ -3,41 +3,41 @@
 require 'optparse'
 
 options = {
-  :simulations => 1000,
-  :timeout => 10000000,
-  :speed => 1,
-  :threads => 20,
-  :organism => 'TcruziCLBrenerEsmeraldo-like'
+  simulations: 1000,
+  timeout: 100_000_000,
+  speed: 1,
+  threads: 20,
+  organism: 'TcruziCLBrenerEsmeraldo-like'
 }
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: simulations.rb [options]"
+  opts.banner = 'Usage: simulations.rb [options]'
 
-  opts.on("-n", "--cells [Integer]", "Number of simulations to run") do |v|
+  opts.on('-n', '--cells [Integer]', 'Number of simulations to run') do |v|
     options[:simulations] = Integer(v)
   end
 
-  opts.on("-t", "--timeout [Integer]", "Simulation timeout") do |v|
+  opts.on('-t', '--timeout [Integer]', 'Simulation timeout') do |v|
     options[:timeout] = Integer(v)
   end
 
-  opts.on("-p", "--threads [Integer]", "Number of threads to use") do |v|
+  opts.on('-p', '--threads [Integer]', 'Number of threads to use') do |v|
     options[:threads] = Integer(v)
   end
 
-  opts.on("-o", "--organism [Integer]", "Organism name") do |v|
+  opts.on('-o', '--organism [Integer]', 'Organism name') do |v|
     options[:organism] = v
   end
 
-  opts.on("-s", "--speed [Integer]", "Replisome speed") do |v|
+  opts.on('-s', '--speed [Integer]', 'Replisome speed') do |v|
     options[:speed] = Integer(v)
   end
 
-  opts.on("-r", "--round [Integer]", "The number of the round in a series of similar experiments") do |v|
+  opts.on('-r', '--round [Integer]', 'The number of the round in a series of similar experiments') do |v|
     options[:round] = Integer(v)
   end
 
-  opts.on("-h", "--help", "Prints this help") do
+  opts.on('-h', '--help', 'Prints this help') do
     puts opts
     exit
   end
@@ -49,16 +49,17 @@ transcription_period = [
   0,
   100,
   1000,
-  10000,
-  100000
+  10_000,
+  100_000
 ]
 
 print "Starting simulations for round #{options[:round]}\n"
 sleep(3)
+start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 transcription_period.each do |period|
   replisome_count.each do |replisomes|
     print "Running for replisomes=#{replisomes} and period=#{period}\n"
-    Dir.chdir("./build") do
+    Dir.chdir('./build') do
       system("mkdir -p output_structured_regions/round_#{options[:round]}_false_#{replisomes}_#{period}")
       system("nice -n 20 ./simulator --cells #{options[:simulations]} \
         --organism '#{options[:organism]}' \
@@ -74,4 +75,10 @@ transcription_period.each do |period|
         ")
     end
   end
+end
+
+end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+elapsed_time = end_time - start_time
+File.open('./build/output_structured_regions/elapsed_time', 'w') do |file|
+  file.write("Elapsed time in seconds: #{elapsed_time}\n")
 end
