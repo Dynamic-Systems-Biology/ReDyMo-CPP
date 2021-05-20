@@ -165,8 +165,9 @@ void SPhase::output(int sim_number, int time, int iod,
                        << std::to_string(n_resources) << "_"
                        << std::to_string(transcription_period) << "/";
 
-    std::string dir        = folder_name_stream.str();
-    std::string simulation = "simulation_" + std::to_string(sim_number) + "/";
+    std::string dir = folder_name_stream.str();
+    std::string simulation =
+        "simulation_" + this->name + "_" + std::to_string(sim_number) + "/";
 
     system(("mkdir -p " + output_folder).c_str());
 
