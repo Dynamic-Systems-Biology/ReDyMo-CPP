@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'optparse'
+require 'ruby-progressbar'
 
 options = {
   simulations: 1000,
@@ -53,12 +54,19 @@ transcription_period = [
   100_000
 ]
 
-print "Starting simulations for round #{options[:round]}\n"
+pb = ProgressBar.create(
+  title: "Completed Simulations", 
+  total: replisome_count.size * transcription_period.size,
+  format: '%t %c/%C |%B| %p%% %a %E'
+)
+
+
+pb.log "Starting simulations for round #{options[:round]}\n"
 sleep(3)
 start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 transcription_period.each do |period|
   replisome_count.each do |replisomes|
-    print "Running for replisomes=#{replisomes} and period=#{period}\n"
+    pb.log "Running for replisomes=#{replisomes} and period=#{period}\n"
     Dir.chdir('./build') do
       system("mkdir -p output_structured_regions/round_#{options[:round]}_false_#{replisomes}_#{period}")
       system("nice -n 20 ./simulator --cells #{options[:simulations]} \
@@ -73,6 +81,7 @@ transcription_period.each do |period|
         1> output_structured_regions/round_#{options[:round]}_false_#{replisomes}_#{period}/simulation_out \
         2> output_structured_regions/round_#{options[:round]}_false_#{replisomes}_#{period}/simulation_err \
         ")
+      pb.increment
     end
   end
 end
