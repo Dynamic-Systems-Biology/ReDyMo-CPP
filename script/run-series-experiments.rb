@@ -106,20 +106,6 @@ transcription_period.each do |period|
       File.open("#{options[:name]}/elapsed_time", 'w') do |file|
         file.write(pb.to_s)
       end
-      puts "nice -n 20 ./simulator --cells #{options[:simulations]} \
-        --organism '#{options[:organism]}' \
-        --resources #{replisomes} \
-        --speed #{options[:speed]} \
-        --period #{period} \
-        --timeout #{options[:timeout]} \
-        --threads #{options[:threads]} \
-        --name round_#{options[:round]} \
-        #{probability} \
-        --summary \
-        --output #{options[:name]} \
-        1> #{options[:name]}/round_#{options[:round]}_false_#{replisomes}_#{period}/simulation_out \
-        2> #{options[:name]}/round_#{options[:round]}_false_#{replisomes}_#{period}/simulation_err \
-        "
       system("nice -n 20 ./simulator --cells #{options[:simulations]} \
         --organism '#{options[:organism]}' \
         --resources #{replisomes} \
