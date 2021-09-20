@@ -142,6 +142,8 @@ void SPhase::simulate(int sim_number)
 
     std::cout << "\t[INFO] " << sim_number
               << " Number of Collisions: " << n_collisions << std::endl;
+    std::cout << "\t[INFO] " << sim_number
+              << " Number of Origins Fired: " << fork_manager->metric_times_attached << std::endl;
     if (use_constitutive_origins)
         std::cout << "\t[INFO] " << sim_number
                   << " Number of constitutive origins that did not fire: "
@@ -210,7 +212,8 @@ void SPhase::semantic_compression_output(int sim_number, int time, int iod,
                                          std::string path)
 {
     // Makes formatted string for compression
-    auto output_str = [](int start_value, int end_value, int seq_length) {
+    auto output_str = [](int start_value, int end_value, int seq_length)
+    {
         std::string out = std::to_string(start_value);
         if (end_value != INT32_MIN && end_value != start_value)
             out += "-" + std::to_string(end_value);
