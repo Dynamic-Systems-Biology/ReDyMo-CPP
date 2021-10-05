@@ -20,9 +20,10 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                                                             uint period,
                                                             bool has_dormant)
 {
-    uint n_collisions = 0;
+    uint n_collisions       = 0;
+    uint RNAP_position      = 0;
+    uint replisome_position = 0;
 
-    uint RNAP_position = 0;
     for (auto fork : replication_forks)
     {
         if (fork->is_attached())
@@ -55,11 +56,16 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                 }
 
                 // The RNAP position for reverse regions should be reversed too.
-                RNAP_position =  RNAP_direction == 1 ? time % period : period - (time % period);
+                RNAP_position = RNAP_direction == 1 ? time % period
+                                                    : period - (time % period);
+
+                replisome_position =
+                    fork->get_direction() == 1
+                        ? replisome_position_within_region % period
+                        : period - (replisome_position_within_region % period);
 
                 // Head to head collision!
-                if (replisome_position_within_region % period ==
-                        RNAP_position &&
+                if (replisome_position == RNAP_position &&
                     fork->get_direction() != RNAP_direction)
                 {
                     if (has_dormant)
