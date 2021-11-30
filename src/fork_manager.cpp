@@ -60,7 +60,7 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                                                     : period - (time % period);
 
                 replisome_position =
-                    fork->get_direction() == 1
+                    RNAP_direction == 1
                         ? replisome_position_within_region % period
                         : period - (replisome_position_within_region % period);
 
