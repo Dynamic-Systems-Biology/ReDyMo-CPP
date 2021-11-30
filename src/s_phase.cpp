@@ -143,6 +143,10 @@ void SPhase::simulate(int sim_number)
     std::cout << "\t[INFO] " << sim_number
               << " Number of Collisions: " << n_collisions << std::endl;
     std::cout << "\t[INFO] " << sim_number
+              << " Number of Collisions 3'5' (RNAP>>): " << fork_manager->metric_collisions_35 << std::endl;
+    std::cout << "\t[INFO] " << sim_number
+              << " Number of Collisions 5'3' (<<RNAP): " << fork_manager->metric_collisions_53 << std::endl;
+    std::cout << "\t[INFO] " << sim_number
               << " Number of Origins Fired: " << fork_manager->metric_times_attached << std::endl;
     if (use_constitutive_origins)
         std::cout << "\t[INFO] " << sim_number

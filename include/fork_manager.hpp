@@ -1,12 +1,12 @@
 #ifndef __FORK_MANAGER__
 #define __FORK_MANAGER__
 
+#include "genome.hpp"
 #include "replication_fork.hpp"
 #include "util.hpp"
-#include "genome.hpp"
 #include <map>
-#include <vector>
 #include <memory>
+#include <vector>
 
 // Forward declaration
 class ReplicationFork;
@@ -17,7 +17,8 @@ class ForkManager
     uint n_forks, n_free_forks;
     std::vector<std::shared_ptr<ReplicationFork>> replication_forks;
     uint metric_times_attached, metric_times_detached_normal,
-        metric_times_detached_collision;
+        metric_times_detached_collision, metric_collisions_35,
+        metric_collisions_53;
 
   public:
     ForkManager(uint n_forks, std::shared_ptr<Genome> genome, uint speed);
