@@ -13,7 +13,7 @@ execute_process(COMMAND git submodule foreach --recursive git submodule update -
 #######
 # Declare our custom options
 #######
-OPTION(BUILD_GPGPU "Wether to build the OpenCL dependant GPU code." OFF)
+OPTION(GPU_ENABLED "Wether to build the OpenCL dependant GPU code." OFF)
 OPTION(BUILD_TESTING "Wether to build the tests." ON)
 OPTION(COVERAGE "Wether to configure test coverage report." OFF)
 
@@ -56,7 +56,7 @@ find_package(OpenMP)
 #######
 # OpenCL
 #######
-if (BUILD_GPGPU)
+if (GPU_ENABLED)
     find_package(OpenCL REQUIRED)
     include_directories(${OpenCL_INCLUDE_DIRS})
     link_directories(${OpenCL_LIBRARY})
@@ -107,18 +107,18 @@ add_library(
     src/evolution.cpp
 )
 
-if (BUILD_GPGPU)
+if (GPU_ENABLED)
     add_library(
         gpudeps
         src/gpu_s_phase.cpp
-        src/gpu_chromosome.cpp
+        src/fork.ocl
     )
 endif()
 
 add_executable(simulator src/main.cpp)
 target_link_libraries(simulator deps SQLiteCpp libzstd_static sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
 
-if (BUILD_GPGPU)
+if (GPU_ENABLED)
     target_link_libraries(simulator gpudeps ${OpenCL_LIBRARY})
 endif()
 
