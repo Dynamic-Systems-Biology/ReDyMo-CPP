@@ -129,5 +129,4 @@ end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 elapsed_time = end_time - start_time
 File.open("./build/#{options[:name]}/elapsed_time", 'w') do |file|
   file.write("Elapsed time in seconds: #{elapsed_time}\n")
-  "#{options[:name]}/round_#{options[:round]}_false_#{replisomes}_#{period}/simulation_out"
 end

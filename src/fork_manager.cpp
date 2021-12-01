@@ -6,9 +6,21 @@ ForkManager::ForkManager(uint n_forks, std::shared_ptr<Genome> genome,
 {
     this->n_forks                         = n_forks;
     this->n_free_forks                    = n_forks;
+    // Metrics
     this->metric_times_attached           = 0;
     this->metric_times_detached_normal    = 0;
     this->metric_times_detached_collision = 0;
+    // 3'5' collision
+    // DNA 5' ATCGATCGATCG  3' coding strand
+    // RNA 5' AUC rnap -->  3' <-- replisome
+    // DNA 3' TAGCTAGCTAGC  5' template strand
+    this->metric_collisions_35            = 0;
+    // 5'3' collision
+    //  template strand  DNA 5' ATCGATCGATCG  3'
+    //   replisome -->   RNA 5' <-- rnap UGC  3'
+    //  coding strand    DNA 3' TAGCTAGCTAGC  5'
+    // In both cases the bottom strand is represented by the simulator
+    this->metric_collisions_53            = 0;
     for (int i = 0; i < (int)n_forks; i++)
     {
         replication_forks.push_back(
@@ -20,9 +32,10 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                                                             uint period,
                                                             bool has_dormant)
 {
-    uint n_collisions = 0;
+    uint n_collisions       = 0;
+    uint RNAP_position      = 0;
+    uint replisome_position = 0;
 
-    uint RNAP_position = time % period;
     for (auto fork : replication_forks)
     {
         if (fork->is_attached())
@@ -54,9 +67,17 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                     RNAP_direction = -1;
                 }
 
+                // The RNAP position for reverse regions should be reversed too.
+                RNAP_position = RNAP_direction == 1 ? time % period
+                                                    : period - (time % period);
+
+                replisome_position =
+                    RNAP_direction == 1
+                        ? replisome_position_within_region % period
+                        : period - (replisome_position_within_region % period);
+
                 // Head to head collision!
-                if (replisome_position_within_region % period ==
-                        RNAP_position &&
+                if (replisome_position == RNAP_position &&
                     fork->get_direction() != RNAP_direction)
                 {
                     if (has_dormant)
@@ -67,6 +88,10 @@ uint ForkManager::check_replication_transcription_conflicts(uint time,
                     fork->detach();
                     n_free_forks++;
                     n_collisions++;
+                    if (RNAP_direction == 1)
+                        this->metric_collisions_35++;
+                    else
+                        this->metric_collisions_53++;
                     // This fork collided, so there is no need to check other
                     // regions with it
                     break;
