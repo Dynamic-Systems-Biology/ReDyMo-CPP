@@ -163,6 +163,7 @@ typedef struct
     double probability              = 0;
     std::string output              = "output";
     unsigned long long threads      = 8;
+    bool gpu                        = false;
 
     // Other modes data
     cl_evolution_data evolution;

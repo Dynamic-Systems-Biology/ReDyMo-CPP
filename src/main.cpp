@@ -1,8 +1,6 @@
-// #define GPU_ENABLED
-
 #include "configuration.hpp"
 #include "evolution.hpp"
-//#include "gpu_s_phase.hpp"
+#include "gpu_s_phase.hpp"
 #include "s_phase.hpp"
 #include <algorithm>
 #include <c4/yml/std/string.hpp>
@@ -34,9 +32,8 @@ int main(int argc, char *argv[])
                 arg_values.organism, arg_values.data_dir + "/database.sqlite",
                 arg_values.data_dir + "/MFA-Seq_" + arg_values.organism + "/",
                 arg_values.probability);
-            bool gpu = false;
 
-            if (gpu)
+            if (arg_values.gpu)
             {
             #ifdef GPU_ENABLED
                 std::cout << std::endl;

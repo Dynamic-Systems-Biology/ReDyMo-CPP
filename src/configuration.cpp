@@ -181,8 +181,8 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
             throw std::invalid_argument("Usage: ");
             break;
         case 'g':
-            std::cout << "GPU Processing is broken for now. Ignoring option..."
-                      << std::endl;
+            std::cout << "GPU Processing enabled" << std::endl;
+            arguments.gpu = std::stoull(optarg);
             break;
         case 'c': arguments.cells = std::stoull(optarg); break;
         case 'o': arguments.organism = std::string(optarg); break;
