@@ -177,9 +177,9 @@ void GPUSPhase::simulate(int sim_number)
         {
             auto regions = (*chromosomes)[c]->get_transcription_regions();
 
-            for (int r = 0; r < regions.size(); r++)
+            for (int r = 0; r < regions->size(); r++)
             {
-                transcription_regions_v.push_back(regions[r]);
+                transcription_regions_v.push_back((*regions)[r]);
             }
         }
 
@@ -295,39 +295,12 @@ void GPUSPhase::output(int sim_number, int time, int iod,
     output_file << n_resources << "\t" << this->replication_speed << "\t"
                 << time << "\t" << iod << "\t\n";
     output_file.close();
-    for (auto chromosome : this->genome->chromosomes)
-    {
-        std::string code = chromosome->get_code() + ".txt.zst";
-        FILE *out_file   = fopen((dir + simulation + code).c_str(), "w+b");
-        size_t compressed_size = 0;
-        void *compressed_data =
-            compress_cpp_string(chromosome->to_string(), compressed_size);
-        size_t written = fwrite(compressed_data, 1, compressed_size, out_file);
-        if (written == 0) std::__throw_ios_failure("Failed to write to file.");
-        fclose(out_file);
-        free(compressed_data);
-    }
+
+    // Save Chromosome data
+    semantic_compression_output(sim_number, time, iod, genome,
+                                dir + simulation);
 
     checkpoint_times.end_save = std::chrono::steady_clock::now();
-}
-
-void GPUSPhase::zstd_compression_output(int sim_number, int time, int iod,
-                                        std::shared_ptr<Genome> genome,
-                                        std::string path)
-{
-    // Write chromosome data
-    for (auto chromosome : this->genome->chromosomes)
-    {
-        std::string code       = chromosome->get_code() + ".txt.zst";
-        FILE *out_file         = fopen((path + code).c_str(), "w+b");
-        size_t compressed_size = 0;
-        void *compressed_data =
-            compress_cpp_string(chromosome->to_string(), compressed_size);
-        size_t written = fwrite(compressed_data, 1, compressed_size, out_file);
-        if (written == 0) std::__throw_ios_failure("Failed to write to file.");
-        fclose(out_file);
-        free(compressed_data);
-    }
 }
 
 void GPUSPhase::semantic_compression_output(int sim_number, int time, int iod,

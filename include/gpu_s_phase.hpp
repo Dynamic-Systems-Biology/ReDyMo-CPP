@@ -11,6 +11,7 @@
 #include "genome.hpp"
 #include "opencl.hpp"
 #include "util.hpp"
+#include "s_phase.hpp"
 #include <vector>
 
 /*! This class represents the whole Synthsis(S) phase of the cell cycle.
