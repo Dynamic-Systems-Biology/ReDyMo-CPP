@@ -83,8 +83,10 @@ int main(int argc, char *argv[])
                 std::cout << "Using Device: "
                           << device.getInfo<CL_DEVICE_NAME>() << std::endl;
 
+                unsigned long long seed = arg_values.seed;
+
                 // Start simulations
-                for (int i = 0; i < n_cells; i++)
+                for (int i = 0; i < arg_values.cells; i++)
                 {
                     cl::Context context({device});
 
@@ -96,6 +98,10 @@ int main(int argc, char *argv[])
 
                     s_phase.simulate(i);
                 }
+            #endif
+            #ifndef GPU_ENABLED
+                std::cout << "This code wa not compiled with GPU support."
+                          << std::endl;
             #endif
             }
             else
