@@ -61,9 +61,6 @@ class GPUSPhase
     void semantic_compression_output(int sim_number, int time, int iod,
                                      std::shared_ptr<Genome> genome,
                                      std::string path);
-    void zstd_compression_output(int sim_number, int time, int iod,
-                                 std::shared_ptr<Genome> genome,
-                                 std::string path);
 
     const s_phase_checkpoints_t getTimes() const;
 };

@@ -24,7 +24,7 @@ GPUSPhase::GPUSPhase(cl::Context &clContext, int origins_range, int n_resources,
     auto codes = data->get_codes();
     for (auto code = codes.begin(); code != codes.end(); code++)
     {
-        chromosomes.push_back(std::make_shared<Chromosome>(*code, *data));
+        chromosomes.push_back(std::make_shared<Chromosome>(*code, data));
     }
 
     genome = std::make_shared<Genome>(chromosomes, seed);
