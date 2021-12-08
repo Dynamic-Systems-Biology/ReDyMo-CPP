@@ -89,10 +89,10 @@ int main(int argc, char *argv[])
                     cl::Context context({device});
 
                     GPUSPhase s_phase(
-                        std::stoi(arg_values[7]), std::stoi(arg_values[2]),
-                        std::stoi(arg_values[3]), std::stoi(arg_values[4]),
-                        std::stoi(arg_values[6]), has_dormant, data,
-                        arg_values[1], context);
+                        context, arg_values.constitutive, arg_values.resources,
+                        arg_values.speed, arg_values.timeout, arg_values.period,
+                        arg_values.dormant, data, arg_values.organism,
+                        arg_values.name, arg_values.output, i ^ seed);
 
                     s_phase.simulate(i);
                 }
