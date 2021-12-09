@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 project(ReDyMo)
 
 #######
@@ -59,7 +59,7 @@ find_package(OpenMP)
 if (GPU_ENABLED)
     find_package(OpenCL REQUIRED)
     include_directories(${OpenCL_INCLUDE_DIRS})
-    link_directories(${OpenCL_LIBRARY})
+    link_directories(${OpenCL_LIBRARIES})
 endif()
 
 #######
@@ -76,12 +76,6 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp/include
 )
-
-#######
-# Zstd
-#######
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/build/cmake)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/zstd/lib)
 
 #######
 # Add the ReDyMo include folder
@@ -116,10 +110,10 @@ if (GPU_ENABLED)
 endif()
 
 add_executable(simulator src/main.cpp)
-target_link_libraries(simulator deps SQLiteCpp libzstd_static sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
+target_link_libraries(simulator deps SQLiteCpp sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
 
 if (GPU_ENABLED)
-    target_link_libraries(simulator gpudeps ${OpenCL_LIBRARY})
+    target_link_libraries(simulator gpudeps OpenCL::OpenCL)
 endif()
 
 #######
@@ -151,11 +145,11 @@ if(BUILD_TESTING)
     target_link_libraries(simulator deps gtest)
 
     target_link_libraries(test_chromosome deps gtest gmock gcov)
-    target_link_libraries(test_genome deps libzstd_static gtest gcov)
-    target_link_libraries(test_genomic_location deps libzstd_static gtest gcov)
-    target_link_libraries(test_replication_fork deps libzstd_static gtest gcov)
-    target_link_libraries(test_fork_manager deps libzstd_static gtest gcov)
-    target_link_libraries(test_data_manager deps gtest SQLiteCpp libzstd_static sqlite3 pthread dl gcov)
+    target_link_libraries(test_genome deps gtest gcov)
+    target_link_libraries(test_genomic_location deps gtest gcov)
+    target_link_libraries(test_replication_fork deps gtest gcov)
+    target_link_libraries(test_fork_manager deps gtest gcov)
+    target_link_libraries(test_data_manager deps gtest SQLiteCpp sqlite3 pthread dl gcov)
     target_link_libraries(test_configuration deps ryml gtest gcov)
     target_link_libraries(test_evolution deps SQLiteCpp sqlite3 dl ryml gtest gmock gcov OpenMP::OpenMP_CXX)
     target_link_libraries(test_s_phase deps SQLiteCpp sqlite3 gtest gmock gcov dl ryml)
