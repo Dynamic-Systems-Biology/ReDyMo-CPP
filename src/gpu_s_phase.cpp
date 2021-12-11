@@ -42,7 +42,7 @@ GPUSPhase::~GPUSPhase() {}
 void GPUSPhase::initialize_opencl()
 {
     // Read OpenCL Kernel Source File
-    std::ifstream kernel_source_stream("../opencl/fork.ocl");
+    std::ifstream kernel_source_stream("../src/fork.ocl");
     kernel_source_stream.seekg(0, std::ios::end);
     kernel_source.reserve(kernel_source_stream.tellg());
     kernel_source_stream.seekg(0, std::ios::beg);
@@ -94,9 +94,9 @@ void GPUSPhase::simulate(int sim_number)
         //////////////////////////
         // Single value buffers //
         //////////////////////////
-        cl::Buffer end_time(CL_MEM_READ_WRITE, sizeof(int));
-        cl::Buffer replicated(CL_MEM_READ_WRITE, sizeof(int));
-        cl::Buffer free_forks(CL_MEM_READ_WRITE, sizeof(int));
+        cl::Buffer end_time(clContext, CL_MEM_READ_WRITE, sizeof(int));
+        cl::Buffer replicated(clContext, CL_MEM_READ_WRITE, sizeof(int));
+        cl::Buffer free_forks(clContext, CL_MEM_READ_WRITE, sizeof(int));
 
         commands.enqueueFillBuffer(end_time, 0, 0, sizeof(cl_int));
         commands.enqueueFillBuffer(replicated, 0, 0, sizeof(cl_int));
@@ -105,9 +105,9 @@ void GPUSPhase::simulate(int sim_number)
         ////////////////////////////////
         // Start locations/directions //
         ////////////////////////////////
-        cl::Buffer start_locations(CL_MEM_READ_WRITE,
+        cl::Buffer start_locations(clContext, CL_MEM_READ_WRITE,
                                    sizeof(int) * n_resources);
-        cl::Buffer start_directions(CL_MEM_READ_WRITE,
+        cl::Buffer start_directions(clContext, CL_MEM_READ_WRITE,
                                     sizeof(int) * n_resources);
 
         commands.enqueueFillBuffer(start_locations, -1, 0,

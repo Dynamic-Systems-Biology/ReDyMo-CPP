@@ -42,27 +42,30 @@ int main(int argc, char *argv[])
                 std::vector<cl::Platform> platforms;
                 cl::Platform::get(&platforms);
                 cl::Platform platform;
-                for (int i = 0; i < platforms.size(); i++)
+                std::cout << "OpenCL Platforms:" << std::endl;
+                for (uint i = 0; i < platforms.size(); i++)
                     std::cout << platforms[i].getInfo<CL_PLATFORM_NAME>()
                               << std::endl;
+                std::cout << std::endl;
 
                 for (auto &p : platforms)
                 {
                     std::string platver = p.getInfo<CL_PLATFORM_VERSION>();
-                    if (platver.find("OpenCL 2.") != std::string::npos)
+                    std::cout << p.getInfo<CL_PLATFORM_NAME>() << platver << std::endl;
+                    if ( (platver.find("OpenCL 2.") != std::string::npos) || (platver.find("OpenCL 3.") != std::string::npos))
                     {
                         platform = p;
                     }
                 }
                 if (platform() == 0)
                 {
-                    std::cout << "No OpenCL 2.0 platform found.";
+                    std::cout << "No OpenCL 2.0 platform found." << std::endl;
                     return -1;
                 }
                 cl::Platform newP = cl::Platform::setDefault(platform);
                 if (newP != platform)
                 {
-                    std::cout << "Error setting default platform.";
+                    std::cout << "Error setting default platform." << std::endl;
                     return -1;
                 }
 
@@ -86,7 +89,7 @@ int main(int argc, char *argv[])
                 unsigned long long seed = arg_values.seed;
 
                 // Start simulations
-                for (int i = 0; i < arg_values.cells; i++)
+                for (uint i = 0; i < arg_values.cells; i++)
                 {
                     cl::Context context({device});
 
