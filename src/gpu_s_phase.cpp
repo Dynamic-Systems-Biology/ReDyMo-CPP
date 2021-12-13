@@ -156,10 +156,11 @@ void GPUSPhase::simulate(int sim_number)
 
         std::vector<int> boundaries(genome->chromosomes.size() + 1, 0);
 
-        for (long unsigned int c = 0, bd = -1; c < chromosomes->size(); c++)
+        for (long unsigned int c = 0, bd = -1; c < genome->chromosomes.size(); c++)
         {
             boundaries[c] = bd;
-            bd += (*chromosomes)[c]->size();
+            //TODO: if a bug appears, checkthis line's history
+            bd += genome->chromosomes[c]->size();
         }
 
         commands.enqueueWriteBuffer(
@@ -173,9 +174,9 @@ void GPUSPhase::simulate(int sim_number)
         ///////////////////////////////////////////
         std::vector<transcription_region_t> transcription_regions_v;
 
-        for (int c = 0; c < chromosomes->size(); c++)
+        for (int c = 0; c < genome->chromosomes.size(); c++)
         {
-            auto regions = (*chromosomes)[c]->get_transcription_regions();
+            auto regions = genome->chromosomes[c]->get_transcription_regions();
 
             for (int r = 0; r < regions->size(); r++)
             {
@@ -186,11 +187,7 @@ void GPUSPhase::simulate(int sim_number)
         cl::Buffer transcription_regions(clContext, CL_MEM_READ_WRITE,
                                          sizeof(transcription_region_t) *
                                              transcription_regions_v.size());
-
-        commands.enqueueWriteBuffer(chromosome_boundaries, CL_TRUE, 0,
-                                    sizeof(transcription_region_t) *
-                                        transcription_regions_v.size(),
-                                    transcription_regions_v.data());
+        commands.enqueueWriteBuffer(chromosome_boundaries, CL_TRUE, 0, 0, sizeof(transcription_region_t) * transcription_regions_v.size(), transcription_regions_v.data());
 
         ///////////////////
         // Create kernel //
