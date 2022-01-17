@@ -156,11 +156,14 @@ void GPUSPhase::simulate(int sim_number)
 
         std::vector<int> boundaries(genome->chromosomes.size() + 1, 0);
 
-        for (long unsigned int c = 0, bd = -1; c < genome->chromosomes.size(); c++)
+        for (long unsigned int c = 0, bd = -1; c < genome->chromosomes.size() + 1;
+             c++)
         {
             boundaries[c] = bd;
-            //TODO: if a bug appears, checkthis line's history
-            bd += genome->chromosomes[c]->size();
+            // TODO: if a bug appears, check this line's history
+            if (c < genome->chromosomes.size())
+                bd += genome->chromosomes[c]->size();
+            printf("bd: %d\n", bd);
         }
 
         commands.enqueueWriteBuffer(
@@ -187,7 +190,10 @@ void GPUSPhase::simulate(int sim_number)
         cl::Buffer transcription_regions(clContext, CL_MEM_READ_WRITE,
                                          sizeof(transcription_region_t) *
                                              transcription_regions_v.size());
-        commands.enqueueWriteBuffer(chromosome_boundaries, CL_TRUE, 0, 0, sizeof(transcription_region_t) * transcription_regions_v.size(), transcription_regions_v.data());
+        commands.enqueueWriteBuffer(transcription_regions, CL_TRUE, 0,
+                                    sizeof(transcription_region_t) *
+                                        transcription_regions_v.size(),
+                                    transcription_regions_v.data());
 
         ///////////////////
         // Create kernel //
@@ -207,9 +213,9 @@ void GPUSPhase::simulate(int sim_number)
                    probability_landscape, chromosome_boundaries,
                    transcription_period, transcription_regions_v.size(),
                    transcription_regions, timeout, genome->size(),
-                   chromosomes->size(), n_resources, 30, 0);
+                   genome->chromosomes.size(), n_resources, 30, 0);
 
-        std::cout << "[INFO] " << sim_number << " Ended simulation"
+        std::cout << "[INFO] " << sim_number << " Waitting for GPU processing"
                   << std::endl;
 
         ////////////////////////////
@@ -234,6 +240,8 @@ void GPUSPhase::simulate(int sim_number)
         commands.enqueueReadBuffer(rt_collisions, CL_TRUE, 0,
                                    sizeof(int) * genome->size(),
                                    fb_colisions_res.data());
+        std::cout << "[INFO] " << sim_number << " got GPU data"
+                  << std::endl;
 
         std::cout << "[DEBUG] " << genome->size() << std::endl;
 
@@ -305,7 +313,8 @@ void GPUSPhase::semantic_compression_output(int sim_number, int time, int iod,
                                             std::string path)
 {
     // Makes formatted string for compression
-    auto output_str = [](int start_value, int end_value, int seq_length) {
+    auto output_str = [](int start_value, int end_value, int seq_length)
+    {
         std::string out = std::to_string(start_value);
         if (end_value != INT32_MIN && end_value != start_value)
             out += "-" + std::to_string(end_value);

@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
             if (arg_values.gpu)
             {
-            #ifdef GPU_ENABLED
+#ifdef GPU_ENABLED
                 std::cout << std::endl;
 
                 // Select Platform
@@ -51,8 +51,10 @@ int main(int argc, char *argv[])
                 for (auto &p : platforms)
                 {
                     std::string platver = p.getInfo<CL_PLATFORM_VERSION>();
-                    std::cout << p.getInfo<CL_PLATFORM_NAME>() << platver << std::endl;
-                    if ( (platver.find("OpenCL 2.") != std::string::npos) || (platver.find("OpenCL 3.") != std::string::npos))
+                    std::cout << p.getInfo<CL_PLATFORM_NAME>() << platver
+                              << std::endl;
+                    if ((platver.find("OpenCL 2.") != std::string::npos) ||
+                        (platver.find("OpenCL 3.") != std::string::npos))
                     {
                         platform = p;
                     }
@@ -84,7 +86,8 @@ int main(int argc, char *argv[])
 
                 cl::Device device = all_devices[0];
                 std::cout << "Using Device: "
-                          << device.getInfo<CL_DEVICE_NAME>() << std::endl;
+                          << device.getInfo<CL_DEVICE_NAME>() << std::endl
+                          << std::endl;
 
                 unsigned long long seed = arg_values.seed;
 
@@ -101,11 +104,11 @@ int main(int argc, char *argv[])
 
                     s_phase.simulate(i);
                 }
-            #endif
-            #ifndef GPU_ENABLED
+#endif
+#ifndef GPU_ENABLED
                 std::cout << "This code wa not compiled with GPU support."
                           << std::endl;
-            #endif
+#endif
             }
             else
             {
@@ -114,7 +117,7 @@ int main(int argc, char *argv[])
 
                 unsigned long long seed = arg_values.seed;
 
-                #pragma omp parallel for
+#pragma omp parallel for
                 for (long long unsigned int i = 0; i < arg_values.cells; i++)
                 {
                     // Run all simulations with the same parameters, except for

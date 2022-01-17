@@ -26,6 +26,7 @@ bool collided(int transcription_period, int transcription_regions_size,
               transcription_region_t *transcription_regions, int at,
               int direction, int time)
 {
+    // TODO: apply lastest fixes for position calculation
     for (int i = 0; i < transcription_regions_size; i++)
     {
         transcription_region_t region = transcription_regions[i];
@@ -126,6 +127,8 @@ __kernel void fork(
     // Do until entire genome is replicated
     while (time < timeout && (*replicated) < genome_size)
     {
+        // if (fork_id == 1)
+        //     printf("time: %d, replicated: %d\n", time, *replicated);
         barrier(CLK_LOCAL_MEM_FENCE);
 
         time++;
@@ -150,33 +153,37 @@ __kernel void fork(
                     // Spawn forks
 
                     // Fork to -1
-                    for (bool ok = false; i < max_forks && !ok; i++)
+                    for (bool attached = false; i < max_forks && !attached; i++)
                     {
+                        // printf("start_locations %d\n", start_locations[i]);
                         if (start_locations[i] == -1)
                         {
+                            // TODO: shouldnt this go one to the left?
+                            // TODO: check if first step replicates or checks for already
                             start_locations[i]  = location + 1;
                             start_directions[i] = -1;
 
-                            ok = true;
+                            attached = true;
 
                             break;
                         }
                     }
 
                     // Fork to +1
-                    for (bool ok = false; i < max_forks && !ok; i++)
+                    for (bool attached = false; i < max_forks && !attached; i++)
                     {
                         if (start_locations[i] == -1)
                         {
                             start_locations[i]  = location;
                             start_directions[i] = 1;
 
-                            ok = true;
+                            attached = true;
 
                             break;
                         }
                     }
 
+                    //TODO: maybe verify that the forks really were attached
                     atomic_sub(free_forks, 2);
                     free_cnt -= 2;
                 }
@@ -198,7 +205,7 @@ __kernel void fork(
                     if (direction < 0)
                         boundary = chromosome_boundaries[c - 1];
                     else
-                        boundary = chromosome_boundaries[c] + 1;
+                        boundary = chromosome_boundaries[c];
                 }
             }
         }
@@ -208,15 +215,20 @@ __kernel void fork(
         {
             int next = at + direction;
 
+            // TODO: why is boundary always -1?
             bool on_boundary = at < 0 ? next == boundary : at == boundary;
 
+            if (next >= 148)
+                printf("next %d, direction %d, boundary %d, at %d\n", next,
+                       direction, boundary, at);
             // If has not reached a boundary, collided with transcription
             // machinery or hit an already replicated base, continue
-            if (next != boundary &&
+            if (next != boundary + 1 &&
                 !atomic_cmpxchg(&replication_times[next], 0, time) &&
                 !collided(transcription_period, transcription_regions_size,
                           transcription_regions, at, direction, time))
             {
+                printf("replicated base %d\n", next);
                 local_replicated++;
 
                 at = next;
