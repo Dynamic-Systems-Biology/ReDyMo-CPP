@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
                 unsigned long long seed = arg_values.seed;
 
                 // Start simulations
+                // # pragma omp parallel for
                 for (uint i = 0; i < arg_values.cells; i++)
                 {
                     cl::Context context({device});
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
                 }
 #endif
 #ifndef GPU_ENABLED
-                std::cout << "This code wa not compiled with GPU support."
+                std::cout << "This code was not compiled with GPU support."
                           << std::endl;
 #endif
             }

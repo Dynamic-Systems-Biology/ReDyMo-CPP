@@ -52,7 +52,7 @@ class GPUSPhase
               int replication_speed, int timeout, int transcription_period,
               bool has_dormant, std::shared_ptr<DataProvider> data,
               std::string organism, std::string name,
-              std::string output_folder = "output", int seed = 0);
+              std::string output_folder = "output", unsigned long long seed = 0);
     ~GPUSPhase();
     void simulate(int sim_number);
 

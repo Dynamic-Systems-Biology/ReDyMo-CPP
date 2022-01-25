@@ -10,7 +10,7 @@ GPUSPhase::GPUSPhase(cl::Context &clContext, int origins_range, int n_resources,
                      int replication_speed, int timeout,
                      int transcription_period, bool has_dormant,
                      std::shared_ptr<DataProvider> data, std::string organism,
-                     std::string name, std::string output_folder, int seed)
+                     std::string name, std::string output_folder, unsigned long long seed)
     : origins_range(origins_range), n_resources(n_resources),
       replication_speed(replication_speed), timeout(timeout),
       transcription_period(transcription_period), has_dormant(has_dormant),
@@ -163,7 +163,6 @@ void GPUSPhase::simulate(int sim_number)
             // TODO: if a bug appears, check this line's history
             if (c < genome->chromosomes.size())
                 bd += genome->chromosomes[c]->size();
-            printf("bd: %d\n", bd);
         }
 
         commands.enqueueWriteBuffer(
@@ -205,7 +204,7 @@ void GPUSPhase::simulate(int sim_number)
                               cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer,
                               cl::Buffer, unsigned int, unsigned int,
                               cl::Buffer, unsigned int, int, int, int,
-                              unsigned int, int>(kernel_program, "fork");
+                              unsigned long long, int>(kernel_program, "fork");
 
         forkKernel(cl::EnqueueArgs(commands, cl::NDRange(n_resources)),
                    end_time, replicated, free_forks, start_locations,
@@ -213,7 +212,7 @@ void GPUSPhase::simulate(int sim_number)
                    probability_landscape, chromosome_boundaries,
                    transcription_period, transcription_regions_v.size(),
                    transcription_regions, timeout, genome->size(),
-                   genome->chromosomes.size(), n_resources, 30, 0);
+                   genome->chromosomes.size(), n_resources, genome->seed, 0);
 
         std::cout << "[INFO] " << sim_number << " Waitting for GPU processing"
                   << std::endl;
@@ -224,9 +223,8 @@ void GPUSPhase::simulate(int sim_number)
         int end_time_res   = 0;
         int replicated_res = 0;
         int free_forks_res = n_resources;
+        int rt_collisions_res = 0;
         std::vector<int> replication_times_res(genome->size(), 0);
-        std::vector<int> ff_colisions_res(genome->size(), 0);
-        std::vector<int> fb_colisions_res(genome->size(), 0);
 
         commands.enqueueReadBuffer(end_time, CL_TRUE, 0, sizeof(int),
                                    &end_time_res);
@@ -237,34 +235,27 @@ void GPUSPhase::simulate(int sim_number)
         commands.enqueueReadBuffer(replication_times, CL_TRUE, 0,
                                    sizeof(int) * genome->size(),
                                    replication_times_res.data());
-        commands.enqueueReadBuffer(rt_collisions, CL_TRUE, 0,
-                                   sizeof(int) * genome->size(),
-                                   fb_colisions_res.data());
+        commands.enqueueReadBuffer(rt_collisions, CL_TRUE, 0, sizeof(int),
+                                   &rt_collisions_res);
         std::cout << "[INFO] " << sim_number << " got GPU data"
                   << std::endl;
 
-        std::cout << "[DEBUG] " << genome->size() << std::endl;
+        std::cout << "[DEBUG] Genome Size:" << genome->size() << std::endl;
 
-        std::cout << "[DEBUG] End: " << end_time_res << std::endl;
+        std::cout << "[DEBUG] End Time: " << end_time_res << std::endl;
         std::cout << "[DEBUG] Replicated: " << replicated_res << std::endl;
-        std::cout << "[DEBUG] Free: " << free_forks_res << std::endl;
-    }
-    catch (cl::Error e)
-    {
-        std::cerr << "[ERROR] " << e.what() << ": " << getCLErrorString(e.err())
-                  << std::endl;
-    }
+        std::cout << "[DEBUG] Free Forks: " << free_forks_res << std::endl;
 
-    if (genome->is_replicated())
+    if (replicated_res == genome->size())
         std::cout << "\t[INFO] " << sim_number
-                  << " Genome fully replicated at time " << time << "."
+                  << " Genome fully replicated at time " << end_time_res << "."
                   << std::endl;
-    else if (time == timeout)
+    else if (end_time_res == timeout)
         std::cout << "\t[WARN] " << sim_number
                   << " Timeout simulation: " << std::endl;
 
     std::cout << "\t[INFO] " << sim_number
-              << " Number of Collisions: " << n_collisions << std::endl;
+              << " Number of Collisions: " << rt_collisions_res << std::endl;
     if (use_constitutive_origins)
         std::cout << "\t[INFO] " << sim_number
                   << " Number of constitutive origins that did not fire: "
@@ -273,6 +264,12 @@ void GPUSPhase::simulate(int sim_number)
     checkpoint_times.end_sim = std::chrono::steady_clock::now();
 
     output(sim_number, time, genome->average_interorigin_distance(), genome);
+    }
+    catch (cl::Error e)
+    {
+        std::cerr << "[ERROR] " << e.what() << ": " << getCLErrorString(e.err())
+                  << std::endl;
+    }
 }
 
 void GPUSPhase::output(int sim_number, int time, int iod,

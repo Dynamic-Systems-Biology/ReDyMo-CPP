@@ -7,7 +7,7 @@ typedef struct _transcription_region_t
 unsigned int int_rand(unsigned int *state)
 {
     unsigned int x = *state;
-    // XOR Shift RNG
+    // 32-bit XOR Shift RNG
     x ^= x << 13;
     x ^= x >> 17;
     x ^= x << 5;
@@ -35,22 +35,33 @@ bool collided(int transcription_period, int transcription_regions_size,
         int t_start = region.start;
         int t_end   = region.end;
 
-        if (region.end > region.start)
+        int replisome_position_within_region = at - t_start;
+
+        if (region.end < region.start)
         {
             t_dir   = -1;
             t_start = region.end;
             t_end   = region.start;
         }
 
+        replisome_position_within_region = t_end - at;
+        int RNAP_position =
+            t_dir == 1 ? time % transcription_period
+                       : transcription_period - (time % transcription_period);
+        int replisome_position =
+            t_dir == 1
+                ? replisome_position_within_region % transcription_period
+                : transcription_period -
+                      (replisome_position_within_region % transcription_period);
+
         // If inside transcription region
         if (t_start <= at && at <= t_end)
         {
             // Check current and next transcription locations so we don't miss
             // collisions
-            if (abs(at - region.start) % (time % transcription_period) == 0 ||
-                abs(at - region.start) % ((time + 1) % transcription_period) ==
-                    0)
+            if (replisome_position == RNAP_position && at != t_dir)
             {
+                printf("collision \n");
                 return true;
             }
         }
@@ -93,7 +104,7 @@ __kernel void fork(
     // Number of max forks
     const int max_forks,
     // Initial seed for random
-    const unsigned int seed,
+    const unsigned long seed,
     // Colldown after detach before next attempt
     const int fork_cooldown)
 {
@@ -127,8 +138,6 @@ __kernel void fork(
     // Do until entire genome is replicated
     while (time < timeout && (*replicated) < genome_size)
     {
-        // if (fork_id == 1)
-        //     printf("time: %d, replicated: %d\n", time, *replicated);
         barrier(CLK_LOCAL_MEM_FENCE);
 
         time++;
@@ -155,11 +164,12 @@ __kernel void fork(
                     // Fork to -1
                     for (bool attached = false; i < max_forks && !attached; i++)
                     {
-                        // printf("start_locations %d\n", start_locations[i]);
                         if (start_locations[i] == -1)
                         {
                             // TODO: shouldnt this go one to the left?
-                            // TODO: check if first step replicates or checks for already
+                            // TODO: check if first step replicates or checks
+                            // for already
+                            // TODO: the actual base replicated is the next one
                             start_locations[i]  = location + 1;
                             start_directions[i] = -1;
 
@@ -183,7 +193,7 @@ __kernel void fork(
                         }
                     }
 
-                    //TODO: maybe verify that the forks really were attached
+                    // TODO: maybe verify that the forks really were attached
                     atomic_sub(free_forks, 2);
                     free_cnt -= 2;
                 }
@@ -218,19 +228,17 @@ __kernel void fork(
             // TODO: why is boundary always -1?
             bool on_boundary = at < 0 ? next == boundary : at == boundary;
 
-            if (next >= 148)
-                printf("next %d, direction %d, boundary %d, at %d\n", next,
-                       direction, boundary, at);
+            bool collision =
+                collided(transcription_period, transcription_regions_size,
+                         transcription_regions, at, direction, time);
+
+            if (collision) atomic_inc(rt_collisions);
             // If has not reached a boundary, collided with transcription
             // machinery or hit an already replicated base, continue
-            if (next != boundary + 1 &&
-                !atomic_cmpxchg(&replication_times[next], 0, time) &&
-                !collided(transcription_period, transcription_regions_size,
-                          transcription_regions, at, direction, time))
+            if (next != boundary + direction && !collision &&
+                !atomic_cmpxchg(&replication_times[next], 0, time))
             {
-                printf("replicated base %d\n", next);
                 local_replicated++;
-
                 at = next;
             }
             // Set cooldown and detach fork
@@ -240,6 +248,9 @@ __kernel void fork(
                 local_replicated = 0;
                 cooldown         = fork_cooldown;
                 at               = -1;
+                float pct_rep    = (float)(*replicated) / genome_size;
+                printf("Replicated: %d / %d %f%\n", *replicated, genome_size,
+                       pct_rep * 100);
             }
         }
 
