@@ -26,7 +26,6 @@ bool collided(int transcription_period, int transcription_regions_size,
               transcription_region_t *transcription_regions, int at,
               int direction, int time)
 {
-    // TODO: apply lastest fixes for position calculation
     for (int i = 0; i < transcription_regions_size; i++)
     {
         transcription_region_t region = transcription_regions[i];
@@ -44,6 +43,9 @@ bool collided(int transcription_period, int transcription_regions_size,
             t_end   = region.start;
         }
 
+        // If inside transcription region
+        if (!(t_start <= at && at <= t_end)) continue;
+
         replisome_position_within_region = t_end - at;
         int RNAP_position =
             t_dir == 1 ? time % transcription_period
@@ -54,17 +56,7 @@ bool collided(int transcription_period, int transcription_regions_size,
                 : transcription_period -
                       (replisome_position_within_region % transcription_period);
 
-        // If inside transcription region
-        if (t_start <= at && at <= t_end)
-        {
-            // Check current and next transcription locations so we don't miss
-            // collisions
-            if (replisome_position == RNAP_position && at != t_dir)
-            {
-                printf("collision \n");
-                return true;
-            }
-        }
+        return replisome_position == RNAP_position && direction != t_dir;
     }
     return false;
 }
@@ -86,7 +78,7 @@ __kernel void fork(
     // Replication timestamps for base pairs
     __global unsigned int *replication_times,
     // Repliction initiation probability landscape
-    __global const double *probability_landscape,
+    __global const float *probability_landscape,
     // Genome chromosome boundaries
     __global const int *chromosome_boundaries,
     // Transcription period
@@ -166,9 +158,6 @@ __kernel void fork(
                     {
                         if (start_locations[i] == -1)
                         {
-                            // TODO: shouldnt this go one to the left?
-                            // TODO: check if first step replicates or checks
-                            // for already
                             // TODO: the actual base replicated is the next one
                             start_locations[i]  = location + 1;
                             start_directions[i] = -1;
@@ -193,7 +182,6 @@ __kernel void fork(
                         }
                     }
 
-                    // TODO: maybe verify that the forks really were attached
                     atomic_sub(free_forks, 2);
                     free_cnt -= 2;
                 }
@@ -225,7 +213,6 @@ __kernel void fork(
         {
             int next = at + direction;
 
-            // TODO: why is boundary always -1?
             bool on_boundary = at < 0 ? next == boundary : at == boundary;
 
             bool collision =

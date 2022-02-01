@@ -137,14 +137,14 @@ void GPUSPhase::simulate(int sim_number)
         // Probability landscape for full genome //
         ///////////////////////////////////////////
         cl::Buffer probability_landscape(clContext, CL_MEM_READ_ONLY,
-                                         sizeof(double) * genome->size());
+                                         sizeof(float) * genome->size());
 
         std::vector<double> probabilities(genome->size(), 2);
 
         // TODO: Calculate probabilities vector
 
         commands.enqueueWriteBuffer(probability_landscape, CL_TRUE, 0,
-                                    sizeof(double) * genome->size(),
+                                    sizeof(float) * genome->size(),
                                     probabilities.data());
 
         ///////////////////////////////
