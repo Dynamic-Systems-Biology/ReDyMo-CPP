@@ -56,6 +56,7 @@ find_package(OpenMP)
 #######
 # OpenCL
 #######
+add_definitions( -DGPU_ENABLED=${GPU_ENABLED} )
 if (GPU_ENABLED)
     find_package(OpenCL REQUIRED)
     include_directories(${OpenCL_INCLUDE_DIRS})

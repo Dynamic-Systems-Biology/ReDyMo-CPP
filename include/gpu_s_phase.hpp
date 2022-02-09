@@ -1,8 +1,6 @@
 #ifndef __GPU_S_PHASE__
 #define __GPU_S_PHASE__
 
-#define GPU_ENABLED
-
 #ifdef GPU_ENABLED
 
 #include "chromosome.hpp"
