@@ -42,12 +42,13 @@ int main(int argc, char *argv[])
                 std::vector<cl::Platform> platforms;
                 cl::Platform::get(&platforms);
                 cl::Platform platform;
-                std::cout << "OpenCL Platforms:" << std::endl;
+                std::cout << "OpenCL Platforms Available:" << std::endl;
                 for (uint i = 0; i < platforms.size(); i++)
                     std::cout << platforms[i].getInfo<CL_PLATFORM_NAME>()
                               << std::endl;
                 std::cout << std::endl;
 
+                std::cout << "Available Platforms version: " << std::endl;
                 for (auto &p : platforms)
                 {
                     std::string platver = p.getInfo<CL_PLATFORM_VERSION>();
@@ -59,9 +60,11 @@ int main(int argc, char *argv[])
                         platform = p;
                     }
                 }
+                std::cout << std::endl;
                 if (platform() == 0)
                 {
-                    std::cout << "No OpenCL 2.0 platform found." << std::endl;
+                    std::cout << "No OpenCL 2.0 platform found." << std::endl
+                              << std::endl;
                     return -1;
                 }
                 cl::Platform newP = cl::Platform::setDefault(platform);
@@ -72,7 +75,8 @@ int main(int argc, char *argv[])
                 }
 
                 std::cout << "Using Platform:"
-                          << platform.getInfo<CL_PLATFORM_NAME>() << std::endl;
+                          << platform.getInfo<CL_PLATFORM_NAME>() << std::endl
+                          << std::endl;
 
                 // Select Device
                 std::vector<cl::Device> all_devices;
