@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ReDyMo)
+project(ReDyMo LANGUAGES CXX CUDA)
 
 #######
 # Make sure libs are available locally
@@ -13,9 +13,11 @@ execute_process(COMMAND git submodule foreach --recursive git submodule update -
 #######
 # Declare our custom options
 #######
-OPTION(GPU_ENABLED "Wether to build the OpenCL dependant GPU code." OFF)
+OPTION(GPU_OPENCL_ENABLED "Wether to build the OpenCL dependant GPU code." OFF)
+OPTION(GPU_CUDA_ENABLED "Wether to build the NVIDIA CUDA dependant GPU code." OFF)
 OPTION(BUILD_TESTING "Wether to build the tests." ON)
 OPTION(COVERAGE "Wether to configure test coverage report." OFF)
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Coverage Release Performace)
 
 #######
 # Set flags for our custom build types
@@ -24,6 +26,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-Wall -O0 -g -pg" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_COVERAGE "-Wall -O0 -g -pg" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_PERFORMANCE "-Wall -Ofast -march=native" CACHE STRING "" FORCE)
 set(CMAKE_CXX_FLAGS_RELEASE "-w -O3" CACHE STRING "" FORCE)
+set(CMAKE_CUDA_ARCHITECTURES 35 50 72)
 
 mark_as_advanced(
     CMAKE_CXX_FLAGS_DEBUG
@@ -53,14 +56,27 @@ endif()
 #######
 find_package(OpenMP)
 
+if (GPU_OPENCL_ENABLED AND GPU_CUDA_ENABLED)
+    message( FATAL_ERROR "Can't have both GPU technologies enabled together, please choose just one." )
+endif()
+
 #######
 # OpenCL
 #######
-if (GPU_ENABLED)
+if (GPU_OPENCL_ENABLED)
     add_definitions(-DGPU_ENABLED)
     find_package(OpenCL REQUIRED)
     include_directories(${OpenCL_INCLUDE_DIRS})
     link_directories(${OpenCL_LIBRARIES})
+endif()
+
+#######
+# CUDA
+#######
+if (GPU_CUDA_ENABLED)
+    set(CUDA_NVCC_FLAGS -g;-G)
+    add_definitions(-DCUDA_ENABLED)
+    enable_language(CUDA)
 endif()
 
 #######
@@ -102,19 +118,32 @@ add_library(
     src/evolution.cpp
 )
 
-if (GPU_ENABLED)
+if (GPU_OPENCL_ENABLED)
     add_library(
         gpudeps
         src/gpu_s_phase.cpp
-        src/fork.ocl
+    )
+endif()
+
+if (GPU_CUDA_ENABLED)
+    add_library(
+        cudadeps
+        STATIC
+        src/cuda_s_phase.cu
+        src/fork.cu
     )
 endif()
 
 add_executable(simulator src/main.cpp)
 target_link_libraries(simulator deps SQLiteCpp sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
 
-if (GPU_ENABLED)
+if (GPU_OPENCL_ENABLED)
     target_link_libraries(simulator gpudeps OpenCL::OpenCL)
+endif()
+
+if (GPU_CUDA_ENABLED)
+    set_target_properties(cudadeps PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    target_link_libraries(simulator pthread cudadeps)
 endif()
 
 #######

@@ -1,6 +1,7 @@
 #include "configuration.hpp"
 #include "evolution.hpp"
 #include "gpu_s_phase.hpp"
+#include "cuda_s_phase.hpp"
 #include "s_phase.hpp"
 #include <algorithm>
 #include <c4/yml/std/string.hpp>
@@ -35,7 +36,10 @@ int main(int argc, char *argv[])
 
             if (arg_values.gpu)
             {
-#ifdef GPU_ENABLED
+#ifdef CUDA_ENABLED
+                CUDASPhase cuda_s_phase;
+                cuda_s_phase.simulate(1);
+#elif GPU_ENABLED
                 std::cout << std::endl;
 
                 // Select Platform
@@ -109,8 +113,8 @@ int main(int argc, char *argv[])
 
                     s_phase.simulate(i);
                 }
-#endif
-#ifndef GPU_ENABLED
+
+#else
                 std::cout << "This code was not compiled with GPU support."
                           << std::endl;
 #endif
