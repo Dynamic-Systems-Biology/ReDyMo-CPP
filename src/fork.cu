@@ -76,7 +76,7 @@ __device__ int get_global_id()
 /**
  *
  */
-__global__ void fork(uint seed)
+__global__ void cuda_fork(uint seed)
 {
     uint seed_boggled;
     seed_boggled = seed ^ get_global_id();

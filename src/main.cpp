@@ -1,7 +1,7 @@
 #include "configuration.hpp"
+#include "cuda_s_phase.hpp"
 #include "evolution.hpp"
 #include "gpu_s_phase.hpp"
-#include "cuda_s_phase.hpp"
 #include "s_phase.hpp"
 #include <algorithm>
 #include <c4/yml/std/string.hpp>
@@ -37,8 +37,20 @@ int main(int argc, char *argv[])
             if (arg_values.gpu)
             {
 #ifdef CUDA_ENABLED
-                CUDASPhase cuda_s_phase;
-                cuda_s_phase.simulate(1);
+                std::cout << std::endl;
+
+                // TODO: Select CUDA Platform
+
+                unsigned long long seed = arg_values.seed;
+
+                // Start simulations
+                // # pragma omp parallel for
+                for (uint i = 0; i < arg_values.cells; i++)
+                {
+                    CUDASPhase s_phase(config, data, i ^ seed);
+
+                    s_phase.simulate(i);
+                }
 #elif GPU_ENABLED
                 std::cout << std::endl;
 
