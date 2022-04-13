@@ -44,9 +44,6 @@ CUDASPhase::~CUDASPhase() {}
 
 void CUDASPhase::simulate(int sim_number)
 {
-    std::cout << "Will run CUDA simulation " << sim_number << std::endl;
-    fork<<<1, 100>>>(1234);
-    cudaDeviceSynchronize();
 
     checkpoint_times.start_sim = std::chrono::steady_clock::now();
 
@@ -63,58 +60,58 @@ void CUDASPhase::simulate(int sim_number)
     //////////////////////////
     // Single value buffers //
     //////////////////////////
-    int *end_time, *replicated, *free_forks;
-    cudaMalloc(&end_time, sizeof(int));
-    cudaMalloc(&replicated, sizeof(int));
-    cudaMalloc(&free_forks, sizeof(int));
+    int *d_end_time, *d_replicated, *d_free_forks;
+    cudaMalloc(&d_end_time, sizeof(int));
+    cudaMalloc(&d_replicated, sizeof(int));
+    cudaMalloc(&d_free_forks, sizeof(int));
 
-    cudaMemset(end_time, 0, sizeof(int));
-    cudaMemset(replicated, 0, sizeof(int));
-    cudaMemset(free_forks, n_resources, n_resources * sizeof(int));
+    cudaMemset(d_end_time, 0, sizeof(int));
+    cudaMemset(d_replicated, 0, sizeof(int));
+    cudaMemset(d_free_forks, n_resources, n_resources * sizeof(int));
 
     ////////////////////////////////
     // Start locations/directions //
     ////////////////////////////////
-    int *start_locations, *start_directions;
-    cudaMalloc(&start_locations, n_resources * sizeof(int));
-    cudaMalloc(&start_directions, n_resources * sizeof(int));
+    int *d_start_locations, *d_start_directions;
+    cudaMalloc(&d_start_locations, n_resources * sizeof(int));
+    cudaMalloc(&d_start_directions, n_resources * sizeof(int));
 
-    cudaMemset(start_locations, -1, n_resources * sizeof(int));
-    cudaMemset(start_directions, 0, n_resources * sizeof(int));
+    cudaMemset(d_start_locations, -1, n_resources * sizeof(int));
+    cudaMemset(d_start_directions, 0, n_resources * sizeof(int));
 
     /////////////////////////////
     // Collision count buffers //
     /////////////////////////////
-    int *rt_collisions;
-    cudaMalloc(&rt_collisions, genome->size() * sizeof(int));
+    int *d_rt_collisions;
+    cudaMalloc(&d_rt_collisions, genome->size() * sizeof(int));
 
-    cudaMemset(rt_collisions, 0, genome->size() * sizeof(int));
+    cudaMemset(d_rt_collisions, 0, genome->size() * sizeof(int));
 
     ///////////////////////////////////////////
     // Replication timestamps for base pairs //
     ///////////////////////////////////////////
-    int *replication_times;
-    cudaMalloc(&replication_times, genome->size() * sizeof(unsigned int));
+    unsigned int *d_replication_times;
+    cudaMalloc(&d_replication_times, genome->size() * sizeof(unsigned int));
 
-    cudaMemset(replication_times, 0, genome->size() * sizeof(int));
+    cudaMemset(d_replication_times, 0, genome->size() * sizeof(unsigned int));
 
     ///////////////////////////////////////////
     // Probability landscape for full genome //
     ///////////////////////////////////////////
-    float *probability_landscape;
-    cudaMalloc(&probability_landscape, genome->size() * sizeof(float));
+    float *d_probability_landscape;
+    cudaMalloc(&d_probability_landscape, genome->size() * sizeof(float));
 
     // TODO: make a flat probability landsacpe for entire genome
     // std::vector<float> probabilities = data->get_probability_landscape();
-    // cudaMemcpy(replication_times, probabilities.data(), sizeof(int), );
+    // cudaMemcpy(probab, probabilities.data(), sizeof(int), );
 
-    cudaMemset(probability_landscape, 0.f, genome->size() * sizeof(float));
+    cudaMemset(d_probability_landscape, 0.f, genome->size() * sizeof(float));
 
     /////////////////////////////////////////////////////////
     // Boundaries of chromosomes (for all the flat arrays) //
     /////////////////////////////////////////////////////////
-    int *chromosome_boundaries;
-    cudaMalloc(&chromosome_boundaries, genome->size() * sizeof(int));
+    int *d_chromosome_boundaries;
+    cudaMalloc(&d_chromosome_boundaries, genome->size() * sizeof(int));
 
     std::vector<int> boundaries(genome->chromosomes.size() + 1, 0);
 
@@ -127,13 +124,13 @@ void CUDASPhase::simulate(int sim_number)
         if (c < genome->chromosomes.size())
             bd += genome->chromosomes[c]->size();
     }
-    cudaMemcpy(replication_times, boundaries.data(),
+    cudaMemcpy(d_chromosome_boundaries, boundaries.data(),
                boundaries.size() * sizeof(int), cudaMemcpyHostToDevice);
 
     ///////////////////////////
     // Transcription regions //
     ///////////////////////////
-    transcription_region_t *transcription_regions;
+    transcription_region_t *d_transcription_regions;
     std::vector<transcription_region_t> transcription_regions_v;
 
     for (int c = 0; c < genome->chromosomes.size(); c++)
@@ -146,10 +143,10 @@ void CUDASPhase::simulate(int sim_number)
         }
     }
 
-    cudaMalloc(&transcription_regions,
+    cudaMalloc(&d_transcription_regions,
                transcription_regions_v.size() * sizeof(transcription_region_t));
 
-    cudaMemcpy(replication_times, boundaries.data(),
+    cudaMemcpy(d_transcription_regions, boundaries.data(),
                transcription_regions_v.size() * sizeof(transcription_region_t),
                cudaMemcpyHostToDevice);
 
@@ -158,6 +155,8 @@ void CUDASPhase::simulate(int sim_number)
     ///////////////////
     // Add an extra thread for management
     cuda_fork<<<1, n_resources + 1>>>();
+    // Wait kernel end
+    cudaDeviceSynchronize();
     // TODO: add cudaFree or use cudaDeviceReset()
 }
 
