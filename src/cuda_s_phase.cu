@@ -99,25 +99,28 @@ void CUDASPhase::simulate(int sim_number)
     // Probability landscape for full genome //
     ///////////////////////////////////////////
     float *d_probability_landscape;
+    std::vector<float> ones(genome->size(), 1.0f);
     cudaMalloc(&d_probability_landscape, genome->size() * sizeof(float));
 
     // TODO: make a flat probability landsacpe for entire genome
     // std::vector<float> probabilities = data->get_probability_landscape();
     // cudaMemcpy(probab, probabilities.data(), sizeof(int), );
 
-    cudaMemset(d_probability_landscape, 1.f, genome->size() * sizeof(float));
+    cudaMemcpy(d_probability_landscape, ones.data(),
+               genome->size() * sizeof(float), cudaMemcpyHostToDevice);
 
     /////////////////////////////////////////////////////////
     // Boundaries of chromosomes (for all the flat arrays) //
     /////////////////////////////////////////////////////////
     int *d_chromosome_boundaries;
-    cudaMalloc(&d_chromosome_boundaries, genome->size() * sizeof(int));
+    int boundary_count = genome->chromosomes.size() + 1;
 
-    std::vector<int> boundaries(genome->chromosomes.size() + 1, 0);
+    cudaMalloc(&d_chromosome_boundaries, boundary_count * sizeof(int));
+
+    std::vector<int> boundaries(boundary_count, 0);
 
     // Generate boundaries list
-    for (long unsigned int c = 0, bd = -1; c < genome->chromosomes.size() + 1;
-         c++)
+    for (long int c = 0, bd = -1; c < boundary_count; c++)
     {
         boundaries[c] = bd;
         // TODO: if a bug appears, check this logic
@@ -125,7 +128,7 @@ void CUDASPhase::simulate(int sim_number)
             bd += genome->chromosomes[c]->size();
     }
     cudaMemcpy(d_chromosome_boundaries, boundaries.data(),
-               boundaries.size() * sizeof(int), cudaMemcpyHostToDevice);
+               boundary_count * sizeof(int), cudaMemcpyHostToDevice);
 
     ///////////////////////////
     // Transcription regions //
@@ -153,6 +156,7 @@ void CUDASPhase::simulate(int sim_number)
     ///////////////////
     // Create kernel //
     ///////////////////
+    cudaDeviceSynchronize();
     std::cout << "[INFO] Launching GPU simulation " << sim_number << std::endl;
     // Add an extra thread for management
     cuda_fork<<<1, n_resources + 1>>>(

@@ -122,6 +122,28 @@ __global__ void cuda_fork(
     // Initial RNG state
     unsigned int state = ((unsigned int)fork_id + 1) * seed;
 
+    if (fork_id < 0)
+    {
+        // Genome
+        for (int i = 0; i < genome_size; i++)
+            printf("%d ", replication_times[i]);
+        printf("\n\n");
+
+        // Probs
+        for (int i = 0; i < genome_size; i++)
+            printf("%.1f ", probability_landscape[i]);
+        printf("\n\n");
+
+        // chrm boundaries
+        for (int i = 0; i < chromosome_count + 1; i++)
+            printf("%d ", chromosome_boundaries[i]);
+        printf("\n\n");
+
+        // Transcr reg
+        for (int i = 0; i < transcription_regions_size; i++)
+            printf("(%d, %d) ", transcription_regions[i].start, transcription_regions[i].end);
+        printf("\n\n");
+    }
     // Do until entire genome is replicated
     while (time < timeout && (*replicated) < genome_size)
     {
