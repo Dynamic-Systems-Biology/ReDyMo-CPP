@@ -13,9 +13,9 @@ __device__ unsigned int int_rand(unsigned int *state)
     return x;
 }
 
-__device__ double uniform_rand(unsigned int *state)
+__device__ float uniform_rand(unsigned int *state)
 {
-    return ((double)int_rand(state)) / UINT_MAX;
+    return ((float)int_rand(state)) / UINT_MAX;
 }
 
 __device__ bool collided(int transcription_period,
@@ -120,7 +120,7 @@ __global__ void cuda_fork(
     bool free = true;
 
     // Initial RNG state
-    unsigned int state = ((unsigned int)fork_id + 1) * seed;
+    unsigned int state = ((unsigned int)fork_id + 2) * seed;
 
     if (fork_id < 0)
     {
