@@ -120,7 +120,7 @@ __global__ void cuda_fork(
     bool free = true;
 
     // Initial RNG state
-    unsigned int state = ((unsigned int)fork_id + 2) * seed;
+    unsigned int state = (unsigned int)(fork_id + 2) * seed;
 
     if (fork_id < 0)
     {

@@ -157,7 +157,7 @@ void GPUSPhase::simulate(int sim_number)
 
         std::vector<int> boundaries(genome->chromosomes.size() + 1, 0);
 
-        for (long unsigned int c = 0, bd = -1;
+        for (long int c = 0, bd = -1;
              c < genome->chromosomes.size() + 1; c++)
         {
             boundaries[c] = bd;
