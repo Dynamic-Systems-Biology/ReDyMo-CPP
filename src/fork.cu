@@ -122,7 +122,7 @@ __global__ void cuda_fork(
     // Initial RNG state
     unsigned int state = (unsigned int)(fork_id + 2) * seed;
 
-    if (fork_id < 0)
+    if (fork_id < 0 && false)
     {
         // Genome
         for (int i = 0; i < genome_size; i++)
@@ -143,6 +143,10 @@ __global__ void cuda_fork(
         for (int i = 0; i < transcription_regions_size; i++)
             printf("(%d, %d) ", transcription_regions[i].start, transcription_regions[i].end);
         printf("\n\n");
+
+        printf("free_forks: %d\n\n", *free_forks);
+        printf("end_time: %d\n\n", *end_time);
+        printf("replicated: %d\n\n", *replicated);
     }
     // Do until entire genome is replicated
     while (time < timeout && (*replicated) < genome_size)
@@ -166,7 +170,6 @@ __global__ void cuda_fork(
                 if (!replication_times[location] &&
                     uniform_rand(&state) < probability_landscape[location])
                 {
-                    printf("Attaching forks\n");
                     int i = 0;
 
                     // Spawn forks
@@ -229,7 +232,6 @@ __global__ void cuda_fork(
         // If attached, loop copy until machinery release
         if (!cooldown && at >= 0)
         {
-            printf("%d replicating at %d\n", fork_id, at);
             int next = at + direction;
 
             bool on_boundary = at < 0 ? next == boundary : at == boundary;

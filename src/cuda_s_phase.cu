@@ -67,7 +67,7 @@ void CUDASPhase::simulate(int sim_number)
 
     cudaMemset(d_end_time, 0, sizeof(int));
     cudaMemset(d_replicated, 0, sizeof(int));
-    cudaMemset(d_free_forks, n_resources, sizeof(int));
+    cudaMemcpy(d_free_forks, &n_resources, sizeof(int), cudaMemcpyHostToDevice);
 
     ////////////////////////////////
     // Start locations/directions //
