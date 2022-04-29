@@ -153,6 +153,12 @@ void SPhase::simulate(int sim_number)
                   << " Number of constitutive origins that did not fire: "
                   << constitutive_origins << std::endl;
 
+    int replicated = 0;
+    for(auto chrm : genome->chromosomes)
+        replicated += chrm->get_n_replicated_bases();
+
+    std::cout << "\t[INFO] " << sim_number
+              << " Number bases replicated: " << replicated << std::endl;
     checkpoint_times.end_sim = std::chrono::steady_clock::now();
 
     output(sim_number, time, genome->average_interorigin_distance(), genome);

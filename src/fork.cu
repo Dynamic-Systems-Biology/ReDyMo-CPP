@@ -23,6 +23,7 @@ __device__ bool collided(int transcription_period,
                          const transcription_region_t *transcription_regions,
                          int at, int direction, int time)
 {
+    if (!transcription_period) return false;
     for (int i = 0; i < transcription_regions_size; i++)
     {
         transcription_region_t region = transcription_regions[i];
@@ -104,6 +105,8 @@ __global__ void cuda_fork(
     // Fork cooldown
     int cooldown = 0;
 
+    int fired_origins = 0;
+
     // Fork location
     int at = -1;
 
@@ -153,7 +156,7 @@ __global__ void cuda_fork(
     {
         __syncthreads();
 
-        time++;
+        if (fork_id >= 0) time++;
 
         // Try to attach forks to genome (fork manager)
         if (fork_id < 0 && (*free_forks) > 1)
@@ -204,6 +207,7 @@ __global__ void cuda_fork(
                     }
 
                     atomicSub(free_forks, 2);
+                    fired_origins += 2;
                     free_cnt -= 2;
                 }
             }
@@ -283,4 +287,6 @@ __global__ void cuda_fork(
     // TODO: maybe use the largest time with cmpexch
     (*end_time) = time;
     if (fork_id < 0 && time >= timeout) printf("Timeout\n");
+    if (fork_id < 0) printf("Origins Fired %d \n", fired_origins);
+    if (fork_id < 0) printf("Bases Replicated %d \n", *replicated);
 }
