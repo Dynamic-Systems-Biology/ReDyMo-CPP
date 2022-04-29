@@ -1,0 +1,50 @@
+
+FROM nvidia/cuda:11.4.1-devel-ubuntu20.04 as BUILD
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Fix nvidia's broken GPG key
+RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
+
+RUN apt-get update && \
+    apt-get install -y build-essential cmake
+
+ENV SRC_PATH=/usr/src/ReDyMo-CPP
+
+COPY . ${SRC_PATH}
+
+WORKDIR ${SRC_PATH}/build
+
+RUN cmake .. -DGPU_CUDA_ENABLED=ON -DBUILD_TYPE=Debug && \
+    make -j10 
+    # && \
+    # make test
+
+# Multi-stage build
+FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
+
+ENV SRC_PATH=/usr/src/ReDyMo-CPP
+ENV ORGANISM=TcruziCLBrenerEsmeraldo-like
+ENV APP_PATH=/opt/redymo
+
+RUN adduser redymo && usermod -aG redymo redymo
+
+RUN mkdir -p ${APP_PATH}; chown redymo: ${APP_PATH}
+
+#RUN apk update && \
+#    apk add --no-cache libstdc++ libgomp libgcc
+#    apt-get install -y build-essential cmake
+
+USER redymo
+
+WORKDIR ${APP_PATH}
+
+COPY --from=BUILD ${SRC_PATH}/build/simulator ${APP_PATH}/
+
+COPY --from=BUILD ${SRC_PATH}/data/database.sqlite ${APP_PATH}/data/
+
+COPY --from=BUILD ${SRC_PATH}/data/ ${APP_PATH}/data/
+
+ENV NSIGHT_CUDA_DEBUGGER=1
+CMD cuda-gdb ./simulator 
+#--cells 1 --organism 'TcruziCLBrenerEsmeraldo-like' --resources 2 --speed 1 --period 0 --timeout 10000 --summary --threads 15 --name double_cs --gpu --data-dir data
