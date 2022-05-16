@@ -1,8 +1,6 @@
-// #define GPU_ENABLED
-
 #include "configuration.hpp"
 #include "evolution.hpp"
-//#include "gpu_s_phase.hpp"
+#include "gpu_s_phase.hpp"
 #include "s_phase.hpp"
 #include <algorithm>
 #include <c4/yml/std/string.hpp>
@@ -34,43 +32,51 @@ int main(int argc, char *argv[])
                 arg_values.organism, arg_values.data_dir + "/database.sqlite",
                 arg_values.data_dir + "/MFA-Seq_" + arg_values.organism + "/",
                 arg_values.probability);
-            bool gpu = false;
 
-            if (gpu)
+            if (arg_values.gpu)
             {
-            #ifdef GPU_ENABLED
+#ifdef GPU_ENABLED
                 std::cout << std::endl;
 
                 // Select Platform
                 std::vector<cl::Platform> platforms;
                 cl::Platform::get(&platforms);
                 cl::Platform platform;
-                for (int i = 0; i < platforms.size(); i++)
+                std::cout << "OpenCL Platforms Available:" << std::endl;
+                for (uint i = 0; i < platforms.size(); i++)
                     std::cout << platforms[i].getInfo<CL_PLATFORM_NAME>()
                               << std::endl;
+                std::cout << std::endl;
 
+                std::cout << "Available Platforms version: " << std::endl;
                 for (auto &p : platforms)
                 {
                     std::string platver = p.getInfo<CL_PLATFORM_VERSION>();
-                    if (platver.find("OpenCL 2.") != std::string::npos)
+                    std::cout << p.getInfo<CL_PLATFORM_NAME>() << platver
+                              << std::endl;
+                    if ((platver.find("OpenCL 2.") != std::string::npos) ||
+                        (platver.find("OpenCL 3.") != std::string::npos))
                     {
                         platform = p;
                     }
                 }
+                std::cout << std::endl;
                 if (platform() == 0)
                 {
-                    std::cout << "No OpenCL 2.0 platform found.";
+                    std::cout << "No OpenCL 2.0 platform found." << std::endl
+                              << std::endl;
                     return -1;
                 }
                 cl::Platform newP = cl::Platform::setDefault(platform);
                 if (newP != platform)
                 {
-                    std::cout << "Error setting default platform.";
+                    std::cout << "Error setting default platform." << std::endl;
                     return -1;
                 }
 
                 std::cout << "Using Platform:"
-                          << platform.getInfo<CL_PLATFORM_NAME>() << std::endl;
+                          << platform.getInfo<CL_PLATFORM_NAME>() << std::endl
+                          << std::endl;
 
                 // Select Device
                 std::vector<cl::Device> all_devices;
@@ -84,22 +90,30 @@ int main(int argc, char *argv[])
 
                 cl::Device device = all_devices[0];
                 std::cout << "Using Device: "
-                          << device.getInfo<CL_DEVICE_NAME>() << std::endl;
+                          << device.getInfo<CL_DEVICE_NAME>() << std::endl
+                          << std::endl;
+
+                unsigned long long seed = arg_values.seed;
 
                 // Start simulations
-                for (int i = 0; i < n_cells; i++)
+                // # pragma omp parallel for
+                for (uint i = 0; i < arg_values.cells; i++)
                 {
                     cl::Context context({device});
 
                     GPUSPhase s_phase(
-                        std::stoi(arg_values[7]), std::stoi(arg_values[2]),
-                        std::stoi(arg_values[3]), std::stoi(arg_values[4]),
-                        std::stoi(arg_values[6]), has_dormant, data,
-                        arg_values[1], context);
+                        context, arg_values.constitutive, arg_values.resources,
+                        arg_values.speed, arg_values.timeout, arg_values.period,
+                        arg_values.dormant, data, arg_values.organism,
+                        arg_values.name, arg_values.output, i ^ seed);
 
                     s_phase.simulate(i);
                 }
-            #endif
+#endif
+#ifndef GPU_ENABLED
+                std::cout << "This code was not compiled with GPU support."
+                          << std::endl;
+#endif
             }
             else
             {
@@ -108,7 +122,7 @@ int main(int argc, char *argv[])
 
                 unsigned long long seed = arg_values.seed;
 
-                #pragma omp parallel for
+#pragma omp parallel for
                 for (long long unsigned int i = 0; i < arg_values.cells; i++)
                 {
                     // Run all simulations with the same parameters, except for

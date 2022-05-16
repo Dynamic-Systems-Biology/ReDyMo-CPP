@@ -135,6 +135,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     cl_configuration_data arguments;
 
     int dormant = -1;
+    int gpu = 0;
     int summary = 0;
 
     std::string config;
@@ -143,7 +144,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     {
         static struct option long_options[] = {
             {"help", no_argument, 0, 'h'},
-            {"gpu", no_argument, 0, 'g'},
+            {"gpu", no_argument, &gpu, 'g'},
             {"cells", required_argument, 0, 'c'},
             {"organism", required_argument, 0, 'o'},
             {"resources", required_argument, 0, 'r'},
@@ -181,8 +182,7 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
             throw std::invalid_argument("Usage: ");
             break;
         case 'g':
-            std::cout << "GPU Processing is broken for now. Ignoring option..."
-                      << std::endl;
+            std::cout << "GPU Processing enabled" << std::endl;
             break;
         case 'c': arguments.cells = std::stoull(optarg); break;
         case 'o': arguments.organism = std::string(optarg); break;
@@ -212,6 +212,8 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
     if (config.length() > 0) read_configuration_file(config, arguments);
 
     if (dormant >= 0) arguments.dormant = !!dormant;
+
+    if (gpu >= 0) arguments.gpu = !!gpu;
 
     if (!arguments.cells)
     {
@@ -283,6 +285,9 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
                   << std::flush;
         std::cout << "Thread count            : " << arguments.threads
                   << std::endl
+                  << std::flush;
+        std::cout << "GPU enabled             : "
+                  << (arguments.gpu ? "Yes" : "No") << std::endl
                   << std::flush;
         std::cout << "Seed for the RNG        : " << arguments.seed << std::endl
                   << std::flush;
