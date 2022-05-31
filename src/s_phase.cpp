@@ -140,6 +140,7 @@ void SPhase::simulate(int sim_number)
         std::cout << "\t[WARN] " << sim_number
                   << " Timeout simulation: " << std::endl;
 
+
     std::cout << "\t[INFO] " << sim_number
               << " Number of Collisions: " << n_collisions << std::endl;
     std::cout << "\t[INFO] " << sim_number
@@ -154,11 +155,12 @@ void SPhase::simulate(int sim_number)
                   << constitutive_origins << std::endl;
 
     int replicated = 0;
-    for(auto chrm : genome->chromosomes)
-        replicated += chrm->get_n_replicated_bases();
+    for ( auto chr: genome->chromosomes)
+        replicated += chr->get_n_replicated_bases();
+    float pct_rep    = (float)(replicated) / genome->size();
 
     std::cout << "\t[INFO] " << sim_number
-              << " Number bases replicated: " << replicated << std::endl;
+              << " Replicated: " << replicated << " / " << genome->size() << " " << pct_rep *100 << std::endl;
     checkpoint_times.end_sim = std::chrono::steady_clock::now();
 
     output(sim_number, time, genome->average_interorigin_distance(), genome);

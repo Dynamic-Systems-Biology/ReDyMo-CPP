@@ -10,6 +10,8 @@ __global__ void cuda_fork(
     int *replicated,
     // Number of free forks
     int *free_forks,
+    // Pointer to keep track of workers that are still in the main loop
+    int *workers_running,
     // Start Location and Direction Arrays
     int *start_locations, int *start_directions,
     // Replication-transcription collision counts

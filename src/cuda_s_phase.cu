@@ -99,15 +99,20 @@ void CUDASPhase::simulate(int sim_number)
     // Probability landscape for full genome //
     ///////////////////////////////////////////
     float *d_probability_landscape;
-    std::vector<float> ones(genome->size(), 1.0f);
     cudaMalloc(&d_probability_landscape, genome->size() * sizeof(float));
 
-    // TODO: make a flat probability landsacpe for entire genome
-    // std::vector<float> probabilities = data->get_probability_landscape();
-    // cudaMemcpy(probab, probabilities.data(), sizeof(int), );
-
-    cudaMemcpy(d_probability_landscape, ones.data(),
-               genome->size() * sizeof(float), cudaMemcpyHostToDevice);
+    std::vector<float> probability_landscape;
+    for (auto chrm : genome->chromosomes)
+    {
+        std::vector<double> chrm_probabilities =
+            data->get_probability_landscape(chrm->get_code());
+        probability_landscape.insert(probability_landscape.end(),
+                                     chrm_probabilities.begin(),
+                                     chrm_probabilities.end());
+    }
+    cudaMemcpy(d_probability_landscape, probability_landscape.data(),
+               probability_landscape.size() * sizeof(float),
+               cudaMemcpyHostToDevice);
 
     /////////////////////////////////////////////////////////
     // Boundaries of chromosomes (for all the flat arrays) //
@@ -153,6 +158,11 @@ void CUDASPhase::simulate(int sim_number)
                transcription_regions_v.size() * sizeof(transcription_region_t),
                cudaMemcpyHostToDevice);
 
+    int *d_workers_running;
+    cudaMalloc(&d_workers_running, sizeof(int));
+
+    cudaMemset(d_workers_running, 0, sizeof(int));
+
     ///////////////////
     // Create kernel //
     ///////////////////
@@ -160,12 +170,12 @@ void CUDASPhase::simulate(int sim_number)
     std::cout << "[INFO] Launching GPU simulation " << sim_number << std::endl;
     // Add an extra thread for management
     cuda_fork<<<1, n_resources + 1>>>(
-        d_end_time, d_replicated, d_free_forks, d_start_locations,
-        d_start_directions, d_rt_collisions, d_replication_times,
-        d_probability_landscape, d_chromosome_boundaries, transcription_period,
-        transcription_regions_v.size(), d_transcription_regions, timeout,
-        genome->size(), genome->chromosomes.size(), n_resources, genome->seed,
-        0);
+        d_end_time, d_replicated, d_free_forks, d_workers_running,
+        d_start_locations, d_start_directions, d_rt_collisions,
+        d_replication_times, d_probability_landscape, d_chromosome_boundaries,
+        transcription_period, transcription_regions_v.size(),
+        d_transcription_regions, timeout, genome->size(),
+        genome->chromosomes.size(), n_resources, genome->seed, 0);
 
     // Wait kernel end
     cudaDeviceSynchronize();

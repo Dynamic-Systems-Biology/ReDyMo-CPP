@@ -60,6 +60,8 @@ __device__ bool collided(int transcription_period,
 }
 __device__ int get_global_id() { return blockIdx.x * blockDim.x + threadIdx.x; }
 
+// TODO: da pra tirar a thread gerente. Cada forquilha pode sortear sua propria origem de replicacao. Da pra usar tbm uma thread por chromosomo
+
 __global__ void cuda_fork(
     // End Time
     int *end_time,
@@ -67,6 +69,8 @@ __global__ void cuda_fork(
     int *replicated,
     // Number of free forks
     int *free_forks,
+    // Number of workers that are still in the main loop
+    int *workers_running,
     // Start Location and Direction Arrays
     int *start_locations, int *start_directions,
     // Replication-transcription collision counts
@@ -125,7 +129,7 @@ __global__ void cuda_fork(
     // Initial RNG state
     unsigned int state = (unsigned int)(fork_id + 2) * seed;
 
-    if (fork_id < 0 && false)
+    if (fork_id < 0 && true)
     {
         // Genome
         for (int i = 0; i < genome_size; i++)
@@ -144,23 +148,46 @@ __global__ void cuda_fork(
 
         // Transcr reg
         for (int i = 0; i < transcription_regions_size; i++)
-            printf("(%d, %d) ", transcription_regions[i].start, transcription_regions[i].end);
+            printf("(%d, %d) ", transcription_regions[i].start,
+                   transcription_regions[i].end);
         printf("\n\n");
 
         printf("free_forks: %d\n\n", *free_forks);
         printf("end_time: %d\n\n", *end_time);
         printf("replicated: %d\n\n", *replicated);
     }
-    // Do until entire genome is replicated
-    while (time < timeout && (*replicated) < genome_size)
-    {
-        __syncthreads();
 
-        if (fork_id >= 0) time++;
+    __syncthreads();
+    if (fork_id >= 0) atomicAdd(workers_running, 1);
+
+    // TODO: see https://core.ac.uk/download/pdf/77011478.pdf
+    //  Do until entire genome is replicated
+    while (((fork_id < 0 && *workers_running > 0) ||
+            (fork_id >= 0 && time < timeout)) &&
+           (*replicated) < genome_size)
+    {
+        // if (*workers_running == max_forks) __syncthreads();
+        // printf("[%d] n_workers_running %d\n", fork_id, *workers_running);
+
+        if ((fork_id == 0 || fork_id == 99) && time % 50 == 0)
+            printf("[%d] time %d/%d  replicated %d/%d\n", fork_id, time,
+                   timeout, *replicated, genome_size);
+        if (fork_id >= 0 || true)
+        {
+            time++;
+            if (fork_id < 0 && time > 10000)
+            {
+                for (int i = 0; i < max_forks; i++)
+                    printf("%d", start_locations[i]);
+                printf("\n\n");
+                break;
+            }
+        }
 
         // Try to attach forks to genome (fork manager)
         if (fork_id < 0 && (*free_forks) > 1)
         {
+            printf("free forks %d\n", *free_forks);
             const int prev_free = *free_forks;
             int free_cnt        = prev_free;
 
@@ -212,9 +239,15 @@ __global__ void cuda_fork(
                 }
             }
         }
+        if (fork_id < 0)
+        {
+            for (int i = 0; i < max_forks; i++)
+                if (start_locations[i] != -1) printf("%d", start_locations[i]);
+        }
 
         // If not attached, check for start_location
-        if (!cooldown && start_locations[fork_id] > -1 && at < 0)
+        if (fork_id >= 0 && !cooldown && start_locations[fork_id] > -1 &&
+            at < 0)
         {
             at        = start_locations[fork_id];
             free      = false;
@@ -267,7 +300,7 @@ __global__ void cuda_fork(
         }
 
         // Fork Grace period before attaching again
-        if (at < 0)
+        if (fork_id >= 0 && at < 0)
         {
             if (cooldown)
                 cooldown--;
@@ -278,10 +311,13 @@ __global__ void cuda_fork(
                 free                     = true;
             }
         }
-
-        __syncthreads();
     }
 
+    // TODO: there are 31 (yeah very odd) workers that are locking the manager
+    printf("======================= thread %d out!!  // ================\n", fork_id);
+    // thread inside the main loop
+    __syncthreads();
+    if (fork_id >= 0) atomicSub(workers_running, 1);
     if (!free) atomicAdd(free_forks, 1);
 
     // TODO: maybe use the largest time with cmpexch
@@ -289,4 +325,5 @@ __global__ void cuda_fork(
     if (fork_id < 0 && time >= timeout) printf("Timeout\n");
     if (fork_id < 0) printf("Origins Fired %d \n", fired_origins);
     if (fork_id < 0) printf("Bases Replicated %d \n", *replicated);
+    if (fork_id < 0) printf("Workers at the end %d \n", *workers_running);
 }
