@@ -1,5 +1,4 @@
-
-FROM alpine:latest as BUILD
+FROM alpine:3.13.0 as BUILD
 
 RUN apk update && \
     apk add --no-cache build-base cmake
@@ -15,7 +14,7 @@ RUN cmake .. && \
     make test
 
 # Multi-stage build
-FROM alpine:latest
+FROM alpine:3.13.0
 
 ENV SRC_PATH=/usr/src/ReDyMo-CPP
 ENV ORGANISM=TBrucei_TREU927
