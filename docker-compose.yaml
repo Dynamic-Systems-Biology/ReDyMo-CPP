@@ -1,6 +1,6 @@
 services:
   redymo:
-    image: brunobbs/redymo:094617688714b3a9c56074a0c58b0c03a6e7a9f3
+    build: .
     user: redymo
     volumes:
       - ./redymo-output:/opt/redymo/build/outputs
