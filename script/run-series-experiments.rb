@@ -47,7 +47,7 @@ OptionParser.new do |opts|
     options[:name] = v
   end
 
-  opts.on('-d', '-description [String]', 'A description of the experiment. Your future self will thank you.') do |v|
+  opts.on('-d', '--description [String]', 'A description of the experiment. Your future self will thank you.') do |v|
     options[:description] = v
   end
 
@@ -84,7 +84,7 @@ pb = ProgressBar.create(
   format: '%t %c/%C |%B| %p%% %a %E'
 )
 
-Dir.chdir('./build') do
+Dir.chdir('./build/outputs/') do
     # Create description file
     system("mkdir -p #{options[:name]}/")
     File.open("#{options[:name]}/description.txt", 'w') do |file|

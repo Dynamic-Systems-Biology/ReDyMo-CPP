@@ -36,10 +36,6 @@ WORKDIR ${APP_PATH}
 
 COPY --from=BUILD --chown=redymo:redymo ${SRC_PATH} ${APP_PATH}/
 
-#COPY --from=BUILD ${SRC_PATH}/data/database.sqlite ${APP_PATH}/data/
-
-#COPY --from=BUILD ${SRC_PATH}/script ${APP_PATH}/script/
-
-#COPY --from=BUILD ${SRC_PATH}/data/MFA-Seq_${ORGANISM} ${APP_PATH}/data/MFA-Seq_${ORGANISM}
+RUN mkdir -p ${APP_PATH}/build/outputs
 
 CMD ./simulator --cells 2 --organism 'Trypanosoma brucei brucei TREU927' --resources 10 --speed 65 --period 150 --timeout 1000000 --dormant true --data-dir data

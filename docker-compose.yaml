@@ -1,0 +1,7 @@
+services:
+  redymo:
+    image: brunobbs/redymo:094617688714b3a9c56074a0c58b0c03a6e7a9f3
+    user: redymo
+    volumes:
+      - ./redymo-output:/opt/redymo/build/outputs
+    command: ruby script/run-series-experiments.rb -r 0 --name "fix_comparison" --description "A comparison with the original paper. Running the same esperiment, but now with the fixes implemented." --cells 10 --threads 24
