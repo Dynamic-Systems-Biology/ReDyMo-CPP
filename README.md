@@ -197,6 +197,9 @@ and then open the documentation index with a web browser:
 The output folder contains the outputs o each run in separate folders which names contain information about the parameters of the **run**.
 If a simulation is run with the same parameters, the folder will be **overwritten**.
 Inside each run folder are located each individual cell output which comprise of a **cell.txt** and the last state of every chromosome.
+
+### Cell.txt
+
 The **cell.txt** file contains, respectively, values for **number of forks**, **steps per iteration**, **total iterations**, **average inter origin distance**
 
 ### cell_output_aggregator.py
