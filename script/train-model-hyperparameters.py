@@ -1,5 +1,3 @@
-import shlex
-
 import optuna
 import subprocess
 import numpy as np
@@ -72,7 +70,7 @@ def calculate_error(params):
         # Read all simulations
         for sim in range(params['simulations']):
             with open(
-                    f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/TcChrm{chrm}-S.cseq",
+                    f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/TcChr{chrm}-S.cseq",
                     'r') as f:
                 simulations.append(np.array(list(decompress(f.readlines()))))
 
@@ -80,7 +78,7 @@ def calculate_error(params):
         print("simulations", simulations.shape)
 
         # Normalize mfa-seq
-        mfaseq = normalize(mfaseq)
+        mfaseq = normalize(np.array(mfaseq))
         # Interpolate mfa-seq
         mfaseq = interpolate(np.array(mfaseq), len(simulations[0]))
         print("mfaseq", mfaseq.shape)
@@ -113,8 +111,8 @@ def objective(trial):
         'organism': 'TcruziCLBrenerEsmeraldo-like',
         'num_chromosomes': 41,
         'probability': 0,
-        'replisomes': trial.suggest_int('replisomes', 2, 1000, 10),
-        'replication_period': trial.suggest_int('period', 0, 1000000, 100),
+        'replisomes': trial.suggest_int('replisomes', 2, 1_000, 10),
+        'replication_period': trial.suggest_int('period', 0, 1_000_000, 100),
         'round': 0,
         'name': f"trial_{trial.number}",
         'training_chromosomes_set': TRAINING_CHROMOSOMES_SET
