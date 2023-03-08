@@ -17,31 +17,50 @@ DataManager::DataManager(std::string organism, std::string database_path,
     : database_path(database_path), mfa_seq_data_path(mfa_seq_data_path),
       uniform(p)
 {
-    SQLite::Database db(database_path, SQLite::OPEN_READONLY);
-    SQLite::Statement query(db, "select * from Chromosome where organism = ?");
-    query.bind(1, organism);
+    try {
+        printf("[INFO] Loading database data for organism \"%s\" \n",
+               organism.c_str());
+        SQLite::Database db(database_path, SQLite::OPEN_READONLY);
+        SQLite::Statement query(db, "select * from Chromosome where organism = ?");
+        query.bind(1, organism);
 
-    while (query.executeStep())
-    {
-        std::string code = query.getColumn("code").getString();
-        int length       = query.getColumn("length").getInt();
-
-        lengths.insert(std::pair<std::string, int>(code, length));
-
-        codes.push_back(code);
-
-        try
+        while (query.executeStep())
         {
-            generate_prob_landscape(code, length);
-            generate_constitutive_origins(code);
-            generate_transcription_regions(code);
-        }
-        catch (std::out_of_range &e)
-        {
-            std::cerr << e.what() << std::endl;
-            exit(-1);
+            std::string code = query.getColumn("code").getString();
+            printf("[INFO] Loading chromosome %s\n", code.c_str());
+            int length       = query.getColumn("length").getInt();
+
+            lengths.insert(std::pair<std::string, int>(code, length));
+
+            codes.push_back(code);
+
+            try
+            {
+                generate_prob_landscape(code, length);
+                generate_constitutive_origins(code);
+                generate_transcription_regions(code);
+            }
+            catch (std::out_of_range &e)
+            {
+                std::cerr << e.what() << std::endl;
+                exit(-1);
+            }
         }
     }
+    catch (std::exception &e) {
+        std::cout << "An error occurred while loading database data: " << e.what()
+                  << std::endl
+                  << std::fflush(nullptr);
+        exit(1);
+    }
+
+    if (codes.empty())
+    {
+        std::cout << "[ERROR] No chromosomes found for organism " << organism << std::endl
+                  << std::fflush(nullptr);
+        exit(1);
+    }
+
 }
 
 DataManager::~DataManager()
