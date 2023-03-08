@@ -35,7 +35,7 @@ def separate_training_set(num_chromosomes):
 
 
 def normalize(array):
-    return (array - np.min(array)) / (np.max(array) - np.min(array))
+    return (array - array.min()) / (array.max() - array.min())
 
 
 def linear_interpolation(a, b, n):
@@ -44,12 +44,9 @@ def linear_interpolation(a, b, n):
 
 def interpolate(array, new_size):
     old_size = len(array)
-    new_array = []
-    for i in range(old_size - 1):
-        expanded = linear_interpolation(array[i], array[i + 1], new_size // old_size)
-        print(expanded)
-        new_array += expanded
-    return np.array(new_array)
+    new_array = np.linspace(0, old_size - 1, new_size)
+    new_array = np.interp(new_array, np.arange(old_size), array)
+    return new_array
 
 
 def mse(a, b):
@@ -63,7 +60,7 @@ def calculate_error(params):
 
         # Read mfa-seq
         with open(f"../data/MFA-Seq_TcruziCLBrenerEsmeraldo-like/TcChr{chrm}-S.txt", 'r') as f:
-            mfaseq = np.array(list(f.readlines()))
+            mfaseq = np.array(list(map(lambda x: float(x), list(f.readlines()))))
 
         print("mfa-seq", mfaseq.shape)
 
@@ -78,14 +75,10 @@ def calculate_error(params):
         print("simulations", simulations.shape)
 
         # Normalize mfa-seq
-        mfaseq = normalize(np.array(mfaseq))
+        mfaseq = normalize(mfaseq)
         # Interpolate mfa-seq
         mfaseq = interpolate(np.array(mfaseq), len(simulations[0]))
         print("mfaseq", mfaseq.shape)
-        import matplotlib.pyplot as plt
-        plt.plot(mfaseq)
-        plt.interactive(False)
-        plt.show()
 
         # Calculate average of simulations
         simulations_average = np.mean(simulations, axis=0)
@@ -120,9 +113,11 @@ def objective(trial):
     command_str = f"nice -n 20 ../build/simulator --cells {params['simulations']} --organism {params['organism']} --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
 
     command_arr = str.split(command_str, ' ')
-    ret = subprocess.run(command_arr, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    subprocess.run(command_arr, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     return calculate_error(params)
+
 
 TRAINING_CHROMOSOMES_SET = separate_training_set(41)
 study = optuna.create_study(direction='minimize')
