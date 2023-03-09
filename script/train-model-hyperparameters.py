@@ -3,6 +3,7 @@ import signal
 import optuna
 import subprocess
 import numpy as np
+import pandas as pd
 
 
 # From https://github.com/seijihariki/redymo-tcruzi-analysis/blob/master/final_scripts/compressor.py
@@ -98,6 +99,7 @@ def calculate_error(params):
 
 # TODO: gaussian curve parameters
 def objective(trial):
+    print(f"Starting trial {trial.number}")
     params = {
         'simulations': 1000,
         'timeout': 100_000_000,
@@ -116,14 +118,21 @@ def objective(trial):
 
     command_arr = str.split(command_str, ' ')
 
-    subprocess.run(command_arr, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    sim_out = subprocess.run(command_arr, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    print(sim_out.stdout)
+    print(sim_out.stderr)
+
+    print("End of trial {trial.number}")
+
 
     return calculate_error(params)
 
 
 def sigint_handler(signum, frame):
+    print(f"Stopping training because signal {signum} received")
     study.stop()
-    print(study.trials_dataframe())
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(study.trials_dataframe().to_string())
     print(study.best_params)
 
 
@@ -133,8 +142,7 @@ signal.signal(signal.SIGTERM, sigint_handler)
 TRAINING_CHROMOSOMES_SET = separate_training_set(41)
 study = optuna.create_study(direction='minimize')
 study.optimize(objective, n_trials=100)
-print(study.trials_dataframe())
 
+with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+    print(study.trials_dataframe().to_string())
 print(study.best_params)
-
-
