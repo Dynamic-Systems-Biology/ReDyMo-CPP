@@ -1,3 +1,5 @@
+import signal
+
 import optuna
 import subprocess
 import numpy as np
@@ -97,20 +99,20 @@ def calculate_error(params):
 # TODO: gaussian curve parameters
 def objective(trial):
     params = {
-        'simulations': 10,
+        'simulations': 1000,
         'timeout': 100_000_000,
         'speed': 1,
-        'threads': 6,
+        'threads': 70,
         'organism': 'TcruziCLBrenerEsmeraldo-like',
         'num_chromosomes': 41,
         'probability': 0,
-        'replisomes': trial.suggest_int('replisomes', 2, 1_000, 10),
+        'replisomes': trial.suggest_int('replisomes', 2, 1_002, 10),
         'replication_period': trial.suggest_int('period', 0, 1_000_000, 100),
         'round': 0,
         'name': f"trial_{trial.number}",
         'training_chromosomes_set': TRAINING_CHROMOSOMES_SET
     }
-    command_str = f"nice -n 20 ../build/simulator --cells {params['simulations']} --organism {params['organism']} --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
+    command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism {params['organism']} --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
 
     command_arr = str.split(command_str, ' ')
 
@@ -119,9 +121,20 @@ def objective(trial):
     return calculate_error(params)
 
 
+def sigint_handler(signum, frame):
+    study.stop()
+    print(study.trials_dataframe())
+    print(study.best_params)
+
+
+signal.signal(signal.SIGINT, sigint_handler)
+signal.signal(signal.SIGTERM, sigint_handler)
+
 TRAINING_CHROMOSOMES_SET = separate_training_set(41)
 study = optuna.create_study(direction='minimize')
-study.optimize(objective, n_trials=2)
+study.optimize(objective, n_trials=100)
 print(study.trials_dataframe())
 
 print(study.best_params)
+
+
