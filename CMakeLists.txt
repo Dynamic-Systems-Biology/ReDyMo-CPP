@@ -145,6 +145,8 @@ if (GPU_ENABLED)
     target_link_libraries(simulator gpudeps OpenCL::OpenCL)
 endif()
 
+add_compile_definitions(BUILD_TYPE="${CMAKE_BUILD_TYPE}")
+
 #######
 # Testing
 #######

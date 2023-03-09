@@ -248,6 +248,10 @@ cl_configuration_data Configuration::configure_cmd_options(int argc,
                   << "Parameter summary "
                      "================================================"
                   << std::endl
+#ifdef BUILD_TYPE
+                  << "Build Type              : " << BUILD_TYPE
+                  << std::endl
+#endif
                   << std::flush;
         std::cout << "Number of cells         : " << arguments.cells
                   << std::endl
