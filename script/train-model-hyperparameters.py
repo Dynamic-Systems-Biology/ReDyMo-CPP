@@ -140,7 +140,8 @@ signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGTERM, sigint_handler)
 
 TRAINING_CHROMOSOMES_SET = separate_training_set(41)
-study = optuna.create_study(direction='minimize')
+study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage='sqlite:///opt/redymo/train.sqlite', load_if_exists=True)
+
 study.optimize(objective, n_trials=100)
 
 with pd.option_context('display.max_rows', None, 'display.max_columns', None):
