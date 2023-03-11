@@ -4,6 +4,7 @@ import optuna
 import subprocess
 import numpy as np
 import pandas as pd
+from multiprocessing import Pool
 
 
 # From https://github.com/seijihariki/redymo-tcruzi-analysis/blob/master/final_scripts/compressor.py
@@ -56,43 +57,49 @@ def mse(a, b):
     return sum((a[i] - b[i]) ** 2 for i in range(len(a))) / len(a)
 
 
+def calculate_error_for_chrm(chrm, params):
+    simulations = []
+
+    # Read mfa-seq
+    with open(f"../data/MFA-Seq_TcruziCLBrenerEsmeraldo-like/TcChr{chrm}-S.txt", 'r') as f:
+        mfaseq = np.array(list(map(lambda x: float(x), list(f.readlines()))))
+
+    print("mfa-seq", mfaseq.shape)
+
+    # Read all simulations
+    for sim in range(params['simulations']):
+        with open(
+                f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/TcChr{chrm}-S.cseq",
+                'r') as f:
+            simulations.append(np.array(list(decompress(f.readlines()))))
+
+    simulations = np.array(simulations)
+    print("simulations", simulations.shape)
+
+    # Normalize mfa-seq
+    mfaseq = normalize(mfaseq)
+    # Interpolate mfa-seq
+    mfaseq = interpolate(np.array(mfaseq), len(simulations[0]))
+    print("mfaseq", mfaseq.shape)
+
+    # Calculate average of simulations
+    simulations_average = np.mean(simulations, axis=0)
+    print("simulations_average", simulations_average.shape)
+
+    # Normalize simulation
+    norm_simulations = normalize(simulations_average)
+    print("norm_simulations", norm_simulations.shape)
+
+    # Calculate error
+    return mse(mfaseq, norm_simulations)
+
+
 def calculate_error(params):
-    mse_for_each_chromosome = []
-    for chrm in params['training_chromosomes_set']:
-        simulations = []
-
-        # Read mfa-seq
-        with open(f"../data/MFA-Seq_TcruziCLBrenerEsmeraldo-like/TcChr{chrm}-S.txt", 'r') as f:
-            mfaseq = np.array(list(map(lambda x: float(x), list(f.readlines()))))
-
-        print("mfa-seq", mfaseq.shape)
-
-        # Read all simulations
-        for sim in range(params['simulations']):
-            with open(
-                    f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/TcChr{chrm}-S.cseq",
-                    'r') as f:
-                simulations.append(np.array(list(decompress(f.readlines()))))
-
-        simulations = np.array(simulations)
-        print("simulations", simulations.shape)
-
-        # Normalize mfa-seq
-        mfaseq = normalize(mfaseq)
-        # Interpolate mfa-seq
-        mfaseq = interpolate(np.array(mfaseq), len(simulations[0]))
-        print("mfaseq", mfaseq.shape)
-
-        # Calculate average of simulations
-        simulations_average = np.mean(simulations, axis=0)
-        print("simulations_average", simulations_average.shape)
-
-        # Normalize simulation
-        norm_simulations = normalize(simulations_average)
-        print("norm_simulations", norm_simulations.shape)
-
-        # Calculate error
-        mse_for_each_chromosome.append(mse(mfaseq, norm_simulations))
+    p = Pool()  # create a pool of worker processes
+    mse_for_each_chromosome = p.starmap(calculate_error_for_chrm,
+                                        [(chrm, params) for chrm in params['training_chromosomes_set']])
+    p.close()  # close the pool
+    p.join()  # wait for all processes to finish
     print(mse_for_each_chromosome)
     return np.mean(mse_for_each_chromosome)
 
@@ -122,8 +129,7 @@ def objective(trial):
     print(sim_out.stdout)
     print(sim_out.stderr)
 
-    print("End of trial {trial.number}")
-
+    print("End of execution for trial {trial.number}")
 
     return calculate_error(params)
 
@@ -140,7 +146,9 @@ signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGTERM, sigint_handler)
 
 TRAINING_CHROMOSOMES_SET = separate_training_set(41)
-study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage='sqlite:///opt/redymo/train.sqlite', load_if_exists=True)
+TRAINING_DB = 'sqlite:///opt/redymo/train.sqlite'
+study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage=TRAINING_DB,
+                            load_if_exists=True)
 
 study.optimize(objective, n_trials=100)
 
