@@ -154,7 +154,6 @@ TRAINING_CHROMOSOMES_SET = separate_training_set(41)
 log.info(f"Starting trainer module")
 log.info(f"Training chromosomes: {np.sort(TRAINING_CHROMOSOMES_SET)}")
 
-exit(0)
 TRAINING_DB = 'sqlite:///train.sqlite'
 study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage=TRAINING_DB,
                             load_if_exists=True)
