@@ -1,7 +1,25 @@
-FROM ubuntu:20.04 as BUILD
+# Multi-stage build
+FROM ubuntu:20.04 as EXECUTER
+
+ENV SRC_PATH=/usr/src/ReDyMo-CPP
+ENV ORGANISM=TcruziCLBrenerEsmeraldo-like
+ENV APP_PATH=/opt/redymo
+
+# RUN addgroup -S redymo && adduser -S redymo -G redymo
+
+# RUN mkdir -p ${APP_PATH}; chown redymo: ${APP_PATH}
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake python3 python3-pip vim sqlite3
+
+RUN pip install numpy optuna pandas
+
+FROM ubuntu:20.04 as BUILDER
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake
+
+FROM BUILDER as COMPILER
 
 ENV SRC_PATH=/usr/src/ReDyMo-CPP
 
@@ -13,32 +31,20 @@ RUN cmake .. -DCMAKE_BUILD_TYPE=Performance -DBUILD_TESTING=ON -DCOVERAGE=OFF -D
     make -j15 && \
     make test
 
-# Multi-stage build
-FROM ubuntu:20.04
-
-ENV SRC_PATH=/usr/src/ReDyMo-CPP
-ENV ORGANISM=TcruziCLBrenerEsmeraldo-like
-ENV APP_PATH=/opt/redymo
-
-# RUN addgroup -S redymo && adduser -S redymo -G redymo
-
-# RUN mkdir -p ${APP_PATH}; chown redymo: ${APP_PATH}
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake python3 python3-pip
-
-RUN pip install numpy optuna pandas
+FROM EXECUTER
 
 # USER redymo
 
 WORKDIR ${APP_PATH}
 
-COPY --from=BUILD ${SRC_PATH}/build/simulator ${APP_PATH}/
+COPY --from=COMPILER ${SRC_PATH}/build/simulator ${APP_PATH}/
 
-COPY --from=BUILD ${SRC_PATH}/data/database.sqlite ${APP_PATH}/data/
+COPY --from=COMPILER ${SRC_PATH}/data/database.sqlite ${APP_PATH}/data/
 
-COPY --from=BUILD ${SRC_PATH}/data/MFA-Seq_${ORGANISM} ${APP_PATH}/data/MFA-Seq_${ORGANISM}
+COPY --from=COMPILER ${SRC_PATH}/data/MFA-Seq_${ORGANISM} ${APP_PATH}/data/MFA-Seq_${ORGANISM}
 
-COPY --from=BUILD ${SRC_PATH}/script ${APP_PATH}/script
+COPY --from=COMPILER ${SRC_PATH}/script ${APP_PATH}/script
+
+VOLUME ${APP_PATH}/train-db
 
 CMD ./simulator --cells 2 --organism '${ORGANISM}' --resources 10 --speed 65 --period 150 --timeout 1000000 --dormant true --data-dir data
