@@ -146,7 +146,7 @@ signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGTERM, sigint_handler)
 
 TRAINING_CHROMOSOMES_SET = separate_training_set(41)
-TRAINING_DB = 'sqlite:///opt/redymo/train.sqlite'
+TRAINING_DB = 'sqlite:///opt/redymo/train-db/train.sqlite'
 study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage=TRAINING_DB,
                             load_if_exists=True)
 
