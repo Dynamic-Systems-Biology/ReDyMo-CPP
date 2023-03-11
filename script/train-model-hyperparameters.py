@@ -1,3 +1,4 @@
+import logging
 import signal
 
 import optuna
@@ -5,6 +6,11 @@ import subprocess
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool
+
+
+# Global logger config
+logging.basicConfig(level=logging.INFO, format='[%(levelname).1s %(asctime)s] %(message)s')
+log = logging.getLogger(__name__)
 
 
 # From https://github.com/seijihariki/redymo-tcruzi-analysis/blob/master/final_scripts/compressor.py
@@ -64,8 +70,6 @@ def calculate_error_for_chrm(chrm, params):
     with open(f"../data/MFA-Seq_TcruziCLBrenerEsmeraldo-like/TcChr{chrm}-S.txt", 'r') as f:
         mfaseq = np.array(list(map(lambda x: float(x), list(f.readlines()))))
 
-    print("mfa-seq", mfaseq.shape)
-
     # Read all simulations
     for sim in range(params['simulations']):
         with open(
@@ -74,21 +78,17 @@ def calculate_error_for_chrm(chrm, params):
             simulations.append(np.array(list(decompress(f.readlines()))))
 
     simulations = np.array(simulations)
-    print("simulations", simulations.shape)
 
     # Normalize mfa-seq
     mfaseq = normalize(mfaseq)
     # Interpolate mfa-seq
     mfaseq = interpolate(np.array(mfaseq), len(simulations[0]))
-    print("mfaseq", mfaseq.shape)
 
     # Calculate average of simulations
     simulations_average = np.mean(simulations, axis=0)
-    print("simulations_average", simulations_average.shape)
 
     # Normalize simulation
     norm_simulations = normalize(simulations_average)
-    print("norm_simulations", norm_simulations.shape)
 
     # Calculate error
     return mse(mfaseq, norm_simulations)
@@ -96,22 +96,24 @@ def calculate_error_for_chrm(chrm, params):
 
 def calculate_error(params):
     p = Pool()  # create a pool of worker processes
+    log.info("Calculating error for each chromosome (parallel)")
     mse_for_each_chromosome = p.starmap(calculate_error_for_chrm,
                                         [(chrm, params) for chrm in params['training_chromosomes_set']])
     p.close()  # close the pool
     p.join()  # wait for all processes to finish
-    print(mse_for_each_chromosome)
+
+    log.info("Taking the mean of the errors of each chromosome")
     return np.mean(mse_for_each_chromosome)
 
 
 # TODO: gaussian curve parameters
 def objective(trial):
-    print(f"Starting trial {trial.number}")
+    log.info(f"Starting trial {trial.number}")
     params = {
         'simulations': 1000,
         'timeout': 100_000_000,
         'speed': 1,
-        'threads': 70,
+        'threads': 60,
         'organism': 'TcruziCLBrenerEsmeraldo-like',
         'num_chromosomes': 41,
         'probability': 0,
@@ -121,6 +123,7 @@ def objective(trial):
         'name': f"trial_{trial.number}",
         'training_chromosomes_set': TRAINING_CHROMOSOMES_SET
     }
+    log.info(f"Starting simulation for trial {trial.number}")
     command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism {params['organism']} --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
 
     command_arr = str.split(command_str, ' ')
@@ -129,13 +132,13 @@ def objective(trial):
     print(sim_out.stdout)
     print(sim_out.stderr)
 
-    print("End of execution for trial {trial.number}")
+    log.info(f"Ended simulation for trial {trial.number}")
 
     return calculate_error(params)
 
 
 def sigint_handler(signum, frame):
-    print(f"Stopping training because signal {signum} received")
+    log.warning(f"Stopping training because signal {signum} received")
     study.stop()
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(study.trials_dataframe().to_string())
@@ -146,7 +149,13 @@ signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGTERM, sigint_handler)
 
 TRAINING_CHROMOSOMES_SET = separate_training_set(41)
-TRAINING_DB = 'sqlite:///opt/redymo/train-db/train.sqlite'
+
+
+log.info(f"Starting trainer module")
+log.info(f"Training chromosomes: {np.sort(TRAINING_CHROMOSOMES_SET)}")
+
+exit(0)
+TRAINING_DB = 'sqlite:///train.sqlite'
 study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage=TRAINING_DB,
                             load_if_exists=True)
 
