@@ -41,7 +41,9 @@ def decompress(input_it):
 
 def separate_training_set(num_chromosomes):
     chromosomes = np.arange(num_chromosomes)
-    return np.random.choice(chromosomes, int(len(chromosomes) * 0.7), replace=False)
+    training = np.random.choice(chromosomes, int(len(chromosomes) * 0.7), replace=False)
+    validation = np.setdiff1d(chromosomes, training)
+    return training, validation
 
 
 def normalize(array):
@@ -94,11 +96,11 @@ def calculate_error_for_chrm(chrm, params):
     return mse(mfaseq, norm_simulations)
 
 
-def calculate_error(params):
+def calculate_error(params, chrm_list):
     p = Pool()  # create a pool of worker processes
     log.info("Calculating error for each chromosome (parallel)")
     mse_for_each_chromosome = p.starmap(calculate_error_for_chrm,
-                                        [(chrm, params) for chrm in params['training_chromosomes_set']])
+                                        [(chrm, params) for chrm in chrm_list])
     p.close()  # close the pool
     p.join()  # wait for all processes to finish
 
@@ -121,7 +123,8 @@ def objective(trial):
         'replication_period': trial.suggest_int('period', 0, 1_000_000, 100),
         'round': 0,
         'name': f"trial_{trial.number}",
-        'training_chromosomes_set': TRAINING_CHROMOSOMES_SET
+        'training_chromosomes_set': TRAINING_CHROMOSOMES_SET,
+        'validation_chromosomes_set': VALIDATION_CHROMOSOMES_SET
     }
     log.info(f"Starting simulation for trial {trial.number}")
     command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism {params['organism']} --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
@@ -131,10 +134,24 @@ def objective(trial):
     sim_out = subprocess.run(command_arr, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     print(sim_out.stdout)
     print(sim_out.stderr)
+    if sim_out.returncode != 0:
+        log.error(f"Simulation for trial {trial.number} failed")
+        raise optuna.exceptions.TrialPruned(f"Simulation for trial {trial.number} failed")
 
     log.info(f"Ended simulation for trial {trial.number}")
 
-    return calculate_error(params)
+    try:
+        training_mse = calculate_error(params, params['training_chromosomes_set'])
+        validation_mse = calculate_error(params, params['validation_chromosomes_set'])
+        trial.set_user_attr('training_mse', training_mse)
+        trial.set_user_attr('validation_mse', validation_mse)
+
+
+    except Exception as e:
+        log.error(f"Error calculating error for trial {trial.number}")
+        raise optuna.exceptions.TrialPruned(f"Error calculating error for trial {trial.number}")
+
+    return training_mse
 
 
 def sigint_handler(signum, frame):
@@ -148,14 +165,14 @@ def sigint_handler(signum, frame):
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGTERM, sigint_handler)
 
-TRAINING_CHROMOSOMES_SET = separate_training_set(41)
-
+TRAINING_CHROMOSOMES_SET, VALIDATION_CHROMOSOMES_SET = separate_training_set(41)
 
 log.info(f"Starting trainer module")
-log.info(f"Training chromosomes: {np.sort(TRAINING_CHROMOSOMES_SET)}")
+log.info(f"Training chromosomes:   {np.sort(TRAINING_CHROMOSOMES_SET)}")
+log.info(f"Validation chromosomes: {np.sort(VALIDATION_CHROMOSOMES_SET)}")
 
-TRAINING_DB = 'sqlite:///train.sqlite'
-study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage=TRAINING_DB,
+RDB_BACKEND_URL = 'sqlite:///train.sqlite'
+study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage=RDB_BACKEND_URL,
                             load_if_exists=True)
 
 study.optimize(objective, n_trials=100)
