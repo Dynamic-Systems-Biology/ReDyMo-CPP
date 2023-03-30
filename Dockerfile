@@ -10,9 +10,9 @@ ENV APP_PATH=/opt/redymo
 # RUN mkdir -p ${APP_PATH}; chown redymo: ${APP_PATH}
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake python3 python3-pip vim sqlite3
+    DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake python3 python3-dev python3-pip vim sqlite3 default-libmysqlclient-dev
 
-RUN pip install numpy optuna pandas
+RUN pip install numpy optuna pandas mysqlclient
 
 FROM ubuntu:20.04 as BUILDER
 
@@ -47,4 +47,6 @@ COPY --from=COMPILER ${SRC_PATH}/script ${APP_PATH}/script
 
 VOLUME ${APP_PATH}/train-db
 
-CMD ./simulator --cells 2 --organism '${ORGANISM}' --resources 10 --speed 65 --period 150 --timeout 1000000 --dormant true --data-dir data
+WORKDIR /opt/redymo/script
+
+CMD nice -n 20 nohup python3 train-model-hyperparameters.py
