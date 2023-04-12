@@ -128,7 +128,7 @@ def objective(trial):
         'timeout': 100_000_000,
         'speed': 1,
         'threads': 60,
-        'organism': 'Trypanosoma brucei brucei TREU927',
+        'organism': 'Trypanosoma\ brucei\ brucei\ TREU927',
         'num_chromosomes': 11,
         'probability': 0,
         'replisomes': trial.suggest_int('replisomes', 2, 1_002, 2),
