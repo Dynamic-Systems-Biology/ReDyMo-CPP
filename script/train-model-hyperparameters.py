@@ -74,7 +74,7 @@ def calculate_errors_for_chrm(chrm, params):
     simulations = []
 
     # Read mfa-seq
-    with open(f"../data/MFA-Seq_{params['organism']}/Tb927_{chrm:02d}_v5.1.txt", 'r') as f:
+    with open(f"../data/MFA-Seq_Trypanosoma brucei brucei TREU927/Tb927_{chrm:02d}_v5.1.txt", 'r') as f:
         mfaseq = np.array(list(map(lambda x: float(x), list(f.readlines()))))
 
     # Read all simulations
