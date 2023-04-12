@@ -128,7 +128,7 @@ def objective(trial):
         'timeout': 100_000_000,
         'speed': 1,
         'threads': 60,
-        'organism': 'Trypanosoma\ brucei\ brucei\ TREU927',
+        'organism': '\"Trypanosoma brucei brucei TREU927\"',
         'num_chromosomes': 11,
         'probability': 0,
         'replisomes': trial.suggest_int('replisomes', 2, 1_002, 2),
@@ -139,9 +139,10 @@ def objective(trial):
         'validation_chromosomes_set': VALIDATION_CHROMOSOMES_SET
     }
     log.info(f"Starting simulation for trial {trial.number}")
-    command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism {params['organism']} --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
+    command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism organism_placeholder --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
 
     command_arr = str.split(command_str, ' ')
+    command_arr[command_arr.index('organism_placeholder')] = params['organism']
 
     sim_out = subprocess.run(command_arr, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     print(sim_out.stdout)
