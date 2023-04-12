@@ -2,7 +2,7 @@
 FROM ubuntu:20.04 as EXECUTER
 
 ENV SRC_PATH=/usr/src/ReDyMo-CPP
-ENV ORGANISM="Trypanosoma\\ brucei\\ brucei\\ TREU927"
+ENV ORGANISM=Trypanosoma\ brucei\ brucei\ TREU927
 ENV APP_PATH=/opt/redymo
 
 # RUN addgroup -S redymo && adduser -S redymo -G redymo
@@ -42,7 +42,6 @@ COPY --from=COMPILER ${SRC_PATH}/build/simulator ${APP_PATH}/
 COPY --from=COMPILER ${SRC_PATH}/data/database.sqlite ${APP_PATH}/data/
 
 COPY --from=COMPILER ${SRC_PATH}/data/MFA-Seq_${ORGANISM} ${APP_PATH}/data/MFA-Seq_${ORGANISM}
-RUN ls -lah ${APP_PATH}/data/
 
 COPY --from=COMPILER ${SRC_PATH}/script ${APP_PATH}/script
 
