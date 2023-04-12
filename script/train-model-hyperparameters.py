@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from multiprocessing import Pool
 
-
 # Global logger config
 logging.basicConfig(level=logging.INFO, format='[%(levelname).1s %(asctime)s] %(message)s')
 log = logging.getLogger(__name__)
@@ -40,7 +39,7 @@ def decompress(input_it):
 
 
 def separate_training_set(num_chromosomes):
-    chromosomes = np.arange(num_chromosomes)
+    chromosomes = np.arange(num_chromosomes) + 1
     training = np.random.choice(chromosomes, int(len(chromosomes) * 0.7), replace=False)
     validation = np.setdiff1d(chromosomes, training)
     return training, validation
@@ -61,21 +60,27 @@ def interpolate(array, new_size):
     return new_array
 
 
+# Calculate SMAPE (Symmetric Mean Absolute Percentage Error)
+def smape(actual, forecast):
+    return (100 / len(actual)) * np.sum(np.abs(forecast - actual) / (np.abs(actual) + np.abs(forecast)))
+
+
 def mse(a, b):
     return sum((a[i] - b[i]) ** 2 for i in range(len(a))) / len(a)
 
 
-def calculate_error_for_chrm(chrm, params):
+# Calculate MSE and SMAPE for each chromosome
+def calculate_errors_for_chrm(chrm, params):
     simulations = []
 
     # Read mfa-seq
-    with open(f"../data/MFA-Seq_TcruziCLBrenerEsmeraldo-like/TcChr{chrm}-S.txt", 'r') as f:
+    with open(f"../data/MFA-Seq_{params['organism']}/Tb927_{chrm:02d}_v5.1.txt", 'r') as f:
         mfaseq = np.array(list(map(lambda x: float(x), list(f.readlines()))))
 
     # Read all simulations
     for sim in range(params['simulations']):
         with open(
-                f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/TcChr{chrm}-S.cseq",
+                f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/Tb927_{chrm:02d}_v5.1.cseq",
                 'r') as f:
             simulations.append(np.array(list(decompress(f.readlines()))))
 
@@ -83,6 +88,13 @@ def calculate_error_for_chrm(chrm, params):
 
     # Normalize mfa-seq
     mfaseq = normalize(mfaseq)
+
+    # The MFA-Seq data means the inverse of what the simulated data means. High
+    # MFA-Seq means sooner in the S-phase, lower simulation data means sooner. So,
+    # the higher the value in the MFA-Seq data, the lower the value in the simulated
+    # data should be. Since we normalized it, we cant invert it with the value 1.
+    mfaseq = 1 - mfaseq
+
     # Interpolate mfa-seq
     mfaseq = interpolate(np.array(mfaseq), len(simulations[0]))
 
@@ -93,34 +105,34 @@ def calculate_error_for_chrm(chrm, params):
     norm_simulations = normalize(simulations_average)
 
     # Calculate error
-    return mse(mfaseq, norm_simulations)
+    return mse(mfaseq, norm_simulations), smape(mfaseq, norm_simulations)
 
 
-def calculate_error(params, chrm_list):
+def calculate_errors(params, chrm_list):
     p = Pool()  # create a pool of worker processes
     log.info("Calculating error for each chromosome (parallel)")
-    mse_for_each_chromosome = p.starmap(calculate_error_for_chrm,
-                                        [(chrm, params) for chrm in chrm_list])
+    errors_for_each_chromosome = p.starmap(calculate_errors_for_chrm,
+                                           [(chrm, params) for chrm in chrm_list])
     p.close()  # close the pool
     p.join()  # wait for all processes to finish
 
     log.info("Taking the mean of the errors of each chromosome")
-    return np.mean(mse_for_each_chromosome)
+    return np.mean(errors_for_each_chromosome)
 
 
 # TODO: gaussian curve parameters
 def objective(trial):
     log.info(f"Starting trial {trial.number}")
     params = {
-        'simulations': 1000,
+        'simulations': 500,
         'timeout': 100_000_000,
         'speed': 1,
         'threads': 60,
-        'organism': 'TcruziCLBrenerEsmeraldo-like',
-        'num_chromosomes': 41,
+        'organism': 'Trypanosoma brucei brucei TREU927',
+        'num_chromosomes': 11,
         'probability': 0,
-        'replisomes': trial.suggest_int('replisomes', 2, 1_002, 10),
-        'replication_period': trial.suggest_int('period', 0, 1_000_000, 100),
+        'replisomes': trial.suggest_int('replisomes', 2, 1_002, 2),
+        'replication_period': trial.suggest_int('period', 0, 1_000_000, 1),
         'round': 0,
         'name': f"trial_{trial.number}",
         'training_chromosomes_set': TRAINING_CHROMOSOMES_SET,
@@ -141,10 +153,12 @@ def objective(trial):
     log.info(f"Ended simulation for trial {trial.number}")
 
     try:
-        training_mse = calculate_error(params, params['training_chromosomes_set'])
-        validation_mse = calculate_error(params, params['validation_chromosomes_set'])
+        training_mse, training_smape = calculate_errors(params, params['training_chromosomes_set'])
+        validation_mse, validation_smape = calculate_errors(params, params['validation_chromosomes_set'])
         trial.set_user_attr('training_mse', training_mse)
         trial.set_user_attr('validation_mse', validation_mse)
+        trial.set_user_attr('training_smape', training_smape)
+        trial.set_user_attr('validation_smape', validation_smape)
 
 
     except Exception as e:
@@ -165,18 +179,15 @@ def sigint_handler(signum, frame):
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGTERM, sigint_handler)
 
-TRAINING_CHROMOSOMES_SET, VALIDATION_CHROMOSOMES_SET = separate_training_set(41)
+TRAINING_CHROMOSOMES_SET = [1, 5, 6, 7, 8, 9, 10, 11]
+VALIDATION_CHROMOSOMES_SET = [2, 3, 4]
 
 log.info(f"Starting trainer module")
 log.info(f"Training chromosomes:   {np.sort(TRAINING_CHROMOSOMES_SET)}")
 log.info(f"Validation chromosomes: {np.sort(VALIDATION_CHROMOSOMES_SET)}")
 
 RDB_BACKEND_URL = 'sqlite:///train.sqlite'
-study = optuna.create_study(direction='minimize', study_name='redymo-no-chipseq', storage=RDB_BACKEND_URL,
+study = optuna.create_study(direction='minimize', study_name='redymo-t-brucei', storage=RDB_BACKEND_URL,
                             load_if_exists=True)
 
 study.optimize(objective, n_trials=100)
-
-with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-    print(study.trials_dataframe().to_string())
-print(study.best_params)

@@ -2,7 +2,7 @@
 FROM ubuntu:20.04 as EXECUTER
 
 ENV SRC_PATH=/usr/src/ReDyMo-CPP
-ENV ORGANISM=TcruziCLBrenerEsmeraldo-like
+ENV ORGANISM=Trypanosoma\ brucei\ brucei\ TREU927
 ENV APP_PATH=/opt/redymo
 
 # RUN addgroup -S redymo && adduser -S redymo -G redymo
