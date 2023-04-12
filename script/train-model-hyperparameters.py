@@ -110,21 +110,20 @@ def calculate_errors_for_chrm(chrm, params):
 
 def calculate_errors(params, chrm_list):
     p = Pool()  # create a pool of worker processes
-    log.info("Calculating error for each chromosome (parallel)")
     errors_for_each_chromosome = p.starmap(calculate_errors_for_chrm,
                                            [(chrm, params) for chrm in chrm_list])
     p.close()  # close the pool
     p.join()  # wait for all processes to finish
 
     log.info("Taking the mean of the errors of each chromosome")
-    return np.mean(errors_for_each_chromosome)
+    return np.mean(errors_for_each_chromosome, axis=0)
 
 
 # TODO: gaussian curve parameters
 def objective(trial):
     log.info(f"Starting trial {trial.number}")
     params = {
-        'simulations': 500,
+        'simulations': 1000,
         'timeout': 100_000_000,
         'speed': 1,
         'threads': 60,
@@ -155,6 +154,7 @@ def objective(trial):
     log.info(f"Ended simulation for trial {trial.number}")
 
     try:
+        log.info("Calculating metrics for each chromosome (parallel)")
         training_mse, training_smape = calculate_errors(params, params['training_chromosomes_set'])
         validation_mse, validation_smape = calculate_errors(params, params['validation_chromosomes_set'])
         trial.set_user_attr('training_mse', training_mse)
@@ -165,7 +165,7 @@ def objective(trial):
 
     except Exception as e:
         log.error(f"Error calculating error for trial {trial.number}")
-        raise optuna.exceptions.TrialPruned(f"Error calculating error for trial {trial.number}")
+        raise optuna.exceptions.TrialPruned(f"Error calculating error for trial {trial.number} " + str(e))
 
     return training_mse
 
