@@ -62,6 +62,9 @@ def interpolate(array, new_size):
 
 # Calculate SMAPE (Symmetric Mean Absolute Percentage Error)
 def smape(actual, forecast):
+    # Add 1 to avoid division by zero
+    actual = actual + 1
+    forecast = forecast + 1
     return (100 / len(actual)) * np.sum(np.abs(forecast - actual) / (np.abs(actual) + np.abs(forecast)))
 
 
