@@ -21,7 +21,7 @@ def CDS_to_SQL():
                 start = end
                 end = tmp
 
-            sql_statement = f"INSERT INTO TranscriptionRegion (start, end, chromosome_code) VALUES ({start}, {end}, \"{chrm}\");\n"
+            sql_statement = f"INSERT INTO TranscriptionRegion (start, end, chromosome_code) VALUES ({start}, {end}, '{chrm}');\n"
             output_file.write(sql_statement)
         output_file.close()
 
