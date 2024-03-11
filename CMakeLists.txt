@@ -1,16 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
 project(ReDyMo)
 
-message("CMake Version: ${CMAKE_VERSION}")
+message("-- CMake Version: ${CMAKE_VERSION}")
 
 #######
 # Make sure libs are available locally
 #######
-execute_process(COMMAND git submodule update --init)
+message("-- Initializing submodules")
+execute_process(COMMAND git submodule update --init OUTPUT_QUIET)
 # We have to run these commands twice because of submodules that have
 # submodules. They will be accounted for only after the first command.
-execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
-execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
+execute_process(COMMAND git submodule foreach --recursive git submodule update --init OUTPUT_QUIET)
+execute_process(COMMAND git submodule foreach --recursive git submodule update --init OUTPUT_QUIET)
 
 #######
 # Declare our custom options
@@ -39,14 +40,14 @@ if(NOT CMAKE_BUILD_TYPE)
        CACHE STRING "Choose the type of build : None Debug Coverage Release Performace."
        FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
-message("* Current build type is : ${CMAKE_BUILD_TYPE}")
+message("-- Current build type is : ${CMAKE_BUILD_TYPE}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Performance")
     set(COVERAGE OFF)
-    message("* Performance BUILD TYPE -> COVERAGE SET TO OFF")
+    message("   -- Performance BUILD TYPE -> COVERAGE SET TO OFF")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Coverage")
     set(COVERAGE ON)
-    message("* Coverage BUILD TYPE -> COVERAGE SET TO ON")
+    message("   -- Coverage BUILD TYPE -> COVERAGE SET TO ON")
 endif()
 
 if (APPLE)
@@ -61,6 +62,11 @@ if (APPLE)
     set(OpenMP_libomp_LIBRARY "omp")
 
 endif()
+
+#######
+# Policies
+#######
+cmake_policy(SET CMP0074 NEW)
 
 #######
 # OpenMP
