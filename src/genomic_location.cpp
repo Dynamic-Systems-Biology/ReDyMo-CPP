@@ -85,7 +85,7 @@ bool GenomicLocation::put_fired_constitutive_origin(
             return true;
         }
     }
-    throw std::runtime_error("Method put_fired_constitutive_origin: Could not register fired constitutive origin");
+    throw std::runtime_error("Method put_fired_constitutive_origin: Could not register fired constitutive origin. Invalid base or already fired.");
 }
 
 GenomicLocation &GenomicLocation::operator+=(int bases)
