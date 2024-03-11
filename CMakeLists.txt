@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(ReDyMo)
 
+message("CMake Version: ${CMAKE_VERSION}")
+
 #######
 # Make sure libs are available locally
 #######
