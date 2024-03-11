@@ -127,8 +127,8 @@ endif()
 add_executable(simulator src/main.cpp)
 target_link_libraries(simulator deps SQLiteCpp sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
 
-set_property(TARGET simulator PROPERTY CXX_STANDARD 14)
-set_property(TARGET deps PROPERTY CXX_STANDARD 14)
+set_property(TARGET simulator PROPERTY CXX_STANDARD 17)
+set_property(TARGET deps PROPERTY CXX_STANDARD 17)
 
 if (APPLE)
     link_directories("/usr/local/opt/libomp/lib/")

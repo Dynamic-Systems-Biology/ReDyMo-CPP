@@ -10,8 +10,8 @@ ReDyMo is a Python-coded, stochastic dynamic model simulator that reproduces the
 
 In order to compile and run this model, one must have installed:
 
-- CMake 3.0 or greater
-- gcc compatible with the C++14 standard
+- CMake 3.10 or greater
+- gcc/clang compatible with the C++17 standard
 - doxygen (Optional) for generating documentation
 
 ## Using docker

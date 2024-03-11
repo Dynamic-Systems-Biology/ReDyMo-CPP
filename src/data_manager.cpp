@@ -1,6 +1,7 @@
 #include "data_manager.hpp"
 #include "chromosome.hpp"
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
