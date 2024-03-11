@@ -33,24 +33,10 @@ bool GenomicLocation::will_activate(bool use_constitutive_origin,
         double chance = rand_distribution(*rand_generator);
         return chance < this->chromosome->activation_probability(this->base);
     }
-    std::vector<constitutive_origin_t> not_fired_origins;
 
-    for (auto origin : *chromosome->constitutive_origins)
-    {
-        bool fired = false;
-        for (auto fired_origin : *chromosome->fired_constitutive_origins)
-        {
-            if (fired_origin.base == origin.base) fired = true;
-        }
-        if (!fired) not_fired_origins.push_back(origin);
-    }
+    bool origin_in_range = get_constitutive_origin(origins_range).base != -1;
 
-    for (auto origin : not_fired_origins)
-        if (this->base >= (origin.base - origins_range / 2) &&
-            this->base <= (origin.base + origins_range / 2))
-            return true;
-
-    return false;
+    return origin_in_range;
 }
 
 constitutive_origin_t
@@ -65,9 +51,11 @@ GenomicLocation::get_constitutive_origin(int origins_range)
         bool fired = false;
         for (auto fired_origin : *chromosome->fired_constitutive_origins)
         {
-            if (fired_origin.base == origin.base) fired = true;
+            if (fired_origin.base == origin.base)
+                fired = true;
         }
-        if (!fired) not_fired_origins.push_back(origin);
+        if (!fired)
+            not_fired_origins.push_back(origin);
     }
     for (auto origin : not_fired_origins)
     {
@@ -79,7 +67,6 @@ GenomicLocation::get_constitutive_origin(int origins_range)
         }
     }
     // If code reaches here, no nonfired origin was found
-    // throw std::range_error("There are no origins within range.");
     ret_origin.base = -1;
     return ret_origin;
 }
@@ -91,13 +78,14 @@ bool GenomicLocation::put_fired_constitutive_origin(
     {
         if (curr_origin == origin)
         {
-            for (auto fired_origin : *chromosome->fired_constitutive_origins)
-                if (fired_origin == origin) return false;
+            //TODO: we really need to check if the origin is being fired twice?
+//            for (auto fired_origin : *chromosome->fired_constitutive_origins)
+//                if (fired_origin == origin) return false;
             chromosome->fired_constitutive_origins->push_back(origin);
             return true;
         }
     }
-    return false;
+    throw std::runtime_error("Method put_fired_constitutive_origin: Could not register fired constitutive origin");
 }
 
 GenomicLocation &GenomicLocation::operator+=(int bases)

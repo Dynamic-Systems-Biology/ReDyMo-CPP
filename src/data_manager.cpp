@@ -1,7 +1,6 @@
 #include "data_manager.hpp"
 #include "chromosome.hpp"
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -151,7 +150,7 @@ void DataManager::generate_prob_landscape(std::string code, uint length)
     }
     catch (int e)
     {
-        std::cout << "An error ocurred while loading MFA_Seq["
+        std::cout << "An error occurred while loading MFA_Seq["
                   << mfa_seq_data_path + code + ".txt"
                   << "] data. Error " << e << std::endl
                   << std::fflush(nullptr);

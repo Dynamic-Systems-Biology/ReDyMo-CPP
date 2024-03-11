@@ -1,6 +1,7 @@
 .git
 .vscode
 build
+cmake-build*
 output
 docs
 Dockerfile

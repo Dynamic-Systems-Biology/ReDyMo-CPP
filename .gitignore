@@ -34,6 +34,7 @@
 .vscode
 .idea
 build
+cmake-build*
 docs
 data/**/*_probability.txt
 data/test_output/
