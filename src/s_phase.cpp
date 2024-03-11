@@ -78,14 +78,14 @@ void SPhase::simulate(int sim_number)
 
     int alpha                     = 1;
     int time                      = 0;
-    int constitutive_origins      = (int)genome->n_constitutive_origins();
+    int n_constitutive_origins    = (int)genome->n_constitutive_origins();
     int n_collisions              = 0;
     bool use_constitutive_origins = origins_range > 0;
 
     std::cout << "[INFO] Starting simulation " << sim_number << std::endl
               << std::flush;
     while (!genome->is_replicated() && time < timeout &&
-           !(use_constitutive_origins && constitutive_origins == 0 &&
+           !(use_constitutive_origins && n_constitutive_origins == 0 &&
              (int)fork_manager->n_free_forks == n_resources))
     {
         time++;
@@ -110,17 +110,17 @@ void SPhase::simulate(int sim_number)
                 if (!loc.is_replicated() && fork_manager->n_free_forks >= 2 &&
                     loc.will_activate(use_constitutive_origins, origins_range))
                 {
+                    // If in constitutive mode and will activate (random base is
+                    // near a constitutive origin), the base to attach is the
+                    // random one, not the origin.
                     fork_manager->attach_forks(loc, time);
                     if (use_constitutive_origins)
                     {
                         constitutive_origin_t origin =
                             loc.get_constitutive_origin(origins_range);
+                        n_constitutive_origins--;
                         if (!loc.put_fired_constitutive_origin(origin))
-                            constitutive_origins += 0;
-                        // std::cout << "[WARN] Failed to add origin. "
-                        //  "Simulation "
-                        //   << sim_number << std::endl;
-                        constitutive_origins--;
+                            n_constitutive_origins += 0;
                     }
                 }
             }
@@ -151,7 +151,7 @@ void SPhase::simulate(int sim_number)
     if (use_constitutive_origins)
         std::cout << "\t[INFO] " << sim_number
                   << " Number of constitutive origins that did not fire: "
-                  << constitutive_origins << std::endl;
+                  << n_constitutive_origins << std::endl;
 
     checkpoint_times.end_sim = std::chrono::steady_clock::now();
 

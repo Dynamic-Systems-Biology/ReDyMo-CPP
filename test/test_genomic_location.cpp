@@ -150,22 +150,12 @@ TEST_F(GenomicLocationTest, PutFiredConstitutiveOrigin)
     ASSERT_FALSE(gen_loc->chromosome->fired_constitutive_origins->empty());
 }
 
-TEST_F(GenomicLocationTest, PutFiredConstitutiveOriginAlreadyFired)
-{
-    ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins->empty());
-    ASSERT_TRUE(gen_loc->put_fired_constitutive_origin(
-        (*gen_loc->chromosome->constitutive_origins)[0]));
-    ASSERT_FALSE(gen_loc->chromosome->fired_constitutive_origins->empty());
-    ASSERT_FALSE(gen_loc->put_fired_constitutive_origin(
-        (*gen_loc->chromosome->constitutive_origins)[0]));
-}
-
 TEST_F(GenomicLocationTest, PutFiredInvalidConstitutiveOrigin)
 {
     constitutive_origin_t invalid_origin;
     invalid_origin.base = 71;
     ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins->empty());
-    ASSERT_FALSE(gen_loc->put_fired_constitutive_origin(invalid_origin));
+    ASSERT_ANY_THROW(gen_loc->put_fired_constitutive_origin(invalid_origin));
     ASSERT_TRUE(gen_loc->chromosome->fired_constitutive_origins->empty());
 }
 

@@ -151,7 +151,7 @@ void DataManager::generate_prob_landscape(std::string code, uint length)
     }
     catch (int e)
     {
-        std::cout << "An error ocurred while loading MFA_Seq["
+        std::cout << "An error occurred while loading MFA_Seq["
                   << mfa_seq_data_path + code + ".txt"
                   << "] data. Error " << e << std::endl
                   << std::fflush(nullptr);

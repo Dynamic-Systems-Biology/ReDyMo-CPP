@@ -1,21 +1,24 @@
 cmake_minimum_required(VERSION 3.10)
 project(ReDyMo)
 
+message("-- CMake Version: ${CMAKE_VERSION}")
+
 #######
 # Make sure libs are available locally
 #######
-execute_process(COMMAND git submodule update --init)
+message("-- Initializing submodules")
+execute_process(COMMAND git submodule update --init OUTPUT_QUIET)
 # We have to run these commands twice because of submodules that have
 # submodules. They will be accounted for only after the first command.
-execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
-execute_process(COMMAND git submodule foreach --recursive git submodule update --init)
+execute_process(COMMAND git submodule foreach --recursive git submodule update --init OUTPUT_QUIET)
+execute_process(COMMAND git submodule foreach --recursive git submodule update --init OUTPUT_QUIET)
 
 #######
 # Declare our custom options
 #######
-OPTION(GPU_ENABLED "Wether to build the OpenCL dependant GPU code." OFF)
-OPTION(BUILD_TESTING "Wether to build the tests." ON)
-OPTION(COVERAGE "Wether to configure test coverage report." OFF)
+OPTION(GPU_ENABLED "Whether to build the OpenCL dependant GPU code." OFF)
+OPTION(BUILD_TESTING "Whether to build the tests." ON)
+OPTION(COVERAGE "Whether to configure test coverage report." OFF)
 
 #######
 # Set flags for our custom build types
@@ -37,16 +40,33 @@ if(NOT CMAKE_BUILD_TYPE)
        CACHE STRING "Choose the type of build : None Debug Coverage Release Performace."
        FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
-message("* Current build type is : ${CMAKE_BUILD_TYPE}")
+message("-- Current build type is : ${CMAKE_BUILD_TYPE}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Performance")
     set(COVERAGE OFF)
-    message("* Performance BUILD TYPE -> COVERAGE SET TO OFF")
+    message("   -- Performance BUILD TYPE -> COVERAGE SET TO OFF")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Coverage")
     set(COVERAGE ON)
-    message("* Coverage BUILD TYPE -> COVERAGE SET TO ON")
+    message("   -- Coverage BUILD TYPE -> COVERAGE SET TO ON")
 endif()
 
+if (APPLE)
+    set(OpenMP_C "${CMAKE_C_COMPILER}")
+    set(OpenMP_C_FLAGS "-fopenmp -I/usr/local/opt/libomp/include")
+    set(OpenMP_C_LIB_NAMES "libomp")
+    set(OpenMP_libomp_LIBRARY "omp")
+
+    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+    set(OpenMP_CXX_FLAGS "-fopenmp -I/usr/local/opt/libomp/include")
+    set(OpenMP_CXX_LIB_NAMES "libomp")
+    set(OpenMP_libomp_LIBRARY "omp")
+
+endif()
+
+#######
+# Policies
+#######
+cmake_policy(SET CMP0074 NEW)
 
 #######
 # OpenMP
@@ -84,7 +104,7 @@ include_directories(
 include_directories(include)
 
 #######
-# Compile componenets in libraries
+# Compile components in libraries
 #######
 add_library(
     deps
@@ -112,6 +132,14 @@ endif()
 
 add_executable(simulator src/main.cpp)
 target_link_libraries(simulator deps SQLiteCpp sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
+
+set_property(TARGET simulator PROPERTY CXX_STANDARD 17)
+set_property(TARGET deps PROPERTY CXX_STANDARD 17)
+
+if (APPLE)
+    link_directories("/usr/local/opt/libomp/lib/")
+    target_link_directories(simulator PRIVATE "/usr/local/opt/libomp/lib/")
+endif ()
 
 if (GPU_ENABLED)
     target_link_libraries(simulator gpudeps OpenCL::OpenCL)
