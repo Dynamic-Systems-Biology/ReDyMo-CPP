@@ -13,9 +13,9 @@ execute_process(COMMAND git submodule foreach --recursive git submodule update -
 #######
 # Declare our custom options
 #######
-OPTION(GPU_ENABLED "Wether to build the OpenCL dependant GPU code." OFF)
-OPTION(BUILD_TESTING "Wether to build the tests." ON)
-OPTION(COVERAGE "Wether to configure test coverage report." OFF)
+OPTION(GPU_ENABLED "Whether to build the OpenCL dependant GPU code." OFF)
+OPTION(BUILD_TESTING "Whether to build the tests." ON)
+OPTION(COVERAGE "Whether to configure test coverage report." OFF)
 
 #######
 # Set flags for our custom build types
@@ -47,6 +47,18 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Coverage")
     message("* Coverage BUILD TYPE -> COVERAGE SET TO ON")
 endif()
 
+if (APPLE)
+    set(OpenMP_C "${CMAKE_C_COMPILER}")
+    set(OpenMP_C_FLAGS "-fopenmp -I/usr/local/opt/libomp/include")
+    set(OpenMP_C_LIB_NAMES "libomp")
+    set(OpenMP_libomp_LIBRARY "omp")
+
+    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+    set(OpenMP_CXX_FLAGS "-fopenmp -I/usr/local/opt/libomp/include")
+    set(OpenMP_CXX_LIB_NAMES "libomp")
+    set(OpenMP_libomp_LIBRARY "omp")
+
+endif()
 
 #######
 # OpenMP
@@ -84,7 +96,7 @@ include_directories(
 include_directories(include)
 
 #######
-# Compile componenets in libraries
+# Compile components in libraries
 #######
 add_library(
     deps
@@ -112,6 +124,14 @@ endif()
 
 add_executable(simulator src/main.cpp)
 target_link_libraries(simulator deps SQLiteCpp sqlite3 pthread dl ryml OpenMP::OpenMP_CXX)
+
+set_property(TARGET simulator PROPERTY CXX_STANDARD 14)
+set_property(TARGET deps PROPERTY CXX_STANDARD 14)
+
+if (APPLE)
+    link_directories("/usr/local/opt/libomp/lib/")
+    target_link_directories(simulator PRIVATE "/usr/local/opt/libomp/lib/")
+endif ()
 
 if (GPU_ENABLED)
     target_link_libraries(simulator gpudeps OpenCL::OpenCL)
