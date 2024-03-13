@@ -1,11 +1,15 @@
 import logging
 import signal
+import os
 
 import optuna
 import subprocess
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool
+from sklearn.metrics import mean_squared_error as mse
+from sklearn.metrics import mean_absolute_error as mae
+
 
 # Global logger config
 logging.basicConfig(level=logging.INFO, format='[%(levelname).1s %(asctime)s] %(message)s')
@@ -40,18 +44,17 @@ def decompress(input_it):
 
 def separate_training_set(num_chromosomes):
     chromosomes = np.arange(num_chromosomes) + 1
-    training = np.random.choice(chromosomes, int(len(chromosomes) * 0.7), replace=False)
-    validation = np.setdiff1d(chromosomes, training)
-    return training, validation
-
+    training = np.random.choice(chromosomes, int(num_chromosomes * 0.7), replace=False)
+    chromosomes = np.setdiff1d(chromosomes, training)
+    validation = np.random.choice(chromosomes, int(num_chromosomes * 0.2), replace=False)
+    testing = np.setdiff1d(chromosomes, validation)
+    return training, validation, testing
 
 def normalize(array):
     return (array - array.min()) / (array.max() - array.min())
 
-
 def linear_interpolation(a, b, n):
     return [a + (b - a) * i / float(n) for i in range(n)]
-
 
 def interpolate(array, new_size):
     old_size = len(array)
@@ -67,23 +70,18 @@ def smape(actual, forecast):
     forecast = forecast + 1
     return (100 / len(actual)) * np.sum(np.abs(forecast - actual) / (np.abs(actual) + np.abs(forecast)))
 
-
-def mse(a, b):
-    return sum((a[i] - b[i]) ** 2 for i in range(len(a))) / len(a)
-
-
 # Calculate MSE and SMAPE for each chromosome
 def calculate_errors_for_chrm(chrm, params):
     simulations = []
 
     # Read mfa-seq
-    with open(f"../data/MFA-Seq_Trypanosoma brucei brucei TREU927/Tb927_{chrm:02d}_v5.1.txt", 'r') as f:
+    with open(f"../data/MFA-Seq_TcruziCLBrenerEsmeraldo-like/TcChr{chrm}-S.txt", 'r') as f:
         mfaseq = np.array(list(map(lambda x: float(x), list(f.readlines()))))
 
     # Read all simulations
     for sim in range(params['simulations']):
         with open(
-                f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/Tb927_{chrm:02d}_v5.1.cseq",
+                f"{params['name']}/round_{params['round']}_false_{params['replisomes']}_{params['replication_period']}/simulation_{sim}/TcChr{chrm}-S.cseq",
                 'r') as f:
             simulations.append(np.array(list(decompress(f.readlines()))))
 
@@ -108,7 +106,7 @@ def calculate_errors_for_chrm(chrm, params):
     norm_simulations = normalize(simulations_average)
 
     # Calculate error
-    return mse(mfaseq, norm_simulations), smape(mfaseq, norm_simulations)
+    return mse(mfaseq, norm_simulations), smape(mfaseq, norm_simulations), mae(mfaseq, norm_simulations)
 
 
 def calculate_errors(params, chrm_list):
@@ -130,15 +128,16 @@ def objective(trial):
         'timeout': 100_000_000,
         'speed': 1,
         'threads': 60,
-        'organism': 'Trypanosoma brucei brucei TREU927',
-        'num_chromosomes': 11,
+        'organism': 'TcruziCLBrenerEsmeraldo-like',
+        'num_chromosomes': 41,
         'probability': 0,
-        'replisomes': trial.suggest_int('replisomes', 2, 1_002, 2),
-        'replication_period': trial.suggest_int('period', 0, 1_000_000, 1),
+        'replisomes': trial.suggest_int('replisomes', 500, 1_500, 2),
+        'replication_period': trial.suggest_int('period', 0, 500_000, 10),
         'round': 0,
         'name': f"trial_{trial.number}",
         'training_chromosomes_set': TRAINING_CHROMOSOMES_SET,
-        'validation_chromosomes_set': VALIDATION_CHROMOSOMES_SET
+        'validation_chromosomes_set': VALIDATION_CHROMOSOMES_SET,
+        'test_chromosomes_set': TEST_CHROMOSOMES_SET
     }
     log.info(f"Starting simulation for trial {trial.number}")
     command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism organism_placeholder --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
@@ -152,47 +151,55 @@ def objective(trial):
     print(sim_out.stderr)
     if sim_out.returncode != 0:
         log.error(f"Simulation for trial {trial.number} failed")
-        raise optuna.exceptions.TrialPruned(f"Simulation for trial {trial.number} failed")
+        trial.set_user_attr('error_exit_code', sim_out.returncode)
+        raise optuna.exceptions.TrialPruned(f"Simulation for trial {trial.number} failed with return code {sim_out.returncode}")
 
     log.info(f"Ended simulation for trial {trial.number}")
 
     try:
         log.info("Calculating metrics for each chromosome (parallel)")
-        training_mse, training_smape = calculate_errors(params, params['training_chromosomes_set'])
-        validation_mse, validation_smape = calculate_errors(params, params['validation_chromosomes_set'])
+        training_mse, training_smape, training_mae = calculate_errors(params, params['training_chromosomes_set'])
+        validation_mse, validation_smape, validation_mae = calculate_errors(params, params['validation_chromosomes_set'])
         trial.set_user_attr('training_mse', training_mse)
         trial.set_user_attr('validation_mse', validation_mse)
         trial.set_user_attr('training_smape', training_smape)
         trial.set_user_attr('validation_smape', validation_smape)
+        trial.set_user_attr('training_mae', training_mae)
+        trial.set_user_attr('validation_mae', validation_mae)
 
 
     except Exception as e:
         log.error(f"Error calculating error for trial {trial.number}")
         raise optuna.exceptions.TrialPruned(f"Error calculating error for trial {trial.number} " + str(e))
 
-    return training_mse
+    return training_mse, training_mae, training_smape
 
 
 def sigint_handler(signum, frame):
     log.warning(f"Stopping training because signal {signum} received")
-    study.stop()
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(study.trials_dataframe().to_string())
     print(study.best_params)
+    raise optuna.exceptions.TrialPruned(f"Trial {trial.number} interrupted with SIGINT or SIGTERM")
 
 
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGTERM, sigint_handler)
 
-TRAINING_CHROMOSOMES_SET = [1, 5, 6, 7, 8, 9, 10, 11]
-VALIDATION_CHROMOSOMES_SET = [2, 3, 4]
+# 70.6% of bases in genome
+TRAINING_CHROMOSOMES_SET = [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 15, 19, 20, 22, 23, 24, 25, 26, 27, 28, 30, 31, 33, 34, 36, 37, 38, 39, 40]
+# 20.2% of bases in genome
+VALIDATION_CHROMOSOMES_SET = [7, 10, 14, 17, 29, 35, 41]
+# 9.1% of bases in genome
+TEST_CHROMOSOMES_SET = [16, 18, 21, 32]
 
 log.info(f"Starting trainer module")
 log.info(f"Training chromosomes:   {np.sort(TRAINING_CHROMOSOMES_SET)}")
 log.info(f"Validation chromosomes: {np.sort(VALIDATION_CHROMOSOMES_SET)}")
+log.info(f"Test chromosomes:       {np.sort(TEST_CHROMOSOMES_SET)}")
 
-RDB_BACKEND_URL = 'sqlite:///train.sqlite'
-study = optuna.create_study(direction='minimize', study_name='redymo-t-brucei', storage=RDB_BACKEND_URL,
+OPTUNA_BACKEND_URL = os.environ['OPTUNA_BACKEND_URL']
+study = optuna.create_study(directions=['minimize', 'minimize', 'minimize'], study_name='redymo-tcruzi-no-chipseq-multi-objective-restricted-params', storage=OPTUNA_BACKEND_URL,
                             load_if_exists=True)
 
-study.optimize(objective, n_trials=100)
+study.optimize(objective, n_trials=4000)
