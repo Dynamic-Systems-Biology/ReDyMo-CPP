@@ -12,7 +12,7 @@ ENV APP_PATH=/opt/redymo
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential cmake python3 python3-dev python3-pip vim sqlite3 default-libmysqlclient-dev
 
-RUN pip install numpy optuna pandas mysqlclient
+RUN pip install numpy==1.24.4 optuna==3.4.0 pandas==2.0.3 mysqlclient==2.1.1
 
 FROM ubuntu:20.04 as BUILDER
 
