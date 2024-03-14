@@ -133,6 +133,7 @@ def objective(trial):
         'probability': 0,
         'replisomes': trial.suggest_int('replisomes', 500, 1_500, 2),
         'replication_period': trial.suggest_int('period', 0, 500_000, 10),
+        'constitutive_range': trial.suggest_int('constitutive_range', 0, 1_000_000, 10),
         'round': 0,
         'name': f"trial_{trial.number}",
         'training_chromosomes_set': TRAINING_CHROMOSOMES_SET,
@@ -140,7 +141,7 @@ def objective(trial):
         'test_chromosomes_set': TEST_CHROMOSOMES_SET
     }
     log.info(f"Starting simulation for trial {trial.number}")
-    command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism organism_placeholder --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
+    command_str = f"nice -n 20 ../simulator --cells {params['simulations']} --organism organism_placeholder --resources {params['replisomes']} --data-dir ../data --speed {params['speed']} --period {params['replication_period']} --constitutive {params['constitutive_range']} --timeout {params['timeout']} --threads {params['threads']} --name round_{params['round']} --summary --output {params['name']}"
 
     command_arr = str.split(command_str, ' ')
     command_arr[command_arr.index('organism_placeholder')] = params['organism']
@@ -180,7 +181,7 @@ def sigint_handler(signum, frame):
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         print(study.trials_dataframe().to_string())
     print(study.best_params)
-    raise optuna.exceptions.TrialPruned(f"Trial {trial.number} interrupted with SIGINT or SIGTERM")
+    raise optuna.exceptions.TrialPruned(f"Trial interrupted with SIGINT or SIGTERM")
 
 
 signal.signal(signal.SIGINT, sigint_handler)
@@ -199,7 +200,7 @@ log.info(f"Validation chromosomes: {np.sort(VALIDATION_CHROMOSOMES_SET)}")
 log.info(f"Test chromosomes:       {np.sort(TEST_CHROMOSOMES_SET)}")
 
 OPTUNA_BACKEND_URL = os.environ['OPTUNA_BACKEND_URL']
-study = optuna.create_study(directions=['minimize', 'minimize', 'minimize'], study_name='redymo-tcruzi-no-chipseq-multi-objective-restricted-params', storage=OPTUNA_BACKEND_URL,
+study = optuna.create_study(directions=['minimize', 'minimize', 'minimize'], study_name='redymo-tcruzi-with-chipseq-multi-objective', storage=OPTUNA_BACKEND_URL,
                             load_if_exists=True)
 
 study.optimize(objective, n_trials=4000)
