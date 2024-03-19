@@ -30,7 +30,7 @@ def decompress(input_it):
         start_s, *end_v = range_values.split('-')
 
         # Parse values
-        start = int(start_s)
+        start = int(start_s) if len(start_s) > 0 else int(range_values)
         end = int(end_v[0]) if len(end_v) == 1 else start
         seq_length = int(seq_length_v[0]) if len(seq_length_v) == 1 else 1
 
@@ -179,8 +179,7 @@ def objective(trial):
 def sigint_handler(signum, frame):
     log.warning(f"Stopping training because signal {signum} received")
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(study.trials_dataframe().to_string())
-    print(study.best_params)
+        print(study.best_trials_dataframe().to_string())
     raise optuna.exceptions.TrialPruned(f"Trial interrupted with SIGINT or SIGTERM")
 
 
