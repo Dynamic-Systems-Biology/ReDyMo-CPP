@@ -31,7 +31,7 @@ def decompress(input_it):
 
         # Parse values
         start = int(start_s) if len(start_s) > 0 else int(range_values)
-        end = int(end_v[0]) if len(end_v) == 1 else start
+        end = int(end_v[0]) if (len(end_v) == 1 and len(start_s) > 0) else start
         seq_length = int(seq_length_v[0]) if len(seq_length_v) == 1 else 1
 
         # Decompress
